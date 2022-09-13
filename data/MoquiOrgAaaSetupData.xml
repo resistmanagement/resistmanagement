@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed">
+    <!-- authz/permission for ALL users -->
+    <moqui.security.ArtifactGroup artifactGroupId="RESISTMANAGEMENT_COM" description="resistmanagement.com app (via root screen)"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="RESISTMANAGEMENT_COM" artifactName="component://resistmanagement/screen/resistmanagement.com.xml"
+            artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="RESISTMANAGEMENT_COM_ALL" userGroupId="ALL_USERS" artifactGroupId="RESISTMANAGEMENT_COM"
+            authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+
+</entity-facade-xml>

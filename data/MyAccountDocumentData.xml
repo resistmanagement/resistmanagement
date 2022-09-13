@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <moqui.security.user.NotificationTopic topic="MantleTask" description="Task Updates"
+            typeString="info" showAlert="Y" persistOnSend="Y" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
+            titleTemplate="Task Updated ${workEffortId} - ${name} - ${status}${priority ? ' - P ' + priority : ''} - ${purpose?:''}"
+            linkTemplate="/vapps/resistapp/User/Task/TaskDetail?workEffortId=${workEffortId}"/>
+    <moqui.security.user.NotificationTopic topic="MantleEvent" description="Event Updates"
+            typeString="info" showAlert="Y" persistOnSend="Y" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
+            titleTemplate="Event Updated ${workEffortId} - ${name} - ${status} - ${purpose?:''}"
+            linkTemplate="/vapps/resistapp/User/Calendar/EventDetail?workEffortId=${workEffortId}"/>
+
+    <moqui.security.user.NotificationTopic topic="MantleCommunicationEvent" description="Message Updates"
+            typeString="info" showAlert="Y" persistOnSend="Y" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
+            titleTemplate="Message Updated ${communicationEventId} - ${subject} - ${status}"
+            linkTemplate="/vapps/resistapp/User/Messages/MessageThread?communicationEventId=${communicationEventId}"/>
+
+    <moqui.security.user.NotificationTopic topic="MantleRequest" description="Request Updates"
+            typeString="info" showAlert="Y" persistOnSend="Y" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
+            titleTemplate="Request Updated ${requestId} - ${name} - ${status}${priority ? ' - P ' + priority : ''} - ${type?:''}"
+            linkTemplate="/vapps/resistapp/User/Request/EditRequest?requestId=${requestId}"/>
+
+    <moqui.security.user.NotificationTopic topic="MantleWikiPage" description="Wiki Page Updates"
+            typeString="info" showAlert="Y" persistOnSend="Y" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
+            titleTemplate="Wiki Page Updated ${wikiSpaceId} / ${pagePath?:''} ${publishedVersionName?:''}"
+            linkTemplate="/vapps/hm/wiki/${wikiSpaceId}/${pagePath?:''}"/>
+
+</entity-facade-xml>

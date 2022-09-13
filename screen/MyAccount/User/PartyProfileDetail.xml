@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Party Profile Detail" default-menu-index="2" default-menu-include="false">
+
+    <parameter name="partyId" required="true" from="ec.user.userAccount?.partyId"/>
+    <parameter name="emplPositionClassId" required="true"/>
+
+<!--    <transition name="addProfile"><default-response url="AddProfile"/></transition>-->
+
+    <transition name="setPartyProfileDimension"><service-call name="store#mantle.party.PartyDimension"/>
+        <default-response url="."/></transition>
+    <transition name="setPartyProfileSkill"><service-call name="store#mantle.humanres.ability.PartySkill"/>
+        <default-response url="."/></transition>
+
+    <transition name="setPartyClassification"><service-call name="mantle.party.PartyServices.set#PartyClassification"/>
+        <default-response url="."/></transition>
+    <transition name="removePartyClassification"><service-call name="mantle.party.PartyServices.remove#PartyClassification"/>
+        <default-response url="."/></transition>
+    <transition-include name="getPartyClassificationList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
+
+<!--    <transition name="setPartyProfile"><service-call name="store#mantle.humanres.position.EmplPositionClassParty"/>-->
+<!--        <default-response url="."/></transition>-->
+    <transition name="setProfile"><actions><log level="warn" message="transition thingId ${thingId}"/></actions>
+        <default-response type="none" save-parameters="true"/></transition>
+
+    <actions>
+        <if condition="partyId != ec.user.userAccount.partyId"><return error="true" message="Party not found with ID ${partyId}"/></if>
+        <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
+            <econdition field-name="emplPositionClassId"/><econdition field-name="partyId"/>
+            <date-filter/><order-by field-name="title"/>
+        </entity-find>
+        <set field="epcpc" from="epcpcList?.getFirst()"/>
+        <if condition="epcpc == null"><return error="true" message="Profile not found with ID ${emplPositionClassId}"/></if>
+    </actions>
+    <widgets>
+        <container-row><row-col xs="0" sm="1" md="2" lg="3">
+        </row-col><row-col xs="12" sm="10" md="8" lg="6">
+
+            <section name="PartyProfileSection"><actions>
+<!--                <entity-find entity-name="mantle.party.PartyDetail" list="pdList">-->
+<!--                    <econditions combine="or"><econdition field-name="partyId"/>-->
+<!--                        <econdition field-name="ownerPartyId" from="partyId"/>-->
+<!--                    </econditions></entity-find>-->
+<!--                <entity-find entity-name="mantle.facility.FacilityAndOwnerDetail" list="faodList">-->
+<!--                    <econdition field-name="partyId" operator="in" from="pdList?.partyId"/>-->
+<!--                    <econdition field-name="ownerPartyId" operator="in" from="pdList?.partyId"/></entity-find>-->
+<!--                <set field="pdfaodList" from="pdList + faodList"/>-->
+
+                <entity-find entity-name="mantle.humanres.position.EmplPositionClassDimension" list="epcdList">
+                    <econdition field-name="emplPositionClassId" from="epcpc?.emplPositionClassId"/></entity-find>
+                <entity-find entity-name="mantle.party.PartyDimension" list="pdList">
+                    <econdition field-name="uomDimensionTypeId" operator="in" from="epcdList?.uomDimensionTypeId"/></entity-find>
+
+                <entity-find entity-name="mantle.humanres.position.EmplPositionClassSkill" list="epcsList">
+                    <econdition field-name="emplPositionClassId" from="epcpc?.emplPositionClassId"/></entity-find>
+                <log level="warn" message="epcsList ${epcsList?.skillTypeEnumId?.toString()}"/>
+                <entity-find entity-name="mantle.humanres.ability.PartySkill" list="psList">
+                    <econdition field-name="skillTypeEnumId" operator="in" from="epcsList?.skillTypeEnumId"/></entity-find>
+                <entity-find entity-name="moqui.basic.Enumeration" list="eList">
+                    <econdition field-name="enumId" operator="in" from="epcsList?.skillTypeEnumId"/>
+                    <econdition field-name="enumTypeId" value="SkillType"/></entity-find>
+                <log level="warn" message="psList ${psList?.toString()}"/>
+            </actions><widgets>
+                <container-box><box-header title="${epcpc.title}"/><box-toolbar>
+                    <!--                                <container-dialog id="SetPartyProfileDialog" button-text="Set Profile">-->
+                    <!--                                    <form-single name="SetPartyProfileForm" transition="setProfile">-->
+                    <!--                                        &lt;!&ndash;                            <field name="partyId"><default-field><hidden/></default-field></field>&ndash;&gt;-->
+                    <!--                                        <field name="thingId"><default-field title="Type">-->
+                    <!--                                            <drop-down allow-empty="true" submit-on-select="true">-->
+                    <!--                                                <list-options list="pdfaodList" key="${facilityId ?: partyId}"-->
+                    <!--                                                              text="${facilityId ? 'Facility: ' + facilityName + ' owned by ' + (ownerPartyId == ec.user.userAccount.partyId ? 'Me' : (organizationName ?: firstName + ' ' + lastName)) : 'Person: ' + firstName + ' ' + lastName + (partyOwnerPartyId ? ' owned by ' + (partyOwnerPartyId == ec.user.userAccount.partyId ? 'Me' : (partyOwnerPartyId) ) : '') }"/>-->
+                    <!--                                            </drop-down>-->
+                    <!--                                        </default-field></field>-->
+                    <!--                                        <field name="testId" from="thingId"><conditional-field condition="thingId" title="Test"><display/></conditional-field></field>-->
+                    <!--                                        <field name="submitButton"><default-field title="Set"><submit/></default-field></field>-->
+                    <!--                                    </form-single>-->
+                    <!--                                </container-dialog>-->
+                </box-toolbar><box-body-nopad>
+                    <form-list name="PartyProfileDimensionForm" list="pdList" transition="setPartyProfileDimension" skip-header="true">
+                        <field name="partyId"><default-field><hidden/></default-field></field>
+                        <field name="uomDimensionTypeId"><default-field><display/></default-field></field>
+<!--                        <field name="dimensionDate"><default-field><hidden/></default-field></field>-->
+                        <field name="value"><default-field><text-line/></default-field></field>
+                        <field name="uomId"><default-field><display/></default-field></field>
+                        <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
+                    </form-list>
+                    <form-list name="PartyProfileSkillForm" list="psList" transition="setPartyProfileSkill" skip-header="true">
+                        <field name="partyId"><default-field><hidden/></default-field></field>
+                        <field name="skillTypeEnumId"><default-field><display text="${eList.find{ it.enumId == skillTypeEnumId }?.description}"/></default-field></field>
+<!--                        <field name="rating"><default-field><display/></default-field></field>-->
+<!--                        <field name="skillLevel"><default-field><display/></default-field></field>-->
+<!--                        <field name="startedUsingDate"><default-field><display/></default-field></field>-->
+                        <field name="yearsExperience"><default-field><text-line/></default-field></field>
+                        <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
+                    </form-list>
+                </box-body-nopad></container-box>
+
+
+<!--                <container-box><box-header title="Profiles"/><box-toolbar>-->
+<!--                    <container-dialog id="SetPartyProfileDialog" button-text="Add Profile">-->
+<!--                        <form-single name="SetPartyProfileForm" transition="addProfile">-->
+<!--                            &lt;!&ndash;                            <field name="partyId"><default-field><hidden/></default-field></field>&ndash;&gt;-->
+<!--                            <field name="thingId"><default-field title="Type">-->
+<!--                                <drop-down allow-empty="true" submit-on-select="true">-->
+<!--                                    <list-options list="pdfaodList" key="${facilityId ?: partyId}"-->
+<!--                                                  text="${facilityId ? 'Facility: ' + facilityName + ' owned by ' + (ownerPartyId == ec.user.userAccount.partyId ? 'Me' : (organizationName ?: firstName + ' ' + lastName)) : 'Person: ' + firstName + ' ' + lastName + (partyOwnerPartyId ? ' owned by ' + (partyOwnerPartyId == ec.user.userAccount.partyId ? 'Me' : (partyOwnerPartyId) ) : '') }"/>-->
+<!--                                </drop-down>-->
+<!--                            </default-field></field>-->
+<!--                        </form-single>-->
+<!--                    </container-dialog>-->
+<!--                </box-toolbar><box-body-nopad>-->
+<!--                </box-body-nopad></container-box>-->
+            </widgets></section>
+
+
+        </row-col><row-col xs="0" sm="1" md="2" lg="3">
+        </row-col></container-row>
+    </widgets>
+</screen>
