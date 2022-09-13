@@ -20,9 +20,9 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="setPartyClassification"><service-call name="mantle.party.PartyServices.set#PartyClassification"/>
         <default-response url="."/></transition>
-    <transition name="removePartyClassification"><service-call name="mantle.party.PartyServices.remove#PartyClassification"/>
-        <default-response url="."/></transition>
-    <transition-include name="getPartyClassificationList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>
+<!--    <transition name="removePartyClassification"><service-call name="mantle.party.PartyServices.remove#PartyClassification"/>-->
+<!--        <default-response url="."/></transition>-->
+<!--    <transition-include name="getPartyClassificationList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>-->
 
     <transition name="setPartyProfile"><service-call name="store#mantle.humanres.position.EmplPositionClassParty"/>
         <default-response url="."/></transition>
