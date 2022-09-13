@@ -16,8 +16,14 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration description="Resist Management App" enumId="UgtResistManagement" enumTypeId="UserGroupType"/>
     <moqui.basic.Enumeration description="Resist App" enumId="UgtResistApp" enumTypeId="UserGroupType"/>
 
-
     <userGroups userGroupId="RESIST_APP_USERS" description="Resist Users" groupTypeEnumId="UgtResistApp"/>
+
+    <!-- Artifact group and authz for Your Account App -->
+    <artifactGroups artifactGroupId="YOUR_ACCOUNT" description="Your Account App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/YourAccount.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="YOUR_ACCOUNT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="YOUR_ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
 
     <!-- Administrators User Group -->
     <userGroups userGroupId="ResistManagementAdmin" description="Resist Management Administrators" groupTypeEnumId="UgtResistManagement">
@@ -50,13 +56,6 @@ along with this software (see the LICENSE.md file). If not, see
                                         artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
     <moqui.security.ArtifactAuthz artifactAuthzId="RESISTMANAGEMENT_COM_ALL" userGroupId="ALL_USERS" artifactGroupId="RESISTMANAGEMENT_COM"
                                   authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-
-    <!-- Artifact group and authz for Your Account App -->
-    <artifactGroups artifactGroupId="YOUR_ACCOUNT" description="Your Account App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/YourAccount.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <authz artifactAuthzId="YOUR_ACCOUNT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
-        <authz artifactAuthzId="YOUR_ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-    </artifactGroups>
 
     <!-- ========== User Groups ========== -->
     <!-- NOTE: see SimpleScreensSetupData.xml for Artifact Groups for parts of SimpleScreens -->

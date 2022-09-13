@@ -113,16 +113,16 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createAccount" require-session-token="false">
         <actions>
             <service-call name="mantle.party.PartyServices.create#Account" out-map="context"
-                          in-map="context + [userGroupId:'HIVE_MIND_VIEW']"/>
+                          in-map="context + [userGroupId:'RESIST_APP_USERS']"/>
             <service-call name="create#moqui.security.UserGroupMember"
-                          in-map="[userGroupId:'HIVE_MIND_VIEW', userId:userId, fromDate:ec.user.nowTimestamp]"/>
+                          in-map="[userGroupId:'RESIST_APP_USERS', userId:userId, fromDate:ec.user.nowTimestamp]"/>
         </actions>
         <default-response type="screen-last"/><error-response url="."/>
     </transition>
 
     <pre-actions><script>
         // if user already logged in redirect to root
-        if (ec.user.userId) sri.sendRedirectAndStopRender('/')
+        if (ec.user.userId) sri.sendRedirectAndStopRender('/qapps')
 
         // jQuery/UI
         html_scripts.add('/libs/jquery/jquery.min.js')

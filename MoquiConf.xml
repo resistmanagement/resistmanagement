@@ -7,7 +7,7 @@
                     location="component://resistmanagement/screen/resistmanagement.xml"/>
         </screen>
         <screen location="component://webroot/screen/webroot/apps.xml">
-            <subscreens-item name="resistapp" menu-title="Your Account" menu-index="5"
+            <subscreens-item name="YourAccount" menu-title="Your Account" menu-index="5"
                              location="component://resistmanagement/screen/YourAccount.xml"/>
             <!-- Not needed generally, but here commented for convenience:
             <subscreens-item name="SimpleScreens" menu-title="Simple Screens" menu-index="95"
