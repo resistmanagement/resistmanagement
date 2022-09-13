@@ -13,7 +13,70 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <entity-facade-xml type="seed-initial">
+    <moqui.basic.Enumeration description="Resist Management App" enumId="UgtResistManagement" enumTypeId="UserGroupType"/>
+    <moqui.basic.Enumeration description="Resist App" enumId="UgtResistApp" enumTypeId="UserGroupType"/>
 
 
+    <userGroups userGroupId="RESIST_APP_USERS" description="Resist Users" groupTypeEnumId="UgtResistApp"/>
 
+    <!-- Administrators User Group -->
+    <userGroups userGroupId="ResistManagementAdmin" description="Resist Management Administrators" groupTypeEnumId="UgtResistManagement">
+        <permissions userPermissionId="INVOICE_APPROVE" fromDate="0"/>
+        <permissions userPermissionId="ORDER_APPROVE" fromDate="0"/>
+        <permissions userPermissionId="CARD_NUMBER_EDIT" fromDate="0"/>
+        <permissions userPermissionId="FISCAL_REOPEN" fromDate="0"/>
+        <authz artifactAuthzId="ResistManagementAdminYourAccount" artifactGroupId="YOUR_ACCOUNT" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </userGroups>
+    <artifactGroups artifactGroupId="ResistManagementAll" description="Resist Management (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/resistmanagement.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="RESIST_MANAGEMENT_ADMIN" userGroupId="ADMIN"  authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL">
+            <filters entityFilterSetId="MANTLE_ACTIVE_ORG"/></authz>
+        <authz artifactAuthzId="RESIST_MANAGEMENT_MERP_ADMIN" userGroupId="ResistManagementAdmin" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL">
+            <filters entityFilterSetId="MANTLE_ACTIVE_ORG"/></authz>
+    </artifactGroups>
+
+    <!-- Root screen (no inherit) and general screens group, for all non-admin user groups -->
+    <artifactGroups artifactGroupId="ResistManagementApp" description="Resist Management App Access">
+        <artifacts artifactName="component://resistmanagement/screen/resistmanagement.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="N"/>
+        <artifacts artifactName="component://resistmanagement/screen/resistmanagement/dashboard.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Search.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/SimpleReport/QuickViewReport.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+    </artifactGroups>
+
+    <!-- authz/permission for ALL users -->
+    <moqui.security.ArtifactGroup artifactGroupId="RESISTMANAGEMENT_COM" description="resistmanagement.com app (via root screen)"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="RESISTMANAGEMENT_COM" artifactName="component://resistmanagement/screen/resistmanagement.com.xml"
+                                        artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="RESISTMANAGEMENT_COM_ALL" userGroupId="ALL_USERS" artifactGroupId="RESISTMANAGEMENT_COM"
+                                  authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+
+    <!-- Artifact group and authz for Your Account App -->
+    <artifactGroups artifactGroupId="YOUR_ACCOUNT" description="Your Account App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/YourAccount.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="YOUR_ACCOUNT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="YOUR_ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- ========== User Groups ========== -->
+    <!-- NOTE: see SimpleScreensSetupData.xml for Artifact Groups for parts of SimpleScreens -->
+    <!-- TODO: revisit and redesign role specific groups, variation on those in PopCommerceAaaSetupData.xml -->
+
+    <!-- ========== DataDocument Links ========== -->
+
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleWikiPage" linkSeqId="41" linkSet="resistmanagement" label="Wiki Page" urlType="screen"
+                                            linkUrl="/apps/resistmanagement/Wiki/wiki/${wikiSpaceId}/${pagePath?:''}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleProduct" linkSeqId="41" linkSet="resistmanagement" label="Edit Product" urlType="screen"
+                                            linkUrl="/apps/resistmanagement/Catalog/Product/EditProduct?productId=${productId}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleFacility" linkSeqId="41" linkSet="resistmanagement" label="Edit Facility" urlType="screen"
+                                            linkUrl="/apps/resistmanagement/Facility/EditFacility?facilityId=${facilityId}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleRequest" linkSeqId="41" linkSet="resistmanagement" label="Edit Request" urlType="screen"
+                                            linkUrl="/apps/resistmanagement/Request/EditRequest?requestId=${requestId}"/>
+
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="41" linkSet="resistmanagement" label="Edit Party" urlType="screen"
+                                            linkUrl="/apps/resistmanagement/Party/EditParty?partyId=${partyId}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="42" linkSet="resistmanagement" label="Edit Customer" urlType="screen"
+                                            linkUrl="/apps/resistmanagement/Customer/EditCustomer?partyId=${partyId}" linkCondition="'Customer' in roles*.roleTypeId"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="43" linkSet="resistmanagement" label="Edit Supplier" urlType="screen"
+                                            linkUrl="/apps/resistmanagement/Supplier/EditSupplier?partyId=${partyId}" linkCondition="'Supplier' in roles*.roleTypeId"/>
 </entity-facade-xml>
