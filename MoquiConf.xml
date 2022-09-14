@@ -14,8 +14,8 @@
                     location="component://SimpleScreens/screen/SimpleScreens.xml"/>
             -->
         </screen>
-        <screen location="component://webroot/screen/webroot.xml" default-subscreen="m">
-            <subscreens-item name="m" menu-include="false" no-sub-path="true" location="component://resistmanagement/screen/resistmanagement.com.xml"/>
+        <screen location="component://webroot/screen/webroot.xml" default-subscreen="r">
+            <subscreens-item name="r" menu-include="false" no-sub-path="true" location="component://resistmanagement/screen/resistmanagement.com.xml"/>
         </screen>
     </screen-facade>
 </moqui-conf>
