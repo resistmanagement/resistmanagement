@@ -175,6 +175,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <link text="HR" url="../HumanRes" link-type="anchor"/>
                     <label text=" - "/>
                     <link text="Employees" url="../Party/FindParty" link-type="anchor" parameter-map="[roleTypeId:'Employee']"/>
+                    <label text=" - "/>
+                    <link text="Profiles" url="../ProfileType" link-type="anchor"/>
                 </container>
             </container>
 

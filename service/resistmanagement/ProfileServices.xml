@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="store" noun="TalentProfileType">
+        <description></description>
+        <in-parameters>
+            <parameter name="emplPositionClassId" default="title.split(' ').collect{ it.toLowerCase().capitalize() }.join('')"/>
+            <parameter name="title" required="true"/>
+            <parameter name="description"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emplPositionClassId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="store#mantle.humanres.position.EmplPositionClass" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="store" noun="TalentProfileTypeDimensionType">
+        <description></description>
+        <in-parameters>
+            <parameter name="uomDimensionTypeId" default="description.split(' ').collect{ it.toLowerCase().capitalize() }.join('')"/>
+            <parameter name="description" required="true"/>
+            <parameter name="uomTypeEnumId"/>
+            <parameter name="defaultUomId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="uomDimensionTypeId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="store#moqui.basic.UomDimensionType" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="storeAndAdd" noun="TalentProfileTypeDimensionType">
+        <in-parameters>
+            <parameter name="emplPositionClassId" required="true"/>
+            <parameter name="uomDimensionTypeId" default="description.split(' ').collect{ it.toLowerCase().capitalize() }.join('')"/>
+            <parameter name="description" required="true"/>
+            <parameter name="uomTypeEnumId"/>
+            <parameter name="defaultUomId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emplPositionClassId"/>
+            <parameter name="enumId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ProfileServices.store#TalentProfileTypeDimensionType" in-map="context" out-map="context"/>
+            <service-call name="store#mantle.humanres.position.EmplPositionClassDimension" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="store" noun="TalentProfileTypeClassificationType">
+        <description></description>
+        <in-parameters>
+            <parameter name="enumId"/>
+            <parameter name="enumTypeId" default-value="PartyClassificationType"/>
+            <parameter name="enumCode"/>
+            <parameter name="sequenceNum"/>
+            <parameter name="description" required="true"/>
+            <parameter name="optionValue"/>
+            <parameter name="optionIndicator"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="enumId"/>
+        </out-parameters>
+        <actions>
+            <set field="enumId" from="enumId ?: camelCaseToPretty(enumTypeId).split(' ').collect{ it[0] }.join('').toLowerCase().capitalize() + description.split(' ').collect{ it.toLowerCase().capitalize() }.join('')"/>
+            <service-call name="store#moqui.basic.Enumeration" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="storeAndAdd" noun="TalentProfileTypeClassificationType">
+        <in-parameters>
+            <parameter name="emplPositionClassId" required="true"/>
+            <parameter name="enumId"/>
+            <parameter name="enumTypeId" default-value="PartyClassificationType"/>
+            <parameter name="enumCode"/>
+            <parameter name="sequenceNum"/>
+            <parameter name="description" required="true"/>
+            <parameter name="optionValue"/>
+            <parameter name="optionIndicator"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emplPositionClassId"/>
+            <parameter name="enumId"/>
+            <parameter name="classificationTypeEnumId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ProfileServices.store#TalentProfileTypeClassificationType" in-map="context" out-map="context"/>
+            <set field="classificationTypeEnumId" from="enumId"/>
+            <service-call name="store#mantle.party.EmplPositionClassPtyClsTp" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="store" noun="TalentProfileTypeClassificationTypeAttribute">
+        <description></description>
+        <in-parameters>
+            <parameter name="partyClassificationId"/>
+            <parameter name="classificationTypeEnumId" required="true"/>
+            <parameter name="parentClassificationId"/>
+            <parameter name="description" required="true"/>
+            <parameter name="standardCode"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyClassificationId"/>
+        </out-parameters>
+        <actions>
+            <set field="partyClassificationId" from="partyClassificationId ?: camelCaseToPretty(classificationTypeEnumId).split(' ')[0].toLowerCase().capitalize() + description.split(' ').collect{ it.toLowerCase().capitalize() }.join('')"/>
+            <service-call name="store#mantle.party.PartyClassification" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="store" noun="TalentProfileTypeSkillType">
+        <description></description>
+        <in-parameters>
+            <parameter name="enumId"/>
+            <parameter name="enumTypeId" default-value="SkillType"/>
+            <parameter name="enumCode"/>
+            <parameter name="sequenceNum"/>
+            <parameter name="description" required="true"/>
+            <parameter name="optionValue"/>
+            <parameter name="optionIndicator"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="enumId"/>
+        </out-parameters>
+        <actions>
+            <set field="enumId" from="enumId ?: camelCaseToPretty(enumTypeId).split(' ').collect{ it[0] }.join('').toLowerCase().capitalize() + description.split(' ').collect{ it.toLowerCase().capitalize() }.join('')"/>
+            <service-call name="store#moqui.basic.Enumeration" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="storeAndAdd" noun="TalentProfileTypeSkillType">
+        <in-parameters>
+            <parameter name="emplPositionClassId" required="true"/>
+            <parameter name="enumId"/>
+            <parameter name="enumTypeId" default-value="SkillType"/>
+            <parameter name="enumCode"/>
+            <parameter name="sequenceNum"/>
+            <parameter name="description" required="true"/>
+            <parameter name="optionValue"/>
+            <parameter name="optionIndicator"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emplPositionClassId"/>
+            <parameter name="enumId"/>
+            <parameter name="skillTypeEnumId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ProfileServices.store#TalentProfileTypeSkillType" in-map="context" out-map="context"/>
+            <set field="skillTypeEnumId" from="enumId"/>
+            <service-call name="store#mantle.humanres.position.EmplPositionClassSkill" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+</services>

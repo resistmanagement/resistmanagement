@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Talent Profile Detail" default-menu-index="2" default-menu-include="false">
+
+    <parameter name="partyId" from="ec.user.userAccount?.partyId"/>
+    <parameter name="emplPositionClassId" required="true"/>
+
+<!--    <transition name="addProfile"><default-response url="AddProfile"/></transition>-->
+
+    <transition name="setTalentProfileTypeDimensionType"><service-call name="resistmanagement.ProfileServices.storeAndAdd#TalentProfileTypeDimensionType"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="setTalentProfileTypeDimension"><service-call name="store#mantle.humanres.position.EmplPositionClassDimension"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="removeTalentProfileTypeDimension"><service-call name="delete#mantle.humanres.position.EmplPositionClassDimension"/>
+        <default-response url="." save-current-screen="true"/></transition>
+
+    <transition name="setTalentProfileTypeClassificationType"><service-call name="store#mantle.party.EmplPositionClassPtyClsTp"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="createTalentProfileTypeClassificationType"><service-call name="resistmanagement.ProfileServices.storeAndAdd#TalentProfileTypeClassificationType"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="removeTalentProfileTypeClassificationType"><service-call name="delete#mantle.party.EmplPositionClassPtyClsTp"/>
+        <default-response url="." save-current-screen="true"/></transition>
+
+    <transition name="setTalentProfileTypeClassificationTypeAttribute"><service-call name="resistmanagement.ProfileServices.store#TalentProfileTypeClassificationTypeAttribute"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="removeTalentProfileTypeClassificationType"><service-call name="delete#mantle.party.EmplPositionClassPtyClsTp"/>
+        <default-response url="." save-current-screen="true"/></transition>
+
+    <transition name="setTalentProfileTypeSkillType"><service-call name="resistmanagement.ProfileServices.storeAndAdd#TalentProfileTypeSkillType"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="setTalentProfileTypeSkill"><service-call name="store#mantle.humanres.position.EmplPositionClassSkill"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="removeTalentProfileTypeSkill"><service-call name="delete#mantle.humanres.position.EmplPositionClassSkill"/>
+        <default-response url="." save-current-screen="true"/></transition>
+
+    <actions>
+        <entity-find-one entity-name="mantle.humanres.position.EmplPositionClass" value-field="emplPositionClass">
+            <field-map field-name="emplPositionClassId"/></entity-find-one>
+
+        <entity-find entity-name="moqui.basic.UomDimensionType" list="udtList">
+            <econdition field-name="uomTypeEnumId" operator="is-not-null"/></entity-find>
+        <entity-find entity-name="moqui.basic.Uom" list="uomList"></entity-find>
+
+        <entity-find entity-name="moqui.basic.Enumeration" list="eutList">
+            <econdition field-name="enumTypeId" value="UomType"/></entity-find>
+        <entity-find entity-name="moqui.basic.Enumeration" list="epctList">
+            <econdition field-name="enumTypeId" value="PartyClassificationType"/></entity-find>
+        <entity-find entity-name="moqui.basic.Enumeration" list="estList">
+            <econdition field-name="enumTypeId" value="SkillType"/></entity-find>
+
+        <entity-find entity-name="mantle.humanres.position.EmplPositionClassDimension" list="epcdList">
+            <econdition field-name="emplPositionClassId"/></entity-find>
+        <entity-find entity-name="mantle.humanres.position.EmplPositionClassSkill" list="epcsList">
+            <econdition field-name="emplPositionClassId"/></entity-find>
+        <entity-find entity-name="mantle.party.EmplPositionClassPtyClsTp" list="epcpctList">
+            <econdition field-name="emplPositionClassId"/></entity-find>
+    </actions>
+    <widgets>
+        <container-row><row-col sm="0" md="2">
+        </row-col><row-col sm="12" md="8">
+
+            <section name="PartyProfileSection"><widgets>
+                <container-box><box-header title="${emplPositionClass.title} Dimensions"/><box-toolbar>
+                    <container-dialog id="SetTalentProfileTypeDimensionDialog" button-text="Create Dimension Type">
+                        <form-single name="SetTalentProfileTypeDimensionTypeForm" transition="setTalentProfileTypeDimensionType">
+                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                            <field name="description"><default-field><text-line/></default-field></field>
+                            <field name="uomTypeEnumId"><default-field title="Uom Type">
+                                <drop-down allow-empty="true">
+                                    <list-options list="eutList" key="${enumId}" text="${description}"/>
+                                </drop-down>
+                            </default-field></field>
+                            <field name="defaultUomId"><default-field>
+                                <drop-down allow-empty="true">
+                                    <list-options list="uomList" key="${uomId}" text="${eutList.find{ it.enumId == uomTypeEnumId }.description} - ${description}"/>
+                                </drop-down>
+                            </default-field></field>
+                            <field name="submit"><default-field><submit/></default-field></field>
+                        </form-single>
+                    </container-dialog>
+                    <container-dialog id="SetTalentProfileTypeDimensionDialog" button-text="Add Dimension">
+                        <form-single name="SetTalentProfileTypeDimensionForm" transition="setTalentProfileTypeDimension">
+                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                            <field name="uomDimensionTypeId"><default-field title="Uom Type">
+                                <drop-down allow-empty="true" submit-on-select="true">
+                                    <list-options list="udtList" key="${uomDimensionTypeId}" text="${eutList.find{ it.enumId == uomTypeEnumId }.description} : ${description}"/>
+                                </drop-down>
+                            </default-field></field>
+                        </form-single>
+                    </container-dialog>
+                </box-toolbar><box-body-nopad>
+                    <form-list name="TalentProfileTypeDimensionForm" list="epcdList" transition="removeTalentProfileTypeDimension" skip-header="true">
+                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                        <field name="uomDimensionTypeId"><default-field><label text="${udtList.find{ it.uomDimensionTypeId == uomDimensionTypeId }.description}"/></default-field></field>
+                        <field name="description"><default-field><label text="${udtList.find{ it.uomDimensionTypeId == uomDimensionTypeId }.uomType.description}"/></default-field></field>
+                        <field name="submitButton"><default-field title=""><submit icon="fa fa-trash"/></default-field></field>
+                    </form-list>
+                </box-body-nopad></container-box>
+
+                <container-box><box-header title="${emplPositionClass.title} Classifications"/><box-toolbar>
+                    <container-dialog id="SetTalentProfileTypeClassificationTypeDialog" button-text="Create Classification Type">
+                        <form-single name="SetTalentProfileTypeClassificationTypeForm" transition="createTalentProfileTypeClassificationType">
+                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                            <field name="description"><default-field><text-line/></default-field></field>
+                            <field name="submit"><default-field><submit/></default-field></field>
+                        </form-single>
+                    </container-dialog>
+                    <container-dialog id="SetTalentProfileTypeclassificationTypeDialog" button-text="Add Classification Type">
+                        <form-single name="SetTalentProfileTypeclassificationTypeForm" transition="setTalentProfileTypeClassificationType">
+                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                            <field name="classificationTypeEnumId"><default-field title="Classification Type">
+                                <drop-down allow-empty="true" submit-on-select="true">
+                                    <list-options list="epctList" key="${enumId}" text="${description}"/>
+                                </drop-down>
+                            </default-field></field>
+                        </form-single>
+                    </container-dialog>
+                </box-toolbar><box-body-nopad>
+                    <form-list name="TalentProfileTypeclassificationTypeForm" list="epcpctList" transition="removeTalentProfileTypeClassificationType" skip-header="true">
+                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                        <field name="classificationTypeEnumId"><default-field><dynamic-dialog id="TalentProfileTypeclassificationTypeFormTransition" transition="SeePartyClassification" button-text="${epctList.find{ it.enumId == classificationTypeEnumId }.description}"/></default-field></field>
+                        <field name="submitButton"><default-field title=""><submit icon="fa fa-trash"/></default-field></field>
+                    </form-list>
+                </box-body-nopad></container-box>
+
+                <container-box><box-header title="${emplPositionClass.title} Skills"/><box-toolbar>
+                    <container-dialog id="SetTalentProfileTypeSkillTypeDialog" button-text="Create Skill Type">
+                        <form-single name="SetTalentProfileTypeSkillTypeForm" transition="setTalentProfileTypeSkillType">
+                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                            <field name="description"><default-field><text-line/></default-field></field>
+                            <field name="submit"><default-field><submit/></default-field></field>
+                        </form-single>
+                    </container-dialog>
+                    <container-dialog id="SetTalentProfileTypeSkillDialog" button-text="Add Skill">
+                        <form-single name="SetTalentProfileTypeSkillForm" transition="setTalentProfileTypeSkill">
+                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                            <field name="skillTypeEnumId"><default-field title="Skill Type">
+                                <drop-down allow-empty="true" submit-on-select="true">
+                                    <list-options list="estList" key="${enumId}" text="${description}"/>
+                                </drop-down>
+                            </default-field></field>
+                        </form-single>
+                    </container-dialog>
+                </box-toolbar><box-body-nopad>
+                    <form-list name="TalentProfileTypeSkillForm" list="epcsList" transition="removeTalentProfileTypeSkill" skip-header="true">
+                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                        <field name="skillTypeEnumId"><default-field><display text="${estList.find{ it.enumId == skillTypeEnumId }?.description}"/></default-field></field>
+                        <field name="submitButton"><default-field title=""><submit icon="fa fa-trash"/></default-field></field>
+                    </form-list>
+                </box-body-nopad></container-box>
+            </widgets></section>
+        </row-col><row-col sm="0" lg="2">
+        </row-col></container-row>
+    </widgets>
+</screen>

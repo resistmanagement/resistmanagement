@@ -16,6 +16,8 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration description="Resist Management App" enumId="UgtResistManagement" enumTypeId="UserGroupType"/>
     <moqui.basic.Enumeration description="Resist App" enumId="UgtResistApp" enumTypeId="UserGroupType"/>
 
+    <!-- ========== User Groups ========== -->
+    <!-- NOTE: see SimpleScreensSetupData.xml for Artifact Groups for parts of SimpleScreens -->
     <userGroups userGroupId="RESIST_APP_USERS" description="Resist Users" groupTypeEnumId="UgtResistApp"/>
 
     <!-- Artifact group and authz for Your Account App -->
@@ -57,24 +59,60 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.security.ArtifactAuthz artifactAuthzId="RESISTMANAGEMENT_COM_ALL" userGroupId="ALL_USERS" artifactGroupId="RESISTMANAGEMENT_COM"
                                   authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
 
-    <!-- ========== User Groups ========== -->
-    <!-- NOTE: see SimpleScreensSetupData.xml for Artifact Groups for parts of SimpleScreens -->
-    <!-- TODO: revisit and redesign role specific groups, variation on those in PopCommerceAaaSetupData.xml -->
+    <!-- ========================================================= -->
+    <!-- ========== Resist Management Profile Type Data ========== -->
+    <!-- ========================================================= -->
+    <enums enumId="PctGender" description="Gender" enumTypeId="PartyClassificationType"/>
+    <enums enumId="PctHairColor" description="Hair Color" enumTypeId="PartyClassificationType"/>
+    <enums enumId="PctEyeColor" description="Eye Color" enumTypeId="PartyClassificationType"/>
+    <enums enumId="PctCamera" description="Camera" enumTypeId="PartyClassificationType"/>
 
-    <!-- ========== DataDocument Links ========== -->
-    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleWikiPage" linkSeqId="41" linkSet="resistmanagement" label="Wiki Page" urlType="screen"
-                                            linkUrl="/apps/resistmanagement/Wiki/wiki/${wikiSpaceId}/${pagePath?:''}"/>
-    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleProduct" linkSeqId="41" linkSet="resistmanagement" label="Edit Product" urlType="screen"
-                                            linkUrl="/apps/resistmanagement/Catalog/Product/EditProduct?productId=${productId}"/>
-    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleFacility" linkSeqId="41" linkSet="resistmanagement" label="Edit Facility" urlType="screen"
-                                            linkUrl="/apps/resistmanagement/Facility/EditFacility?facilityId=${facilityId}"/>
-    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleRequest" linkSeqId="41" linkSet="resistmanagement" label="Edit Request" urlType="screen"
-                                            linkUrl="/apps/resistmanagement/Request/EditRequest?requestId=${requestId}"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctBrown" description="Brown"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctBlonde" description="Blonde"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctBlack" description="Black"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctAuburn" description="Auburn"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctRed" description="Red"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctGrey" description="Grey"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctWhite" description="White"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctMale" description="Male"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctFemale" description="Female"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctNonBinary" description="Non Binary"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctBlue" description="Blue"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctGreen" description="Green"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctHazel" description="Hazel"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctAmber" description="Amber"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctGray" description="Gray"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctDslr" description="DSLR"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctMirrorless" description="Mirrorless"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctPointAndShoot" description="Point and Shoot"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctPhone" description="Phone"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctFilm" description="Film"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctPolaroid" description="Polaroid"/>
 
-    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="41" linkSet="resistmanagement" label="Edit Party" urlType="screen"
-                                            linkUrl="/apps/resistmanagement/Party/EditParty?partyId=${partyId}"/>
-    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="42" linkSet="resistmanagement" label="Edit Customer" urlType="screen"
-                                            linkUrl="/apps/resistmanagement/Customer/EditCustomer?partyId=${partyId}" linkCondition="'Customer' in roles*.roleTypeId"/>
-    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="43" linkSet="resistmanagement" label="Edit Supplier" urlType="screen"
-                                            linkUrl="/apps/resistmanagement/Supplier/EditSupplier?partyId=${partyId}" linkCondition="'Supplier' in roles*.roleTypeId"/>
+    <enums enumId="StProgrammer" description="Programmer" enumTypeId="SkillType"/>
+    <enums enumId="StFashion" description="Fashion" enumTypeId="SkillType"/>
+    <enums enumId="StArt" description="Art" enumTypeId="SkillType"/>
+    <enums enumId="StInfluencer" description="Influencer" enumTypeId="SkillType"/>
+    <enums enumId="StWedding" description="Wedding" enumTypeId="SkillType"/>
+    <enums enumId="StSport" description="Sport" enumTypeId="SkillType"/>
+
+    <mantle.humanres.position.EmplPositionClass emplPositionClassId="Model" title="Model">
+        <mantle.humanres.position.EmplPositionClassDimension uomDimensionTypeId="Height"/>
+        <mantle.humanres.position.EmplPositionClassDimension uomDimensionTypeId="Weight"/>
+        <mantle.party.EmplPositionClassPtyClsTp classificationTypeEnumId="PctHairColor"/>
+        <mantle.party.EmplPositionClassPtyClsTp classificationTypeEnumId="PctGender"/>
+        <mantle.party.EmplPositionClassPtyClsTp classificationTypeEnumId="PctEyeColor"/>
+        <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StFashion"/>
+        <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StArt"/>
+        <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StInfluencer"/>
+    </mantle.humanres.position.EmplPositionClass>
+    <mantle.humanres.position.EmplPositionClass emplPositionClassId="Photographer" title="Photographer">
+        <mantle.humanres.position.EmplPositionClassDimension uomDimensionTypeId="Height"/>
+        <mantle.humanres.position.EmplPositionClassDimension uomDimensionTypeId="Weight"/>
+        <mantle.party.EmplPositionClassPtyClsTp classificationTypeEnumId="PctGender"/>
+        <mantle.party.EmplPositionClassPtyClsTp classificationTypeEnumId="PctCamera"/>
+        <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StWedding"/>
+        <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StFashion"/>
+    </mantle.humanres.position.EmplPositionClass>
+
 </entity-facade-xml>

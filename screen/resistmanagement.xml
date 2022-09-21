@@ -61,6 +61,11 @@ along with this software (see the LICENSE.md file). If not, see
         <subscreens-item name="Task" location="component://SimpleScreens/screen/SimpleScreens/Task.xml" menu-index="10"/>
         <subscreens-item name="Wiki" location="component://SimpleScreens/screen/SimpleScreens/Wiki.xml" menu-index="10"/>
 
+        <subscreens-item name="ProfileType" menu-title="Profile Types" menu-index="10"
+                         location="component://resistmanagement/screen/resistmanagement/dashboard/ProfileType.xml"/>
+        <subscreens-item name="TalentTypeDetail" menu-title="Talent Type Detail" menu-index="10"
+                         location="component://resistmanagement/screen/resistmanagement/dashboard/ProfileType/TalentTypeDetail.xml"/>
+
         <subscreens-item name="QuickViewReport" menu-title="Custom Reports" menu-index="30"
                 location="component://SimpleScreens/screen/SimpleScreens/SimpleReport/QuickViewReport.xml"/>
         <subscreens-item name="SimpleReport" menu-title="Report Builder" menu-index="31"

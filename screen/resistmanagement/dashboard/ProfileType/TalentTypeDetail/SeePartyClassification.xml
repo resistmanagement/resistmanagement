@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-include="false" standalone="true">
+
+    <parameter name="emplPositionClassId" required="true"/>
+    <parameter name="classificationTypeEnumId" required="true"/>
+
+    <transition name="setTalentProfileTypeClassificationTypeAttribute"><service-call name="resistmanagement.ProfileServices.store#TalentProfileTypeClassificationTypeAttribute"/>
+        <default-response type="none" save-current-screen="true"/></transition>
+    <transition name="removeTalentProfileTypeClassificationTypeAttribute"><service-call name="delete#mantle.party.PartyClassification"/>
+        <default-response url="none" save-current-screen="true"/></transition>
+
+    <actions>
+        <entity-find entity-name="mantle.party.PartyClassification" list="pcList">
+            <econdition field-name="classificationTypeEnumId"/></entity-find>
+<!--        <entity-find-one entity-name="moqui.basic.Enumeration" value-field="enum">-->
+<!--            <field-map field-name="enumId" from="classificationTypeEnumId"/></entity-find-one>-->
+    </actions>
+
+    <widgets>
+        <container-box><box-header title="Classification Type Attributes"></box-header><box-toolbar>
+            <container-dialog id="SetTalentProfileTypeClassificationTypeAttributeDialog" button-text="Add Classification Type Attribute">
+                <form-single name="SetTalentProfileTypeClassificationTypeAttributeForm" transition="setTalentProfileTypeClassificationTypeAttribute">
+                    <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                    <field name="classificationTypeEnumId"><default-field><hidden/></default-field></field>
+                    <field name="description"><default-field><text-line/></default-field></field>
+                    <field name="submit"><default-field><submit/></default-field></field>
+                </form-single>
+        </container-dialog></box-toolbar><box-body-nopad>
+            <form-list name="TalentProfileTypeClassificationTypeAttributeForm" list="pcList" transition="removeTalentProfileTypeClassificationTypeAttribute" skip-header="true">
+                <field name="description"><default-field><label text="${description}"/></default-field></field>
+                <field name="submitButton"><default-field title=""><submit icon="fa fa-trash"/></default-field></field>
+            </form-list>
+        </box-body-nopad></container-box>
+
+    </widgets>
+</screen>
