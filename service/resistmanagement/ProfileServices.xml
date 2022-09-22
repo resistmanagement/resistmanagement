@@ -165,4 +165,66 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="store#mantle.humanres.position.EmplPositionClassSkill" in-map="context" out-map="context"/>
         </actions>
     </service>
+
+    <service verb="store" noun="PartyClassificationAppl">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="classificationTypeEnumId" required="true"/>
+            <parameter name="partyClassificationId"/>
+            <parameter name="fromDate" required="true" default="ec.user.nowTimestamp"/>
+            <auto-parameters entity-name="mantle.party.PartyClassificationAppl" include="nonpk"/>
+        </in-parameters>
+        <out-parameters>
+            <auto-parameters entity-name="mantle.party.PartyClassificationAppl"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="pcapList">
+                <econdition field-name="partyId"/><econdition field-name="classificationTypeEnumId"/>
+                <date-filter/><order-by field-name="-thruDate,-fromDate"/></entity-find>
+            <iterate list="pcapList" entry="pcap">
+                <set field="pcapOut" from="pcap"/><set field="pcapOut.thruDate" from="ec.user.nowTimestamp"/>
+                <service-call name="update#mantle.party.PartyClassificationAppl" in-map="pcapOut"/></iterate>
+
+            <if condition="partyId &amp;&amp; partyClassificationId &amp;&amp; fromDate">
+                <service-call name="store#mantle.party.PartyClassificationAppl" in-map="context" out-map="context"/></if>
+        </actions>
+    </service>
+
+    <service verb="set" noun="PartySkills">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="emplPositionClassId" required="true"/>
+            <parameter name="skillTypeEnumIdList" type="List"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="skillTypeEnumIdList"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.humanres.position.EmplPositionClassSkill" list="epcsList">
+                <econdition field-name="emplPositionClassId"/></entity-find>
+            <entity-find entity-name="mantle.humanres.ability.PartySkill" list="psList">
+                <econdition field-name="skillTypeEnumId" operator="in" from="epcsList.skillTypeEnumId"/>
+                <econdition field-name="partyId"/></entity-find>
+
+            <log level="warn" message="epcsList.skillTypeEnumId ${epcsList.skillTypeEnumId}"/>
+            <log level="warn" message="psList.skillTypeEnumId ${psList.skillTypeEnumId}"/>
+            <log level="warn" message="skillTypeEnumIdList ${skillTypeEnumIdList}"/>
+
+            <iterate list="epcsList" entry="epcs">
+                <if condition="skillTypeEnumIdList?.contains(epcs.skillTypeEnumId) &amp;&amp; !psList.skillTypeEnumId.contains(epcs.skillTypeEnumId)"><then>
+                    <log level="warn" message="create ${epcs.skillTypeEnumId}"/>
+                    <service-call name="create#mantle.humanres.ability.PartySkill" in-map="[partyId:partyId, skillTypeEnumId:epcs.skillTypeEnumId]"/>
+                </then><else-if condition="!skillTypeEnumIdList?.contains(epcs.skillTypeEnumId) &amp;&amp; psList.skillTypeEnumId.contains(epcs.skillTypeEnumId)">
+                    <log level="warn" message="delete ${epcs.skillTypeEnumId}"/>
+                    <service-call name="delete#mantle.humanres.ability.PartySkill" in-map="[partyId:partyId, skillTypeEnumId:epcs.skillTypeEnumId]"/>
+                </else-if><else-if condition="skillTypeEnumIdList?.contains(epcs.skillTypeEnumId) &amp;&amp; psList.skillTypeEnumId.contains(epcs.skillTypeEnumId)">
+                    <log level="warn" message="both exist ${epcs.skillTypeEnumId}"/>
+                </else-if><else-if condition="!skillTypeEnumIdList?.contains(epcs.skillTypeEnumId) &amp;&amp; !psList.skillTypeEnumId.contains(epcs.skillTypeEnumId)">
+                    <log level="warn" message="neither exist ${epcs.skillTypeEnumId}"/>
+                </else-if></if>
+            </iterate>
+
+        </actions>
+    </service>
+
 </services>

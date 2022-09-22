@@ -62,10 +62,26 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
     <!-- ========== Resist Management Profile Type Data ========== -->
     <!-- ========================================================= -->
-    <enums enumId="PctGender" description="Gender" enumTypeId="PartyClassificationType"/>
-    <enums enumId="PctHairColor" description="Hair Color" enumTypeId="PartyClassificationType"/>
-    <enums enumId="PctEyeColor" description="Eye Color" enumTypeId="PartyClassificationType"/>
-    <enums enumId="PctCamera" description="Camera" enumTypeId="PartyClassificationType"/>
+    <moqui.basic.Uom abbreviation="lb" description="Pound" uomId="WT_lb" uomTypeEnumId="UT_WEIGHT_MEASURE"/>
+
+    <moqui.basic.UomDimensionType description="Quantity Included" uomDimensionTypeId="QuantityIncluded" defaultUomId="OTH_ct"/>
+    <moqui.basic.UomDimensionType description="Pieces Included" uomDimensionTypeId="PiecesIncluded" defaultUomId="OTH_ea"/>
+    <moqui.basic.UomDimensionType description="Weight" uomDimensionTypeId="Weight" uomTypeEnumId="UT_WEIGHT_MEASURE" defaultUomId="WT_lb"/>
+    <moqui.basic.UomDimensionType description="Height" uomDimensionTypeId="Height" uomTypeEnumId="UT_LENGTH_MEASURE" defaultUomId="LEN_in"/>
+    <moqui.basic.UomDimensionType description="Width" uomDimensionTypeId="Width" uomTypeEnumId="UT_LENGTH_MEASURE" defaultUomId="LEN_in"/>
+    <moqui.basic.UomDimensionType description="Depth" uomDimensionTypeId="Depth" uomTypeEnumId="UT_LENGTH_MEASURE" defaultUomId="LEN_in"/>
+    <moqui.basic.UomDimensionType description="Volume - Dry" uomDimensionTypeId="Volume" uomTypeEnumId="UT_VOLUME_DRY_MEAS"/>
+    <moqui.basic.UomDimensionType description="Volume - Liquid" uomDimensionTypeId="VolumeLiquid" uomTypeEnumId="UT_VOLUME_LIQ_MEAS"/>
+    <moqui.basic.UomDimensionType description="Diameter" uomDimensionTypeId="Diameter" uomTypeEnumId="UT_LENGTH_MEASURE" defaultUomId="LEN_in"/>
+    <moqui.basic.UomDimensionType description="Shipping Weight" uomDimensionTypeId="ShippingWeight" uomTypeEnumId="UT_WEIGHT_MEASURE"/>
+    <moqui.basic.UomDimensionType description="Shipping Height" uomDimensionTypeId="ShippingHeight" uomTypeEnumId="UT_LENGTH_MEASURE"/>
+    <moqui.basic.UomDimensionType description="Shipping Width" uomDimensionTypeId="ShippingWidth" uomTypeEnumId="UT_LENGTH_MEASURE"/>
+    <moqui.basic.UomDimensionType description="Shipping Depth" uomDimensionTypeId="ShippingDepth" uomTypeEnumId="UT_LENGTH_MEASURE"/>
+
+    <moqui.basic.Enumeration enumId="PctGender" description="Gender" enumTypeId="PartyClassificationType"/>
+    <moqui.basic.Enumeration enumId="PctHairColor" description="Hair Color" enumTypeId="PartyClassificationType"/>
+    <moqui.basic.Enumeration enumId="PctEyeColor" description="Eye Color" enumTypeId="PartyClassificationType"/>
+    <moqui.basic.Enumeration enumId="PctCamera" description="Camera" enumTypeId="PartyClassificationType"/>
 
     <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctBrown" description="Brown"/>
     <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctBlonde" description="Blonde"/>
@@ -89,12 +105,12 @@ along with this software (see the LICENSE.md file). If not, see
     <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctFilm" description="Film"/>
     <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctPolaroid" description="Polaroid"/>
 
-    <enums enumId="StProgrammer" description="Programmer" enumTypeId="SkillType"/>
-    <enums enumId="StFashion" description="Fashion" enumTypeId="SkillType"/>
-    <enums enumId="StArt" description="Art" enumTypeId="SkillType"/>
-    <enums enumId="StInfluencer" description="Influencer" enumTypeId="SkillType"/>
-    <enums enumId="StWedding" description="Wedding" enumTypeId="SkillType"/>
-    <enums enumId="StSport" description="Sport" enumTypeId="SkillType"/>
+    <moqui.basic.Enumeration enumId="StProgrammer" description="Programmer" enumTypeId="SkillType"/>
+    <moqui.basic.Enumeration enumId="StFashion" description="Fashion" enumTypeId="SkillType"/>
+    <moqui.basic.Enumeration enumId="StArt" description="Art" enumTypeId="SkillType"/>
+    <moqui.basic.Enumeration enumId="StInfluencer" description="Influencer" enumTypeId="SkillType"/>
+    <moqui.basic.Enumeration enumId="StWedding" description="Wedding" enumTypeId="SkillType"/>
+    <moqui.basic.Enumeration enumId="StSport" description="Sport" enumTypeId="SkillType"/>
 
     <mantle.humanres.position.EmplPositionClass emplPositionClassId="Model" title="Model">
         <mantle.humanres.position.EmplPositionClassDimension uomDimensionTypeId="Height"/>

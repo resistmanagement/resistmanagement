@@ -18,115 +18,108 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="partyId" required="true" from="ec.user.userAccount?.partyId"/>
     <parameter name="emplPositionClassId" required="true"/>
 
-<!--    <transition name="addProfile"><default-response url="AddProfile"/></transition>-->
-
-    <transition name="setPartyProfileDimension"><service-call name="store#mantle.party.PartyDimension"/>
-        <default-response url="."/></transition>
-    <transition name="setPartyProfileSkill"><service-call name="store#mantle.humanres.ability.PartySkill"/>
-        <default-response url="."/></transition>
-
-    <transition name="setPartyClassification"><service-call name="mantle.party.PartyServices.set#PartyClassification"/>
-        <default-response url="."/></transition>
-<!--    <transition name="removePartyClassification"><service-call name="mantle.party.PartyServices.remove#PartyClassification"/>-->
-<!--        <default-response url="."/></transition>-->
-<!--    <transition-include name="getPartyClassificationList" location="component://SimpleScreens/template/party/PartyTransitions.xml"/>-->
-
-<!--    <transition name="setPartyProfile"><service-call name="store#mantle.humanres.position.EmplPositionClassParty"/>-->
-<!--        <default-response url="."/></transition>-->
-    <transition name="setProfile"><actions><log level="warn" message="transition thingId ${thingId}"/></actions>
-        <default-response type="none" save-parameters="true"/></transition>
+    <transition name="setPartyDimension"><service-call name="store#mantle.party.PartyDimension"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="setPartyClassificationAppl"><service-call name="resistmanagement.ProfileServices.store#PartyClassificationAppl"/>
+        <default-response url="." save-current-screen="true"/></transition>
+    <transition name="setPartySkill"><service-call name="resistmanagement.ProfileServices.set#PartySkills"/>
+        <default-response url="." save-current-screen="true"/></transition>
 
     <actions>
         <if condition="partyId != ec.user.userAccount.partyId"><return error="true" message="Party not found with ID ${partyId}"/></if>
-        <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
-            <econdition field-name="emplPositionClassId"/><econdition field-name="partyId"/>
-            <date-filter/><order-by field-name="title"/>
-        </entity-find>
-        <set field="epcpc" from="epcpcList?.getFirst()"/>
-        <if condition="epcpc == null"><return error="true" message="Profile not found with ID ${emplPositionClassId}"/></if>
+
+        <entity-find-one entity-name="mantle.humanres.position.EmplPositionClass" value-field="emplPositionClass">
+            <field-map field-name="emplPositionClassId"/></entity-find-one>
+        <if condition="emplPositionClass == null"><return error="true" message="Profile not found with ID ${emplPositionClassId}"/></if>
+
+        <entity-find entity-name="mantle.humanres.position.EmplPositionClassDimension" list="epcdList">
+            <econdition field-name="emplPositionClassId"/></entity-find>
+
+        <set field="epcdpList" from="[]"/>
+        <iterate list="epcdList" entry="epcd">
+            <entity-find entity-name="mantle.party.PartyDimension" list="pdList">
+                <econdition field-name="partyId"/>
+                <econdition field-name="uomDimensionTypeId" from="epcd.uomDimensionTypeId"/>
+                <order-by field-name="-dimensionDate"/></entity-find>
+            <if condition="pdList?.getFirst()"><then>
+                <script>epcdpList.add(pdList.getFirst().getMap() + [uomDescription:pdList.getFirst().uom.description, uomTypeDescription:pdList.getFirst().type.description])</script>
+            </then><else>
+                <script>epcdpList.add(epcd.getMap() + [partyId:partyId, uomId:epcd.type.defaultUomId, uomDescription:epcd.type.defaultUom.description, uomTypeDescription:epcd.type.description])</script>
+            </else></if>
+        </iterate>
+
+        <entity-find entity-name="mantle.party.EmplPositionClassPtyClsTp" list="epcpctList">
+            <econdition field-name="emplPositionClassId"/></entity-find>
+
+        <set field="epcpctpList" from="[]"/>
+        <iterate list="epcpctList" entry="epcpct">
+            <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="pcapList">
+                <econdition field-name="partyId"/>
+                <econdition field-name="classificationTypeEnumId" from="epcpct.classificationTypeEnumId"/>
+                <date-filter/><order-by field-name="-thruDate,-fromDate"/></entity-find>
+
+            <set field="classificationTypeDescription" from="epcpct.type.description"/>
+            <if condition="pcapList?.getFirst()"><then>
+                <script>epcpctpList.add(pcapList.getFirst().getMap() + [classificationTypeDescription:classificationTypeDescription])</script>
+            </then><else>
+                <script>epcpctpList.add(epcpct.getMap() + [partyId:partyId, classificationTypeDescription:classificationTypeDescription])</script>
+            </else></if>
+        </iterate>
+
+        <entity-find entity-name="mantle.humanres.position.EmplPositionClassSkill" list="epcsList">
+            <econdition field-name="emplPositionClassId"/></entity-find>
+        <entity-find entity-name="mantle.humanres.ability.PartySkill" list="psList">
+            <econdition field-name="skillTypeEnumId" operator="in" from="epcsList.skillTypeEnumId"/>
+            <econdition field-name="partyId"/></entity-find>
+
+        <set field="epcspList" from="[]"/>
+        <iterate list="epcsList" entry="epcs"><script>epcspList.add(epcs.getMap() + [partyId:partyId, skillTypeDescription:epcs.skillTypeEnum.description])</script></iterate>
+
     </actions>
     <widgets>
-        <container-row><row-col xs="0" sm="1" md="2" lg="3">
-        </row-col><row-col xs="12" sm="10" md="8" lg="6">
+        <container-row><row-col sm="0" md="2">
+        </row-col><row-col sm="12" md="8">
 
-            <section name="PartyProfileSection"><actions>
-<!--                <entity-find entity-name="mantle.party.PartyDetail" list="pdList">-->
-<!--                    <econditions combine="or"><econdition field-name="partyId"/>-->
-<!--                        <econdition field-name="ownerPartyId" from="partyId"/>-->
-<!--                    </econditions></entity-find>-->
-<!--                <entity-find entity-name="mantle.facility.FacilityAndOwnerDetail" list="faodList">-->
-<!--                    <econdition field-name="partyId" operator="in" from="pdList?.partyId"/>-->
-<!--                    <econdition field-name="ownerPartyId" operator="in" from="pdList?.partyId"/></entity-find>-->
-<!--                <set field="pdfaodList" from="pdList + faodList"/>-->
-
-                <entity-find entity-name="mantle.humanres.position.EmplPositionClassDimension" list="epcdList">
-                    <econdition field-name="emplPositionClassId" from="epcpc?.emplPositionClassId"/></entity-find>
-                <entity-find entity-name="mantle.party.PartyDimension" list="pdList">
-                    <econdition field-name="uomDimensionTypeId" operator="in" from="epcdList?.uomDimensionTypeId"/></entity-find>
-
-                <entity-find entity-name="mantle.humanres.position.EmplPositionClassSkill" list="epcsList">
-                    <econdition field-name="emplPositionClassId" from="epcpc?.emplPositionClassId"/></entity-find>
-                <log level="warn" message="epcsList ${epcsList?.skillTypeEnumId?.toString()}"/>
-                <entity-find entity-name="mantle.humanres.ability.PartySkill" list="psList">
-                    <econdition field-name="skillTypeEnumId" operator="in" from="epcsList?.skillTypeEnumId"/></entity-find>
-                <entity-find entity-name="moqui.basic.Enumeration" list="eList">
-                    <econdition field-name="enumId" operator="in" from="epcsList?.skillTypeEnumId"/>
-                    <econdition field-name="enumTypeId" value="SkillType"/></entity-find>
-                <log level="warn" message="psList ${psList?.toString()}"/>
-            </actions><widgets>
-                <container-box><box-header title="${epcpc.title}"/><box-toolbar>
-                    <!--                                <container-dialog id="SetPartyProfileDialog" button-text="Set Profile">-->
-                    <!--                                    <form-single name="SetPartyProfileForm" transition="setProfile">-->
-                    <!--                                        &lt;!&ndash;                            <field name="partyId"><default-field><hidden/></default-field></field>&ndash;&gt;-->
-                    <!--                                        <field name="thingId"><default-field title="Type">-->
-                    <!--                                            <drop-down allow-empty="true" submit-on-select="true">-->
-                    <!--                                                <list-options list="pdfaodList" key="${facilityId ?: partyId}"-->
-                    <!--                                                              text="${facilityId ? 'Facility: ' + facilityName + ' owned by ' + (ownerPartyId == ec.user.userAccount.partyId ? 'Me' : (organizationName ?: firstName + ' ' + lastName)) : 'Person: ' + firstName + ' ' + lastName + (partyOwnerPartyId ? ' owned by ' + (partyOwnerPartyId == ec.user.userAccount.partyId ? 'Me' : (partyOwnerPartyId) ) : '') }"/>-->
-                    <!--                                            </drop-down>-->
-                    <!--                                        </default-field></field>-->
-                    <!--                                        <field name="testId" from="thingId"><conditional-field condition="thingId" title="Test"><display/></conditional-field></field>-->
-                    <!--                                        <field name="submitButton"><default-field title="Set"><submit/></default-field></field>-->
-                    <!--                                    </form-single>-->
-                    <!--                                </container-dialog>-->
+            <section name="PartyProfileSection"><widgets>
+                <container-box><box-header title="${emplPositionClass.title} Measurements"/><box-toolbar>
                 </box-toolbar><box-body-nopad>
-                    <form-list name="PartyProfileDimensionForm" list="pdList" transition="setPartyProfileDimension" skip-header="true">
+                    <form-list name="TalentProfileTypeDimensionForm" list="epcdpList" transition="setPartyDimension" skip-header="true">
+                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
                         <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="uomDimensionTypeId"><default-field><display/></default-field></field>
-<!--                        <field name="dimensionDate"><default-field><hidden/></default-field></field>-->
+                        <field name="uomDimensionTypeId"><default-field><display text="${uomTypeDescription}"/></default-field></field>
+                        <field name="dimensionDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
                         <field name="value"><default-field><text-line/></default-field></field>
-                        <field name="uomId"><default-field><display/></default-field></field>
-                        <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
-                    </form-list>
-                    <form-list name="PartyProfileSkillForm" list="psList" transition="setPartyProfileSkill" skip-header="true">
-                        <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="skillTypeEnumId"><default-field><display text="${eList.find{ it.enumId == skillTypeEnumId }?.description}"/></default-field></field>
-<!--                        <field name="rating"><default-field><display/></default-field></field>-->
-<!--                        <field name="skillLevel"><default-field><display/></default-field></field>-->
-<!--                        <field name="startedUsingDate"><default-field><display/></default-field></field>-->
-                        <field name="yearsExperience"><default-field><text-line/></default-field></field>
+                        <field name="uomId"><default-field><display text="${uomDescription}"/></default-field></field>
                         <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
                     </form-list>
                 </box-body-nopad></container-box>
 
+                <container-box><box-header title="${emplPositionClass.title} Classifications"/><box-toolbar>
+                </box-toolbar><box-body-nopad>
+                    <form-list name="TalentProfileTypeclassificationTypeForm" list="epcpctpList" transition="setPartyClassificationAppl" skip-header="true">
+                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                        <field name="partyId"><default-field><hidden/></default-field></field>
+                        <field name="classificationTypeEnumId"><default-field><display text="${classificationTypeDescription}"/></default-field></field>
+                        <field name="partyClassificationId"><default-field title="${classificationTypeDescription}"><drop-down allow-empty="true" submit-on-select="true">
+                            <entity-options key="${partyClassificationId}" text="${description}">
+                                <entity-find entity-name="mantle.party.PartyClassification" list="pcList">
+                                    <econdition field-name="classificationTypeEnumId"/></entity-find></entity-options>
+                        </drop-down></default-field></field>
+                    </form-list>
+                </box-body-nopad></container-box>
 
-<!--                <container-box><box-header title="Profiles"/><box-toolbar>-->
-<!--                    <container-dialog id="SetPartyProfileDialog" button-text="Add Profile">-->
-<!--                        <form-single name="SetPartyProfileForm" transition="addProfile">-->
-<!--                            &lt;!&ndash;                            <field name="partyId"><default-field><hidden/></default-field></field>&ndash;&gt;-->
-<!--                            <field name="thingId"><default-field title="Type">-->
-<!--                                <drop-down allow-empty="true" submit-on-select="true">-->
-<!--                                    <list-options list="pdfaodList" key="${facilityId ?: partyId}"-->
-<!--                                                  text="${facilityId ? 'Facility: ' + facilityName + ' owned by ' + (ownerPartyId == ec.user.userAccount.partyId ? 'Me' : (organizationName ?: firstName + ' ' + lastName)) : 'Person: ' + firstName + ' ' + lastName + (partyOwnerPartyId ? ' owned by ' + (partyOwnerPartyId == ec.user.userAccount.partyId ? 'Me' : (partyOwnerPartyId) ) : '') }"/>-->
-<!--                                </drop-down>-->
-<!--                            </default-field></field>-->
-<!--                        </form-single>-->
-<!--                    </container-dialog>-->
-<!--                </box-toolbar><box-body-nopad>-->
-<!--                </box-body-nopad></container-box>-->
+                <container-box><box-header title="${emplPositionClass.title} Skills"/><box-toolbar>
+                </box-toolbar><box-body-nopad>
+                    <form-single name="TalentProfileTypeSkillForm" transition="setPartySkill">
+                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                        <field name="partyId"><default-field><hidden/></default-field></field>
+                        <field name="skillTypeEnumIdList" from="psList.skillTypeEnumId"><default-field title="Skills"><drop-down allow-empty="false" allow-multiple="true" submit-on-select="true">
+                            <list-options list="epcspList" key="${skillTypeEnumId}" text="${skillTypeDescription}"/>
+                        </drop-down></default-field></field>
+                    </form-single>
+                </box-body-nopad></container-box>
             </widgets></section>
-
-
-        </row-col><row-col xs="0" sm="1" md="2" lg="3">
+        </row-col><row-col sm="0" lg="2">
         </row-col></container-row>
     </widgets>
 </screen>
