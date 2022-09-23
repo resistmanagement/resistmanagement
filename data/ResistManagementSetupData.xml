@@ -90,6 +90,7 @@ along with this software (see the LICENSE.md file). If not, see
     <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctRed" description="Red"/>
     <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctGrey" description="Grey"/>
     <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctWhite" description="White"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctBrown" description="Brown"/>
     <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctMale" description="Male"/>
     <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctFemale" description="Female"/>
     <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctNonBinary" description="Non Binary"/>
