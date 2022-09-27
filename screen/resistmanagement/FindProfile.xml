@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Dashboard" default-menu-index="1">
+
+    <transition name="createPersonProfile"><service-call name="resistmanagement.ProfileServices.create#CreatePersonProfile"/>
+        <default-response url="."/></transition>
+
+    <actions>
+<!--        <entity-find-one entity-name="mantle.party.Party" value-field="party">-->
+<!--            <field-map field-name="ownerPartyId" from="ec.user.userAccount.partyId"/>-->
+<!--            <field-map field-name="partyId" from="realPartyId"/></entity-find-one>-->
+<!--        <entity-find entity-name="mantle.party.Party" list="partyList">-->
+<!--            <econdition field-name="partyId" from="realPartyId"/>-->
+<!--            <econditions combine="or"><econdition field-name="ownerPartyId" from="ec.user.userAccount.partyId"/>-->
+<!--                <econdition field-name="partyId" from="ec.user.userAccount.partyId"/></econditions>-->
+<!--        </entity-find>-->
+
+<!--        <set field="party" from="partyList?.getFirst()"/>-->
+<!--        <if condition="party?.partyId == null"><return type="danger" error="true" message="No Party found with id ${realPartyId}"/></if>-->
+
+<!--        <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">-->
+<!--            <econdition field-name="partyId" from="realPartyId"/><date-filter/><order-by field-name="-fromDate"/></entity-find>-->
+<!--        &lt;!&ndash; TODO: Allow for different relationships between the current party and a work effort &ndash;&gt;-->
+<!--        <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="weapList">-->
+<!--            <econdition field-name="ownerPartyId" from="realPartyId"/></entity-find>-->
+
+<!--        &lt;!&ndash; TODO: Allow for different relationships between the current party and a facility &ndash;&gt;-->
+<!--        <entity-find entity-name="mantle.facility.Facility" list="fList">-->
+<!--            <econdition field-name="ownerPartyId" from="realPartyId"/></entity-find>-->
+<!--        &lt;!&ndash; TODO: Allow for different relationships between the current party and an organization &ndash;&gt;-->
+<!--        <entity-find entity-name="mantle.party.PartyDetail" list="pdList">-->
+<!--            <econdition field-name="ownerPartyId" from="realPartyId"/></entity-find>-->
+    </actions>
+
+    <widgets>
+        <container-row><row-col lg="12">
+            <section name="PartyProfileSection"><actions>
+            </actions><widgets>
+
+                <container-box><box-header title="Profiles"/><box-toolbar>
+                    <container-dialog id="SetTalentProfileDialog" button-text="Create Personal Profile">
+                        <form-single name="SetTalentProfileForm" transition="createPersonProfile">
+                            <field name="partyId"><default-field><hidden/></default-field></field>
+                            <field name="submitButton"><default-field title="Set"><submit/></default-field></field>
+                        </form-single>
+                    </container-dialog>
+                </box-toolbar><box-body-nopad>
+                    <form-list name="TalentProfileForm" list="epcpcList" skip-form="true" skip-header="true">
+                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+                        <field name="partyId"><default-field><hidden/></default-field></field>
+                        <field name="fromDate"><default-field><hidden/></default-field></field>
+                        <field name="thruDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
+                        <field name="title"><default-field title="Profile"><link url="partyProfileDetail" link-type="anchor-button" text="${title}"/></default-field></field>
+                    </form-list>
+                </box-body-nopad></container-box>
+            </widgets></section>
+
+        </row-col></container-row>
+    </widgets>
+</screen>

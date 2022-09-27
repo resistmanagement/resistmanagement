@@ -3,8 +3,12 @@
 <moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd">
     <screen-facade>
         <screen location="component://webroot/screen/webroot/apps.xml">
-            <subscreens-item name="resistmanagement" menu-title="Resist Management" menu-index="4"
-                    location="component://resistmanagement/screen/resistmanagement.xml"/>
+            <subscreens-item name="resistmanagement" menu-title="Resist Management" menu-index="3"
+                             location="component://resistmanagement/screen/resistmanagement.xml"/>
+        </screen>
+        <screen location="component://webroot/screen/webroot/apps.xml">
+            <subscreens-item name="resistmanagementadmin" menu-title="Resist Admin" menu-index="4"
+                        location="component://resistmanagement/screen/resistadmin.xml"/>
         </screen>
         <screen location="component://webroot/screen/webroot/apps.xml">
             <subscreens-item name="YourAccount" menu-title="Your Account" menu-index="5"

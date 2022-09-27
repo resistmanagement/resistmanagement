@@ -227,4 +227,23 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="create" noun="CreatePersonProfile">
+        <in-parameters>
+            <parameter name="nickname" required="true"/>
+        </in-parameters>
+        <out-parameters>
+
+        </out-parameters>
+        <actions>
+
+
+            <service-call name="create#mantle.party.Party" in-map="context + [partyTypeEnumId:'PtyPerson']" out-map="context"/>
+            <service-call name="create#mantle.party.Person" in-map="context"/>
+            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Supplier']"/>
+<!--            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Talent']"/>-->
+            <service-call name="create#mantle.party.PartyRelationship" in-map="[partyId:partyId, roleTypeId:'Supplier']"/>
+
+        </actions>
+    </service>
+
 </services>
