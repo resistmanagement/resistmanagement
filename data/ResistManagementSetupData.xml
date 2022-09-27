@@ -70,6 +70,8 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
     <!-- ========== Resist Management Profile Type Data ========== -->
     <!-- ========================================================= -->
+    <mantle.party.RoleType description="Talent" roleTypeId="Talent"/>
+
     <moqui.basic.Uom abbreviation="lb" description="Pound" uomId="WT_lb" uomTypeEnumId="UT_WEIGHT_MEASURE"/>
 
     <moqui.basic.UomDimensionType description="Quantity Included" uomDimensionTypeId="QuantityIncluded" defaultUomId="OTH_ct"/>
