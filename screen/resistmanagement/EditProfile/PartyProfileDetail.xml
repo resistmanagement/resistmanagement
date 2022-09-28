@@ -19,15 +19,13 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="emplPositionClassId" required="true"/>
 
     <transition name="setPartyDimension"><service-call name="store#mantle.party.PartyDimension"/>
-        <default-response url="." save-current-screen="true"/></transition>
+        <default-response type="none" save-current-screen="true"/></transition>
     <transition name="setPartyClassificationAppl"><service-call name="resistmanagement.ProfileServices.store#PartyClassificationAppl"/>
-        <default-response url="." save-current-screen="true"/></transition>
+        <default-response type="none" save-current-screen="true"/></transition>
     <transition name="setPartySkill"><service-call name="resistmanagement.ProfileServices.set#PartySkills"/>
-        <default-response url="." save-current-screen="true"/></transition>
+        <default-response type="none" save-current-screen="true"/></transition>
 
     <actions>
-        <if condition="partyId != ec.user.userAccount.partyId"><return error="true" message="Party not found with ID ${partyId}"/></if>
-
         <entity-find-one entity-name="mantle.humanres.position.EmplPositionClass" value-field="emplPositionClass">
             <field-map field-name="emplPositionClassId"/></entity-find-one>
         <if condition="emplPositionClass == null"><return error="true" message="Profile not found with ID ${emplPositionClassId}"/></if>
@@ -77,49 +75,31 @@ along with this software (see the LICENSE.md file). If not, see
 
     </actions>
     <widgets>
-        <container-row><row-col sm="0" md="2">
-        </row-col><row-col sm="12" md="8">
-
-            <section name="PartyProfileSection"><widgets>
-                <container-box><box-header title="${emplPositionClass.title} Measurements"/><box-toolbar>
-                </box-toolbar><box-body-nopad>
-                    <form-list name="TalentProfileTypeDimensionForm" list="epcdpList" transition="setPartyDimension" skip-header="true">
-                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                        <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="uomDimensionTypeId"><default-field><display text="${uomTypeDescription}"/></default-field></field>
-                        <field name="dimensionDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
-                        <field name="value"><default-field><text-line/></default-field></field>
-                        <field name="uomId"><default-field><display text="${uomDescription}"/></default-field></field>
-                        <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
-                    </form-list>
-                </box-body-nopad></container-box>
-
-                <container-box><box-header title="${emplPositionClass.title} Classifications"/><box-toolbar>
-                </box-toolbar><box-body-nopad>
-                    <form-list name="TalentProfileTypeclassificationTypeForm" list="epcpctpList" transition="setPartyClassificationAppl" skip-header="true">
-                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                        <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="classificationTypeEnumId"><default-field><display text="${classificationTypeDescription}"/></default-field></field>
-                        <field name="partyClassificationId"><default-field title="${classificationTypeDescription}"><drop-down allow-empty="true" submit-on-select="true">
-                            <entity-options key="${partyClassificationId}" text="${description}">
-                                <entity-find entity-name="mantle.party.PartyClassification" list="pcList">
-                                    <econdition field-name="classificationTypeEnumId"/></entity-find></entity-options>
-                        </drop-down></default-field></field>
-                    </form-list>
-                </box-body-nopad></container-box>
-
-                <container-box><box-header title="${emplPositionClass.title} Skills"/><box-toolbar>
-                </box-toolbar><box-body-nopad>
-                    <form-single name="TalentProfileTypeSkillForm" transition="setPartySkill">
-                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                        <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="skillTypeEnumIdList" from="psList.skillTypeEnumId"><default-field title="Skills"><drop-down allow-empty="false" allow-multiple="true" submit-on-select="true">
-                            <list-options list="epcspList" key="${skillTypeEnumId}" text="${skillTypeDescription}"/>
-                        </drop-down></default-field></field>
-                    </form-single>
-                </box-body-nopad></container-box>
-            </widgets></section>
-        </row-col><row-col sm="0" lg="2">
-        </row-col></container-row>
+        <form-list name="TalentProfileTypeDimensionForm" list="epcdpList" transition="setPartyDimension" skip-header="true">
+            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+            <field name="partyId"><default-field><hidden/></default-field></field>
+            <field name="uomDimensionTypeId"><default-field><display text="${uomTypeDescription}"/></default-field></field>
+            <field name="dimensionDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
+            <field name="value"><default-field><text-line/></default-field></field>
+            <field name="uomId"><default-field><display text="${uomDescription}"/></default-field></field>
+            <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
+        </form-list>
+        <form-list name="TalentProfileTypeclassificationTypeForm" list="epcpctpList" transition="setPartyClassificationAppl" skip-header="true">
+            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+            <field name="partyId"><default-field><hidden/></default-field></field>
+            <field name="classificationTypeEnumId"><default-field><display text="${classificationTypeDescription}"/></default-field></field>
+            <field name="partyClassificationId"><default-field title="${classificationTypeDescription}"><drop-down allow-empty="true" submit-on-select="true">
+                <entity-options key="${partyClassificationId}" text="${description}">
+                    <entity-find entity-name="mantle.party.PartyClassification" list="pcList">
+                        <econdition field-name="classificationTypeEnumId"/></entity-find></entity-options>
+            </drop-down></default-field></field>
+        </form-list>
+        <form-single name="TalentProfileTypeSkillForm" transition="setPartySkill">
+            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
+            <field name="partyId"><default-field><hidden/></default-field></field>
+            <field name="skillTypeEnumIdList" from="psList.skillTypeEnumId"><default-field title="Skills"><drop-down allow-empty="false" allow-multiple="true" submit-on-select="true">
+                <list-options list="epcspList" key="${skillTypeEnumId}" text="${skillTypeDescription}"/>
+            </drop-down></default-field></field>
+        </form-single>
     </widgets>
 </screen>

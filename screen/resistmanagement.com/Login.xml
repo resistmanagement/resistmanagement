@@ -158,6 +158,15 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="username" from="ec.web.errorParameters?.username ?: ''"/>
         </else></if>
 
+        <entity-find entity-name="mantle.party.agreement.AgreementAndContent" list="agreementList">
+            <econdition field-name="agreementTypeEnumId" operator="in" from="['AgrCookiesPolicy','AgrPrivacyPolicy','AgrTermsOfUse']" ignore-if-empty="true"/>
+            <econdition field-name="isTemplate" value="Y" ignore-if-empty="true"/>
+            <econdition field-name="contentTypeEnumId" value="AcntDocument"/>
+            <date-filter/>
+            <order-by field-name="-contentDate, -agreementDate"/>
+        </entity-find>
+
+
         <set field="passwordNode" from="ec.ecfi.confXmlRoot.first('user-facade').first('password')"/>
         <set field="minLength" from="passwordNode.attribute('min-length')" default-value="8" type="Integer"/>
         <set field="minDigits" from="passwordNode.attribute('min-digits')" default-value="1" type="Integer"/>

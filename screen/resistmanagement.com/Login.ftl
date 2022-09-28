@@ -110,6 +110,9 @@
             <input type="text" name="username" value="${(ec.getWeb().getErrorParameters().get("username"))!""}" placeholder="Username" class="form-control middle">
             <input type="password" class="form-control middle required" name="newPassword" placeholder="Password" required="required">
             <input type="password" class="form-control bottom required" name="newPasswordVerify" placeholder="Verify Password" required="required">
+
+            <p class="text-muted text-left">By signing up, you agree to our <#list agreementList as agreement><a href="${agreement.contentLocation}">${agreement.typeDescription}</a><#sep>, </#list>.</p>
+
             <button class="btn btn-lg btn-success btn-block" type="submit">Create Account</button>
         </form>
     </div>

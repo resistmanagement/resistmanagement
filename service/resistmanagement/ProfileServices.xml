@@ -229,19 +229,31 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="create" noun="CreatePersonProfile">
         <in-parameters>
+            <!-- TODO: Should we restrict the characters and the length of characters allowed in a nickname -->
             <parameter name="nickname" required="true"/>
         </in-parameters>
         <out-parameters>
-
+            <parameter name="partyId"/>
         </out-parameters>
         <actions>
+            <!-- no special characters, no spaces, all lowercase, max 30 characters -->
+            <set field="nickname" from="nickname.toLowerCase().replaceAll('[^a-z]+', '')"/>
+            <if condition="nickname.length() &gt; 30"><return type="danger" error="true" message="Profile name cannot be above 30 characters. It is currently ${nickname.length()} characters; lease shorten it."/></if>
+            <log level="warn" message="nickname ${nickname}"/>
 
+            <!-- nickname is intended to be unique. Check for existing nickname with same characters. -->
+            <entity-find-count entity-name="mantle.party.Person" count-field="personCount">
+                <econdition field-name="nickname"/></entity-find-count>
+
+            <if condition="personCount &gt; 0"><return type="danger" error="true" message="Profile name ${nickname} is not available. Please choose another."/></if>
 
             <service-call name="create#mantle.party.Party" in-map="context + [partyTypeEnumId:'PtyPerson']" out-map="context"/>
             <service-call name="create#mantle.party.Person" in-map="context"/>
             <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Supplier']"/>
-<!--            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Talent']"/>-->
-            <service-call name="create#mantle.party.PartyRelationship" in-map="[partyId:partyId, roleTypeId:'Supplier']"/>
+            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Talent']"/>
+            <service-call name="create#mantle.party.PartyRelationship" in-map="[relationshipTypeEnumId:'PrtManager',
+                fromPartyId:ec.user.userAccount.partyId, fromRoleTypeId:'Administrator', toPartyId:partyId, toRoleTypeId:'Talent',
+                fromDate:ec.user.nowTimestamp]"/>
 
         </actions>
     </service>

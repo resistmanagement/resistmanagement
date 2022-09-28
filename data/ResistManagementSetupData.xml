@@ -142,4 +142,65 @@ along with this software (see the LICENSE.md file). If not, see
         <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StFashion"/>
     </mantle.humanres.position.EmplPositionClass>
 
+    <!-- ====================================================== -->
+    <!-- ========== Resist Management Agreement Data ========== -->
+    <!-- ====================================================== -->
+    <moqui.basic.Enumeration enumId="AgrPrivacyPolicy" description="Privacy Policy" enumTypeId="AgreementType"/>
+    <moqui.basic.Enumeration enumId="AgrCookiesPolicy" description="Cookies Policy" enumTypeId="AgreementType"/>
+    <moqui.basic.Enumeration enumId="AgrTermsOfUse" description="Terms of Use" enumTypeId="AgreementType"/>
+
+    <dbResources resourceId="AgreementFile" filename="Agreement.md" isFile="Y" parentResourceId="WIKI_SPACE_ROOT">
+        <file rootVersionName="01" mimeType="text/x-markdown" versionName="01">
+            <fileData><![CDATA[CkF1dG9tYXRpYyByb290IHBhZ2UgZm9yIHNwYWNlIEFncmVlbWVudHMgZm9yIFVzZXJzCgo=]]></fileData>
+            <dbResource filename="Agreement.md" isFile="Y" parentResourceId="WIKI_SPACE_ROOT"/>
+        </file>
+    </dbResources>
+    <dbResources resourceId="AgreementDirectory" filename="Agreement" isFile="N" parentResourceId="WIKI_SPACE_ROOT"/>
+    <dbResources resourceId="AgreementFile" filename="Agreement.md" isFile="Y" parentResourceId="WIKI_SPACE_ROOT">
+        <file rootVersionName="01" mimeType="text/x-markdown" versionName="01">
+            <fileData><![CDATA[CkF1dG9tYXRpYyByb290IHBhZ2UgZm9yIHNwYWNlIEFncmVlbWVudHMgZm9yIFVzZXJzCgo=]]></fileData>
+        </file>
+    </dbResources>
+    <dbResources resourceId="AgreementDirectory" filename="Agreement" isFile="N" parentResourceId="WIKI_SPACE_ROOT"/>
+    <dbResources resourceId="PrivacyPolicy" filename="PrivacyPolicy.md" isFile="Y" parentResourceId="AgreementDirectory">
+        <file rootVersionName="01" mimeType="text/x-markdown" versionName="01">
+            <fileData><![CDATA[VGhpcyBpcyB0aGUgUHJpdmFjeSBQb2xpY3kgQWdyZWVtZW50Lg==]]></fileData>
+            <histories versionName="01" versionDate="1664402907372" isDiff="N"/>
+        </file>
+    </dbResources>
+    <dbResources resourceId="CookiesPolicy" filename="CookiesPolicy.md" isFile="Y" parentResourceId="AgreementDirectory">
+        <file rootVersionName="01" mimeType="text/x-markdown" versionName="01">
+            <fileData><![CDATA[VGhpcyBpcyB0aGUgQ29va2llIFBvbGljeSBBZ3JlZW1lbnQu]]></fileData>
+            <histories versionName="01" versionDate="1664402907372" isDiff="N"/>
+        </file>
+    </dbResources>
+    <dbResources resourceId="TermsOfUse" filename="TermsOfUse.md" isFile="Y" parentResourceId="AgreementDirectory">
+        <file rootVersionName="01" mimeType="text/x-markdown" versionName="01">
+            <fileData><![CDATA[VGhpcyBpcyB0aGUgVGVybXMgb2YgVXNlIEFncmVlbWVudC4=]]></fileData>
+            <histories versionName="01" versionDate="1664402907372" isDiff="N"/>
+        </file>
+    </dbResources>
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="Agreement" description="Agreements" rootPageLocation="dbresource://WikiSpace/Agreement.md" publicPageUrl="/r/content/${pagePath}?ver=${versionName}" publicAttachmentUrl="/r/content/attachment/${wikiPageId}/${filename}" restrictView="N" restrictUpdate="N" allowAnyHtml="N">
+        <moqui.resource.wiki.WikiPage wikiPageId="AgreementPage"/>
+        <moqui.resource.wiki.WikiPage sequenceNum="50" wikiPageId="PrivacyPolicyPage" publishedVersionName="01" pagePath="PrivacyPolicy">
+            <histories historySeqId="01" versionName="01" changeDateTime="1485028800000"/>
+        </moqui.resource.wiki.WikiPage>
+        <moqui.resource.wiki.WikiPage sequenceNum="50" wikiPageId="CookiesPolicyPage" publishedVersionName="01" pagePath="CookiesPolicy">
+            <histories historySeqId="01" versionName="01" changeDateTime="1485028800000"/>
+        </moqui.resource.wiki.WikiPage>
+        <moqui.resource.wiki.WikiPage sequenceNum="50" wikiPageId="TermsOfUsePage" publishedVersionName="01" pagePath="TermsOfUse">
+            <histories historySeqId="01" versionName="01" changeDateTime="1485028800000"/>
+        </moqui.resource.wiki.WikiPage>
+    </moqui.resource.wiki.WikiSpace>
+
+    <mantle.party.agreement.Agreement agreementId="PrivacyPolicyTemplate" agreementTypeEnumId="AgrPrivacyPolicy" isTemplate="Y">
+        <mantle.party.agreement.AgreementContent contentTypeEnumId="AcntDocument" agreementContentId="PrivacyPolicyTemplateContent" contentLocation="/content/PrivacyPolicy"/>
+    </mantle.party.agreement.Agreement>
+    <mantle.party.agreement.Agreement agreementId="CookiesPolicyTemplate" agreementTypeEnumId="AgrCookiesPolicy" isTemplate="Y">
+        <mantle.party.agreement.AgreementContent contentTypeEnumId="AcntDocument" agreementContentId="CookiesPolicyTemplateContent" contentLocation="/content/CookiesPolicy"/>
+    </mantle.party.agreement.Agreement>
+    <mantle.party.agreement.Agreement agreementId="TermsOfUseTemplate" agreementTypeEnumId="AgrTermsOfUse" isTemplate="Y">
+        <mantle.party.agreement.AgreementContent contentTypeEnumId="AcntDocument" agreementContentId="TermsOfUseTemplateTemplateContent" contentLocation="/content/TermsOfUse"/>
+    </mantle.party.agreement.Agreement>
+
 </entity-facade-xml>

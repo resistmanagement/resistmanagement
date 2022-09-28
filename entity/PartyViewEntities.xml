@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- mantle.party.agreement -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="AgreementAndContent" package="mantle.party.agreement">
+        <member-entity entity-alias="AGMT" entity-name="mantle.party.agreement.Agreement"/>
+        <member-relationship entity-alias="ATYP" join-from-alias="AGMT" relationship="type"/>
+        <member-entity entity-alias="ACNT" entity-name="mantle.party.agreement.AgreementContent" join-from-alias="AGMT">
+            <key-map field-name="agreementId"/></member-entity>
+        <alias-all entity-alias="AGMT"/>
+        <alias-all entity-alias="ACNT"/>
+        <alias entity-alias="ATYP" name="typeDescription" field="description"/>
+    </view-entity>
+
+</entities>
