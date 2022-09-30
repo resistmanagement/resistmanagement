@@ -15,8 +15,9 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Your Account" default-menu-index="99" menu-image="fa fa-user" menu-image-type="icon">
 
-    <subscreens default-item="FindProfile"/>
+    <subscreens default-item="FindAccount">
+    </subscreens>
     <widgets>
-        <subscreens-panel id="your-account-panel" type="popup"/>
+        <subscreens-panel id="resist-management-panel" type="popup"/>
     </widgets>
 </screen>

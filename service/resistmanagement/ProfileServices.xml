@@ -45,12 +45,9 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="storeAndAdd" noun="TalentProfileTypeDimensionType">
+        <implements service="resistmanagement.ProfileServices.store#TalentProfileTypeDimensionType"/>
         <in-parameters>
             <parameter name="emplPositionClassId" required="true"/>
-            <parameter name="uomDimensionTypeId" default="description.split(' ').collect{ it.toLowerCase().capitalize() }.join('')"/>
-            <parameter name="description" required="true"/>
-            <parameter name="uomTypeEnumId"/>
-            <parameter name="defaultUomId"/>
         </in-parameters>
         <out-parameters>
             <parameter name="emplPositionClassId"/>
@@ -83,15 +80,9 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="storeAndAdd" noun="TalentProfileTypeClassificationType">
+        <implements service="resistmanagement.ProfileServices.store#TalentProfileTypeClassificationType"/>
         <in-parameters>
             <parameter name="emplPositionClassId" required="true"/>
-            <parameter name="enumId"/>
-            <parameter name="enumTypeId" default-value="PartyClassificationType"/>
-            <parameter name="enumCode"/>
-            <parameter name="sequenceNum"/>
-            <parameter name="description" required="true"/>
-            <parameter name="optionValue"/>
-            <parameter name="optionIndicator"/>
         </in-parameters>
         <out-parameters>
             <parameter name="emplPositionClassId"/>
@@ -227,9 +218,60 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="ProfilePictureInfo">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="firstChar" required="true"/>
+            <parameter name="primaryColor" required="true"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId"/></entity-find-one>
+            <set field="firstChar" from="(party?.person ? (party.person.nickname ?: party.person.firstName ?: party.person.lastName ?: '?') : party.organization.organizationName ?: '?')[0].toUpperCase()"/>
+            <set field="colorList" type="NewList" from="['#fbf8ccff', '#fde4cfff', '#ffcfd2ff', '#f1c0e8ff', '#cfbaf0ff', '#a3c4f3ff', '#90dbf4ff', '#8eecf5ff', '#98f5e1ff', '#b9fbc0ff']"/>
+            <set field="primaryColor" from="colorList[Math.abs(new Random().nextInt() % colorList.size() - 1)]"/>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="ProfilePictureAttachment">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile?.getName() ?: 'DefaultProfilePicture.svg'"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/party/${partyId}/content_${partyContentId}/${filename}"/>
+
+            <entity-find-count entity-name="mantle.party.PartyContent" count-field="pcCount">
+                <econdition field-name="partyId"/>
+                <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+                <econdition field-name="contentLocation"/></entity-find-count>
+            <if condition="pcCount &gt; 0"><return type="warning" message="Not creating Profile Picture because the same file already exists."/></if>
+            <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:'PcntPrimaryImage']" out-map="context"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile?.getName() ? contentFile.getInputStream() : new ByteArrayInputStream(ec.screen.makeRender().rootScreen('component://resistmanagement/screen/resistmanagement/DefaultProfilePicture.xml').webappName(null).renderMode('text').render().getBytes())
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.party.PartyContent"
+                                                              in-map="[partyContentId:partyContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+
     <service verb="create" noun="CreatePersonProfile">
         <in-parameters>
-            <!-- TODO: Should we restrict the characters and the length of characters allowed in a nickname -->
             <parameter name="nickname" required="true"/>
         </in-parameters>
         <out-parameters>
@@ -239,7 +281,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- no special characters, no spaces, all lowercase, max 30 characters -->
             <set field="nickname" from="nickname.toLowerCase().replaceAll('[^a-z]+', '')"/>
             <if condition="nickname.length() &gt; 30"><return type="danger" error="true" message="Profile name cannot be above 30 characters. It is currently ${nickname.length()} characters; lease shorten it."/></if>
-            <log level="warn" message="nickname ${nickname}"/>
 
             <!-- nickname is intended to be unique. Check for existing nickname with same characters. -->
             <entity-find-count entity-name="mantle.party.Person" count-field="personCount">
@@ -254,7 +295,29 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="create#mantle.party.PartyRelationship" in-map="[relationshipTypeEnumId:'PrtManager',
                 fromPartyId:ec.user.userAccount.partyId, fromRoleTypeId:'Administrator', toPartyId:partyId, toRoleTypeId:'Talent',
                 fromDate:ec.user.nowTimestamp]"/>
+            <service-call name="resistmanagement.ProfileServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId]"/>
+        </actions>
+    </service>
 
+    <service verb="store" noun="TalentProfile">
+        <in-parameters>
+            <parameter name="emplPositionClassId" required="true"/>
+            <parameter name="partyId" required="true"/>
+            <parameter name="fromDate"/>
+            <auto-parameters entity-name="mantle.humanres.position.EmplPositionClassParty" include="nonpk"/>
+        </in-parameters>
+        <out-parameters>
+            <auto-parameters entity-name="mantle.humanres.position.EmplPositionClassParty" include="pk"/>
+        </out-parameters>
+        <actions>
+            <if condition="!fromDate">
+                <entity-find entity-name="mantle.humanres.position.EmplPositionClassParty" list="epcpList">
+                    <econdition field-name="emplPositionClassId"/>
+                    <econdition field-name="partyId"/>
+                    <date-filter/><order-by field-name="-fromDate"/></entity-find>
+                <set field="fromDate" from="epcpList?.getFirst()?.fromDate ?: ec.user.nowTimestamp"/>
+            </if>
+            <service-call name="store#mantle.humanres.position.EmplPositionClassParty" in-map="context" out-map="context"/>
         </actions>
     </service>
 

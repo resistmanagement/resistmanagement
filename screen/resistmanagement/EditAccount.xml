@@ -13,23 +13,19 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Edit Profile" default-menu-index="2">
+        default-menu-title="Edit Account" default-menu-index="2">
 
     <parameter name="partyId" required="true"/>
 
-    <transition name="setTalentProfile"><service-call name="store#mantle.humanres.position.EmplPositionClassParty"/>
+    <transition name="setTalentProfile"><service-call name="resistmanagement.ProfileServices.store#TalentProfile"/>
         <default-response url="."/></transition>
-    <transition name="setPartyWorkEffort"><service-call name="store#mantle.work.effort.WorkEffort"/>
+    <transition name="deleteTalentProfile"><service-call name="delete#mantle.humanres.position.EmplPositionClassParty"/>
         <default-response url="."/></transition>
 
-    <transition name="setPartyFacility"><service-call name="store#mantle.facility.Facility"/>
-        <default-response url="."/></transition>
-    <transition name="createOrganization">
-        <parameter name="ownerPartyId"/><parameter name="organizationName"/>
-        <service-call name="mantle.party.PartyServices.create#Organization" in-map="[organizationName:organizationName, ownerPartyId:ownerPartyId]"/>
-        <default-response url="."/></transition>
-    <transition name="partyProfileDetail"><default-response url="PartyProfileDetail" parameter-map="[partyId:partyId, emplPositionClassId:emplPositionClassId]"/></transition>
-    <transition name="organizationDashboard"><default-response url="//apps/resistmanagement/EditProfile" parameter-map="[partyId:partyId]"/></transition>
+<!--    <transition name="setPartyWorkEffort"><service-call name="store#mantle.work.effort.WorkEffort"/>-->
+<!--        <default-response url="."/></transition>-->
+
+<!--    <transition name="partyProfileDetail"><default-response url="PartyProfileDetail" parameter-map="[partyId:partyId, emplPositionClassId:emplPositionClassId]"/></transition>-->
 
     <transition name="setPartyDimension"><service-call name="store#mantle.party.PartyDimension"/>
         <default-response url="."/></transition>
@@ -37,6 +33,13 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="." save-current-screen="true"/></transition>
     <transition name="setPartySkill"><service-call name="resistmanagement.ProfileServices.set#PartySkills"/>
         <default-response url="." save-current-screen="true"/></transition>
+
+    <transition name="downloadContent" read-only="true">
+        <parameter name="partyContentId"/>
+        <actions><entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent"/>
+            <script>ec.web.sendResourceResponse(partyContent?.contentLocation)</script></actions>
+        <default-response type="none"/>
+    </transition>
 
     <actions>
         <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">
@@ -49,6 +52,13 @@ along with this software (see the LICENSE.md file). If not, see
 
         <entity-find-one entity-name="mantle.party.Party" value-field="party">
             <field-map field-name="partyId"/></entity-find-one>
+        <!-- Temporarily make sure that the party has a valid profile picture content -->
+        <service-call name="resistmanagement.ProfileServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId]"/>
+        <entity-find entity-name="mantle.party.PartyContent" list="partyContentList">
+            <econdition field-name="partyId"/>
+            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <order-by field-name="-contentDate"/></entity-find>
+
 
         <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
             <econdition field-name="partyId"/><date-filter/><order-by field-name="-fromDate"/></entity-find>
@@ -64,7 +74,11 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
     </actions>
     <widgets>
-        <label text="${party?.person ? (party.person.nickname ?: party.person.firstName + ' ' + party.person.lastName) : party.organization.organizationName}" type="h3"/>
+        <container-row><row-col xs="1">
+            <image url="downloadContent" parameter-map="[partyContentId:partyContentList.getFirst().partyContentId]" url-type="transition"/>
+        </row-col><row-col xs="11">
+            <label text="${party?.person ? (party.person.nickname ?: party.person.firstName + ' ' + party.person.lastName) : party.organization.organizationName}" type="h3"/>
+        </row-col></container-row>
         <container-row><row-col lg="12">
             <section name="PartyProfileSection"><actions>
             </actions><widgets>
@@ -86,6 +100,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <actions>
                             <set field="partyId" from="epcpc.partyId"/>
                             <set field="emplPositionClassId" from="epcpc.emplPositionClassId"/>
+                            <set field="fromDate" from="epcpc.fromDate"/>
 
                             <entity-find-one entity-name="mantle.humanres.position.EmplPositionClass" value-field="emplPositionClass">
                                 <field-map field-name="emplPositionClassId"/></entity-find-one>
@@ -136,7 +151,8 @@ along with this software (see the LICENSE.md file). If not, see
                         </actions>
                         <widgets>
                             <container-box><box-header title="${emplPositionClass.title}"></box-header><box-toolbar>
-
+                                    <link url="deleteTalentProfile" text="Delete ${emplPositionClass.title}" parameter-map="[partyId:partyId, emplPositionClassId:emplPositionClassId, fromDate:fromDate]"
+                                        confirmation="Are you sure you want to delete the ${emplPositionClass.title} Profile?"/>
                                 </box-toolbar><box-body-nopad>
                                     <form-list name="TalentProfileTypeDimensionForm" list="epcdpList" transition="setPartyDimension" skip-header="true">
                                         <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
@@ -166,7 +182,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     </form-single>
                                 </box-body-nopad>
                             </container-box>
-
                         </widgets>
                     </section-iterate>
 
