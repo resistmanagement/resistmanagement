@@ -241,23 +241,45 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="partyId" required="true"/>
             <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
             <parameter name="saveContentLocation" type="Boolean" default="true"/>
+            <parameter name="fileMimeTypeList" required="true" type="List" default="['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp', 'image/apng', 'image/avif', 'image/gif']"><description>
+                See: https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types for this list.</description></parameter>
         </in-parameters>
-        <out-parameters><parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/></out-parameters>
+        <out-parameters>
+            <parameter name="partyContentId"/>
+            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
+        </out-parameters>
         <actions>
+            <set field="test" from="fileMimeTypeList.collect{ fileMimeTypeList.indexOf(it) &lt; fileMimeTypeList.size() -1 ? it.split('/')[1].split('\\+')[0] : 'or ' + it.split('/')[1].split('\\+')[0] }.join(', ')"/>
+            <log level="warn" message="test ${test}"/>
+
+            <if condition="contentFile != null &amp;&amp; !fileMimeTypeList.contains(contentFile.getContentType())">
+                <!-- see: https://www.javacodeexamples.com/solution-java-util-regex-patternsyntaxexception-dangling-meta-character-near-index-0/3446 for why not split('+') and is split('\\+') -->
+                <!-- see: https://freemarker.apache.org/docs/dgui_misc_autoescaping.html for why not split('\\+') and is split('\\\\+') -->
+                <return error="true" message="The file type you used: ${contentFile.getContentType().split('/')[1].split('\\\\+')[0] } is not supported. Please upload a ${fileMimeTypeList.collect{ fileMimeTypeList.indexOf(it) &lt; fileMimeTypeList.size() -1 ? it.split('/')[1].split('\\\\+')[0] : 'or ' + it.split('/')[1].split('\\\\+')[0] }.join(', ')} file format."/>
+            </if>
+
             <set field="filename" from="contentFile?.getName() ?: 'DefaultProfilePicture.svg'"/>
             <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
             </then><else>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
             </else></if>
-            <set field="contentLocation" value="${contentRoot}/party/${partyId}/content_${partyContentId}/${filename}"/>
 
-            <entity-find-count entity-name="mantle.party.PartyContent" count-field="pcCount">
+            <entity-find entity-name="mantle.party.PartyContent" list="pcList">
                 <econdition field-name="partyId"/>
                 <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
-                <econdition field-name="contentLocation"/></entity-find-count>
-            <if condition="pcCount &gt; 0"><return type="warning" message="Not creating Profile Picture because the same file already exists."/></if>
+                <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${filename}"/>
+                <order-by field-name="-contentDate"/>
+            </entity-find>
+<!--            <log level="warn" message="pcList ${pcList}"/>-->
+
+            <if condition="pcList?.size() &gt; 0">
+                <service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:pcList.getFirst().partyContentId, contentDate:ec.user.nowTimestamp]" out-map="context"/>
+                <return message="Using existing file with the name ${filename}"/>
+            </if>
             <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:'PcntPrimaryImage']" out-map="context"/>
+
+            <set field="contentLocation" value="${contentRoot}/party/${partyId}/content_${partyContentId}/${filename}"/>
 
             <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
             <script>

@@ -13,12 +13,12 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Resist Management" default-menu-index="99" menu-image="fa fa-user" menu-image-type="icon">
-<!--    default-menu-title="Your Account" screen-theme-type-enum-id="STT_RESIST_MANAGEMENT" default-menu-index="99" menu-image="fa fa-user" menu-image-type="icon">-->
+        default-menu-title="Profile" default-menu-index="99" menu-image="fa fa-user" menu-image-type="icon">
+    <!--    default-menu-title="Your Account" screen-theme-type-enum-id="STT_RESIST_MANAGEMENT" default-menu-index="99" menu-image="fa fa-user" menu-image-type="icon">-->
 
-    <subscreens default-item="Profile">
+    <subscreens default-item="FindAccount">
     </subscreens>
     <widgets>
-        <subscreens-panel id="resist-management-panel" type="popup"/>
+        <subscreens-panel id="ProfilePanel" type="tab"/>
     </widgets>
 </screen>

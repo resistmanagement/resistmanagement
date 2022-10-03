@@ -203,4 +203,13 @@ along with this software (see the LICENSE.md file). If not, see
         <mantle.party.agreement.AgreementContent contentTypeEnumId="AcntDocument" agreementContentId="TermsOfUseTemplateTemplateContent" contentLocation="/content/TermsOfUse"/>
     </mantle.party.agreement.Agreement>
 
+    <!-- =================================================== -->
+    <!-- ========== Resist Management Screen Data ========== -->
+    <!-- =================================================== -->
+<!--    <moqui.basic.Enumeration description="Resist Management Theme Type" enumId="STT_RESIST_MANAGEMENT" enumTypeId="ScreenThemeType"/>-->
+<!--    <moqui.screen.ScreenTheme screenThemeId="RESIST_MANAGEMENT_DEFAULT" screenThemeTypeEnumId="STT_RESIST_MANAGEMENT"-->
+<!--                              description="Resist Management Default Theme"/>-->
+<!--    <moqui.screen.ScreenThemeResource screenThemeId="RESIST_MANAGEMENT_DEFAULT" sequenceNum="50" resourceTypeEnumId="STRT_STYLESHEET"-->
+<!--                                      resourceValue="/apps/resistmanagement/css/resistmanagement.css"/>-->
+
 </entity-facade-xml>
