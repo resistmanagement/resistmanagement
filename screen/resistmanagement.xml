@@ -16,7 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Resist Management" default-menu-index="99" menu-image="fa fa-user" menu-image-type="icon">
 <!--    default-menu-title="Your Account" screen-theme-type-enum-id="STT_RESIST_MANAGEMENT" default-menu-index="99" menu-image="fa fa-user" menu-image-type="icon">-->
 
-    <subscreens default-item="Profile">
+    <subscreens default-item="Account">
     </subscreens>
     <widgets>
         <subscreens-panel id="resist-management-panel" type="popup"/>
