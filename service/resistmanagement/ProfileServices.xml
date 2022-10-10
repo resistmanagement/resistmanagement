@@ -236,9 +236,17 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="upload" noun="ProfilePictureAttachment">
+    <service verb="upload" noun="PartyContent">
+        <description>
+            Upload a file for a Party to create a PartyContent entry.
+
+            If a file is not uploaded, there is no defaultFileName, AND there is no defaultFileRenderLocation, then an error is thrown that a file must be uploaded.
+        </description>
         <in-parameters>
             <parameter name="partyId" required="true"/>
+            <parameter name="partyContentTypeEnumId" required="true"/>
+            <parameter name="defaultFileName"/>
+            <parameter name="defaultFileRenderLocation"><description>Screen location to render the default file. Defaults to the text render mode.</description></parameter>
             <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
             <parameter name="saveContentLocation" type="Boolean" default="true"/>
             <parameter name="fileMimeTypeList" required="true" type="List" default="['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp', 'image/apng', 'image/avif', 'image/gif']"><description>
@@ -257,8 +265,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- see: https://freemarker.apache.org/docs/dgui_misc_autoescaping.html for why not split('\\+') and is split('\\\\+') -->
                 <return error="true" message="The file type you used: ${contentFile.getContentType().split('/')[1].split('\\\\+')[0] } is not supported. Please upload a ${fileMimeTypeList.collect{ fileMimeTypeList.indexOf(it) &lt; fileMimeTypeList.size() -1 ? it.split('/')[1].split('\\\\+')[0] : 'or ' + it.split('/')[1].split('\\\\+')[0] }.join(', ')} file format."/>
             </if>
+            <if condition="!defaultFileName &amp;&amp; !defaultFileRenderLocation &amp;&amp; contentFile == null"><return error="true" message="File upload is required."/></if>
 
-            <set field="filename" from="contentFile?.getName() ?: 'DefaultProfilePicture.svg'"/>
+            <set field="filename" from="contentFile?.getName() ?: defaultFileName"/>
             <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
             </then><else>
@@ -267,28 +276,63 @@ along with this software (see the LICENSE.md file). If not, see
 
             <entity-find entity-name="mantle.party.PartyContent" list="pcList">
                 <econdition field-name="partyId"/>
-                <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+                <econdition field-name="partyContentTypeEnumId"/>
                 <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${filename}"/>
                 <order-by field-name="-contentDate"/>
             </entity-find>
-<!--            <log level="warn" message="pcList ${pcList}"/>-->
 
             <if condition="pcList?.size() &gt; 0">
                 <service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:pcList.getFirst().partyContentId, contentDate:ec.user.nowTimestamp]" out-map="context"/>
                 <return message="Using existing file with the name ${filename}"/>
             </if>
-            <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:'PcntPrimaryImage']" out-map="context"/>
+            <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:partyContentTypeEnumId]" out-map="context"/>
 
             <set field="contentLocation" value="${contentRoot}/party/${partyId}/content_${partyContentId}/${filename}"/>
 
             <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
             <script>
-                fileStream = contentFile?.getName() ? contentFile.getInputStream() : new ByteArrayInputStream(ec.screen.makeRender().rootScreen('component://resistmanagement/screen/resistmanagement/DefaultProfilePicture.xml').webappName(null).renderMode('text').render().getBytes())
+                fileStream = contentFile?.getName() ? contentFile.getInputStream() : new ByteArrayInputStream(ec.screen.makeRender().rootScreen(defaultFileRenderLocation).webappName(null).renderMode('text').render().getBytes())
                 try { docRr.putStream(fileStream) } finally { fileStream.close() }
             </script>
 
             <if condition="saveContentLocation"><service-call name="update#mantle.party.PartyContent"
                                                               in-map="[partyContentId:partyContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="ProfilePictureAttachment">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyContentId"/>
+            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
+        </out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ProfileServices.upload#PartyContent" in-map="context + [
+                partyContentTypeEnumId:'PcntPrimaryImage', defaultFileName:'DefaultProfilePicture.svg',
+                defaultFileRenderLocation:'component://resistmanagement/screen/resistmanagement/DefaultProfilePicture.xml']" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="PostAttachment">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyContentId"/>
+            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
+        </out-parameters>
+        <actions>
+            <entity-find-count entity-name="mantle.party.PartyContent" count-field="postCount">
+                <econdition field-name="partyId"/>
+                <econdition field-name="partyContentTypeEnumId" value="PcntPost"/>
+            </entity-find-count>
+            <if condition="postCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>
+
+            <service-call name="resistmanagement.ProfileServices.upload#PartyContent" in-map="context + [partyContentTypeEnumId:'PcntPost']" out-map="context"/>
         </actions>
     </service>
 

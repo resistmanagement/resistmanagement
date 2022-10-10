@@ -73,6 +73,8 @@ along with this software (see the LICENSE.md file). If not, see
     <mantle.party.RoleType roleTypeId="Talent" description="Talent"/>
     <mantle.party.RoleType roleTypeId="ClientManager" description="Client"/>
 
+    <moqui.basic.Enumeration enumId="PcntPost" description="Post" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
+
     <moqui.basic.Uom abbreviation="lb" description="Pound" uomId="WT_lb" uomTypeEnumId="UT_WEIGHT_MEASURE"/>
 
     <moqui.basic.UomDimensionType description="Quantity Included" uomDimensionTypeId="QuantityIncluded" defaultUomId="OTH_ct"/>

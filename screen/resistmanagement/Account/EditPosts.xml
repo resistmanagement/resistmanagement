@@ -13,7 +13,7 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Posts" default-menu-index="5" default-menu-include="false">
+        default-menu-title="Posts" default-menu-index="4" default-menu-include="true">
 
     <parameter name="partyId" required="true"/>
 
@@ -39,159 +39,58 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
     <transition name="setTalentProfile"><service-call name="resistmanagement.ProfileServices.store#TalentProfile"/>
         <default-response url="."/></transition>
-    <transition name="updateProfilePicture"><service-call name="resistmanagement.ProfileServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId, contentFile:contentFile]"/>
+    <transition name="addPost"><service-call name="resistmanagement.ProfileServices.upload#PostAttachment" in-map="[partyId:partyId, contentFile:contentFile]"/>
         <default-response url="."/></transition>
 
     <actions>
-
         <entity-find-one entity-name="mantle.party.Party" value-field="party">
             <field-map field-name="partyId"/></entity-find-one>
+
         <!-- Temporarily make sure that the party has a valid profile picture content -->
 <!--        <service-call name="resistmanagement.ProfileServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId]"/>-->
         <entity-find entity-name="mantle.party.PartyContent" list="partyContentList">
             <econdition field-name="partyId"/>
-            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="partyContentTypeEnumId" value="PcntPost"/>
             <order-by field-name="-contentDate"/></entity-find>
-        <set field="partyProfilePictureList" from="[[partyContentId:partyContentList.getFirst().partyContentId, partyText:party?.person ? (party.person.nickname ?: party.person.firstName + ' ' + party.person.lastName) : party.organization.organizationName]]"/>
+        <set field="postTitleList" from="[[partyContentId:partyContentList.getFirst()?.partyContentId, partyText:party.pseudoId]]"/>
 
-        <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
-            <econdition field-name="partyId"/><date-filter/><order-by field-name="-fromDate"/></entity-find>
-        <!-- TODO: Allow for different relationships between the current party and a work effort -->
-        <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="weapList">
-            <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
+        <set field="postList" from="[]"/>
+        <set field="intermediatePostList" from="[]"/>
+        <iterate list="partyContentList" entry="partyContent">
+            <script>intermediatePostList.add(partyContent.partyContentId)</script>
+<!--            <log level="warn" message="intermediatePostList ${intermediatePostList} ${partyContent_index % 3}"/>-->
 
-        <!-- TODO: Allow for different relationships between the current party and a facility -->
-        <entity-find entity-name="mantle.facility.Facility" list="fList">
-            <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
-        <!-- TODO: Allow for different relationships between the current party and an organization -->
-        <entity-find entity-name="mantle.party.PartyDetail" list="pdList">
-            <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
+            <if condition="partyContent_index % 3 == 2 || partyContent_index == partyContentList.size() - 1">
+                <script>postList.add(intermediatePostList)</script>
+                <set field="intermediatePostList" from="[]"/>
+                <log level="warn" message="postList ${postList} ${partyContent_index % 3}"/>
+            </if>
+        </iterate>
     </actions>
     <widgets>
-        <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true">
-            <field name="content"><default-field><image url="downloadContent" url-type="transition" width="100px" parameter-map="[partyContentId:partyContentList.getFirst().partyContentId]"/></default-field></field>
-            <field name="partyText"><default-field><label text="${partyText}" type="h2"/></default-field></field>
-            <field name="updateProfilePictureButton"><default-field>
-                <container-dialog id="UpdateProfilePicture" button-text="Update Picture">
-                    <form-single name="UpdateProfilePictureForm" transition="updateProfilePicture">
-                        <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="contentFile"><default-field><file/></default-field></field>
-                        <field name="submit"><default-field><submit/></default-field></field>
-                    </form-single>
-                </container-dialog>
-            </default-field></field>
-        </form-list>
         <container-row><row-col lg="12">
-            <section name="PartyProfileSection"><actions>
-            </actions><widgets>
-                <container-box><box-header title="Talents"/><box-toolbar>
-                    <container-dialog id="SetTalentProfileDialog" button-text="Set Talent">
-                        <form-single name="SetTalentProfileForm" transition="setTalentProfile">
+            <form-list name="AddPostsSection" list="postTitleList" skip-form="true" skip-header="true">
+                <field name="partyText"><default-field><label text="Posts" type="h2"/></default-field></field>
+                <field name="addPostButton"><default-field>
+                    <container-dialog id="AddPost" button-text="Add Post">
+                        <form-single name="AddPostForm" transition="addPost">
                             <field name="partyId"><default-field><hidden/></default-field></field>
-                            <field name="emplPositionClassId"><default-field title="Type">
-                                <drop-down allow-empty="true" submit-on-select="true">
-                                    <entity-options key="${emplPositionClassId}" text="${title}">
-                                        <entity-find entity-name="mantle.humanres.position.EmplPositionClass"><order-by field-name="title"/>
-                                    </entity-find></entity-options>
-                                </drop-down>
-                            </default-field></field>
+                            <field name="contentFile"><default-field><file/></default-field></field>
+                            <field name="submit"><default-field><submit/></default-field></field>
                         </form-single>
                     </container-dialog>
-                </box-toolbar><box-body-nopad>
-                    <section-iterate name="ProfileSectionIterate" list="epcpcList" entry="epcpc">
-                        <actions>
-                            <set field="partyId" from="epcpc.partyId"/>
-                            <set field="emplPositionClassId" from="epcpc.emplPositionClassId"/>
-                            <set field="fromDate" from="epcpc.fromDate"/>
+                </default-field></field>
+            </form-list>
 
-                            <entity-find-one entity-name="mantle.humanres.position.EmplPositionClass" value-field="emplPositionClass">
-                                <field-map field-name="emplPositionClassId"/></entity-find-one>
-                            <if condition="emplPositionClass == null"><return error="true" message="Profile not found with ID ${emplPositionClassId}"/></if>
-
-                            <entity-find entity-name="mantle.humanres.position.EmplPositionClassDimension" list="epcdList">
-                                <econdition field-name="emplPositionClassId"/></entity-find>
-
-                            <set field="epcdpList" from="[]"/>
-                            <iterate list="epcdList" entry="epcd">
-                                <entity-find entity-name="mantle.party.PartyDimension" list="pdList">
-                                    <econdition field-name="partyId"/>
-                                    <econdition field-name="uomDimensionTypeId" from="epcd.uomDimensionTypeId"/>
-                                    <order-by field-name="-dimensionDate"/></entity-find>
-                                <if condition="pdList?.getFirst()"><then>
-                                    <script>epcdpList.add(pdList.getFirst().getMap() + [uomDescription:pdList.getFirst().uom.description, uomTypeDescription:pdList.getFirst().type.description])</script>
-                                </then><else>
-                                    <script>epcdpList.add(epcd.getMap() + [partyId:partyId, uomId:epcd.type.defaultUomId, uomDescription:epcd.type.defaultUom.description, uomTypeDescription:epcd.type.description])</script>
-                                </else></if>
-                            </iterate>
-
-                            <entity-find entity-name="mantle.party.EmplPositionClassPtyClsTp" list="epcpctList">
-                                <econdition field-name="emplPositionClassId"/></entity-find>
-
-                            <set field="epcpctpList" from="[]"/>
-                            <iterate list="epcpctList" entry="epcpct">
-                                <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="pcapList">
-                                    <econdition field-name="partyId"/>
-                                    <econdition field-name="classificationTypeEnumId" from="epcpct.classificationTypeEnumId"/>
-                                    <date-filter/><order-by field-name="-thruDate,-fromDate"/></entity-find>
-
-                                <set field="classificationTypeDescription" from="epcpct.type.description"/>
-                                <if condition="pcapList?.getFirst()"><then>
-                                    <script>epcpctpList.add(pcapList.getFirst().getMap() + [classificationTypeDescription:classificationTypeDescription])</script>
-                                </then><else>
-                                    <script>epcpctpList.add(epcpct.getMap() + [partyId:partyId, classificationTypeDescription:classificationTypeDescription])</script>
-                                </else></if>
-                            </iterate>
-
-                            <entity-find entity-name="mantle.humanres.position.EmplPositionClassSkill" list="epcsList">
-                                <econdition field-name="emplPositionClassId"/></entity-find>
-                            <entity-find entity-name="mantle.humanres.ability.PartySkill" list="psList">
-                                <econdition field-name="skillTypeEnumId" operator="in" from="epcsList.skillTypeEnumId"/>
-                                <econdition field-name="partyId"/></entity-find>
-
-                            <set field="epcspList" from="[]"/>
-                            <iterate list="epcsList" entry="epcs"><script>epcspList.add(epcs.getMap() + [partyId:partyId, skillTypeDescription:epcs.skillTypeEnum.description])</script></iterate>
-                        </actions>
-                        <widgets>
-                            <container-box><box-header title="${emplPositionClass.title}"></box-header><box-toolbar>
-                                    <link url="deleteTalentProfile" text="Delete ${emplPositionClass.title}" parameter-map="[partyId:partyId, emplPositionClassId:emplPositionClassId, fromDate:fromDate]"
-                                        confirmation="Are you sure you want to delete the ${emplPositionClass.title} Profile?"/>
-                                </box-toolbar><box-body-nopad>
-                                    <form-list name="TalentProfileTypeDimensionForm" list="epcdpList" transition="setPartyDimension" skip-header="true">
-                                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                                        <field name="partyId"><default-field><hidden/></default-field></field>
-                                        <field name="uomDimensionTypeId"><default-field><display text="${uomTypeDescription}"/></default-field></field>
-                                        <field name="dimensionDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
-                                        <field name="value"><default-field><text-line/></default-field></field>
-                                        <field name="uomId"><default-field><display text="${uomDescription}"/></default-field></field>
-                                        <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
-                                    </form-list>
-                                    <form-list name="TalentProfileTypeclassificationTypeForm" list="epcpctpList" transition="setPartyClassificationAppl" skip-header="true">
-                                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                                        <field name="partyId"><default-field><hidden/></default-field></field>
-                                        <field name="classificationTypeEnumId"><default-field><display text="${classificationTypeDescription}"/></default-field></field>
-                                        <field name="partyClassificationId"><default-field title="${classificationTypeDescription}"><drop-down allow-empty="true" submit-on-select="true">
-                                            <entity-options key="${partyClassificationId}" text="${description}">
-                                                <entity-find entity-name="mantle.party.PartyClassification" list="pcList">
-                                                    <econdition field-name="classificationTypeEnumId"/></entity-find></entity-options>
-                                        </drop-down></default-field></field>
-                                    </form-list>
-                                    <form-single name="TalentProfileTypeSkillForm" transition="setPartySkill">
-                                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                                        <field name="partyId"><default-field><hidden/></default-field></field>
-                                        <field name="skillTypeEnumIdList" from="psList.skillTypeEnumId"><default-field title="Skills"><drop-down allow-empty="false" allow-multiple="true" submit-on-select="true">
-                                            <list-options list="epcspList" key="${skillTypeEnumId}" text="${skillTypeDescription}"/>
-                                        </drop-down></default-field></field>
-                                    </form-single>
-                                </box-body-nopad>
-                            </container-box>
-                        </widgets>
-                    </section-iterate>
-
-                </box-body-nopad></container-box>
-            </widgets></section>
-
-        </row-col><row-col lg="6">
-
+            <section-iterate name="PostsSection" list="postList" entry="intermediatePostList">
+                <widgets>
+                    <form-list name="PostFormList" list="postTitleList" skip-form="true" skip-header="true">
+                        <field name="content0"><default-field><image url="downloadContent" url-type="transition" width="120px" parameter-map="[partyContentId:intermediatePostList?.get(0)]"/></default-field></field>
+                        <field name="content1"><conditional-field condition="intermediatePostList.size() &gt; 1"><image url="downloadContent" url-type="transition" width="120px" parameter-map="[partyContentId:intermediatePostList?.get(1)]"/></conditional-field></field>
+                        <field name="content2"><conditional-field condition="intermediatePostList.size() &gt; 2"><image url="downloadContent" url-type="transition" width="120px" parameter-map="[partyContentId:intermediatePostList?.get(2)]"/></conditional-field></field>
+                    </form-list>
+                </widgets>
+            </section-iterate>
         </row-col></container-row>
     </widgets>
 </screen>
