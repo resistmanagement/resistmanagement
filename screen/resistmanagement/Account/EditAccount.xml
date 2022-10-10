@@ -17,6 +17,8 @@ along with this software (see the LICENSE.md file). If not, see
 
     <parameter name="partyId" required="true"/>
 
+    <always-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></always-actions>
+
     <transition name="downloadContent" read-only="true">
         <parameter name="partyContentId"/>
         <actions><entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent"/>
@@ -29,8 +31,6 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="updateProfile"><service-call name="resistmanagement.ProfileServices.update#Account"/>
         <default-response url="."/></transition>
 
-    <pre-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></pre-actions>
-
     <actions>
         <entity-find-one entity-name="mantle.party.Party" value-field="party">
             <field-map field-name="partyId"/></entity-find-one>
@@ -40,11 +40,11 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="partyId"/>
             <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
             <order-by field-name="-contentDate"/></entity-find>
-        <set field="partyProfilePictureList" from="[[partyContentId:partyContentList.getFirst().partyContentId, partyText:party?.person ? (party.person.nickname ?: party.person.firstName + ' ' + party.person.lastName) : party.organization.organizationName]]"/>
+        <set field="partyProfilePictureList" from="[[partyContentId:partyContentList.getFirst()?.partyContentId, partyText:party?.pseudoId ?: (party?.person?.firstName + ' ' + party?.person?.lastName) ?: party?.organization?.organizationName]]"/>
     </actions>
     <widgets>
         <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true">
-            <field name="content"><default-field><image url="downloadContent" url-type="transition" width="100px" parameter-map="[partyContentId:partyContentList.getFirst().partyContentId]"/></default-field></field>
+            <field name="content"><default-field><image url="downloadContent" url-type="transition" width="100px" parameter-map="[partyContentId:partyContentList.getFirst()?.partyContentId]"/></default-field></field>
 <!--            <field name="partyText"><default-field><label text="${partyText}" type="h2"/></default-field></field>-->
             <field name="updateProfilePictureButton"><default-field>
                 <container-dialog id="UpdateProfilePicture" button-text="Update Picture">

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Projects" default-menu-index="4" default-menu-include="false" standalone="true">
+
+    <parameter name="partyId" required="true"/>
+
+    <always-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></always-actions>
+
+    <transition name="createTask"><parameter name="partyId" required="true"/><service-call name="mantle.work.TaskServices.create#Task" in-map="context + [assignToPartyId:partyId]"/>
+        <default-response url="." save-parameters="true"/></transition>
+    <transition name="editTask"><default-response url="../../Task/TaskSummary"/></transition>
+
+<!--    <transition name="getProjectParties">-->
+<!--        <service-call name="mantle.work.ProjectServices.get#ProjectParties" web-send-json-response="resultList"/>-->
+<!--        <default-response type="none"/>-->
+<!--    </transition>-->
+<!--    <transition name="getProjectMilestones">-->
+<!--        <service-call name="mantle.work.ProjectServices.get#ProjectMilestones" web-send-json-response="resultList"/>-->
+<!--        <default-response type="none"/>-->
+<!--    </transition>-->
+    <!--
+    <transition name="getProjectTasks">
+        <service-call name="mantle.work.ProjectServices.get#ProjectTasks" web-send-json-response="resultList"/>
+        <default-response type="none"/>
+    </transition>
+    -->
+
+    <actions>
+<!--        <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="myProjectList">-->
+<!--            <date-filter/><econdition field-name="partyId"/>-->
+<!--            <econdition field-name="workEffortTypeEnumId" value="WetProject"/>-->
+<!--            <order-by field-name="workEffortId"/>-->
+<!--        </entity-find>-->
+    </actions>
+    <widgets>
+        <container id="dashboard-tasks-section">
+            <container-box><box-header title="My Open Tasks"/><box-toolbar>
+                <container-dialog id="NewTaskContainer" button-text="New Task">
+                    <form-single name="NewTaskForm" transition="createTask">
+                        <field name="workEffortName"><default-field title="Task Name"><text-line/></default-field></field>
+<!--                        <field name="purposeEnumId"><default-field title="Purpose">-->
+<!--                            <drop-down no-current-selected-key="WepTask">-->
+<!--                                <entity-options key="${enumId}" text="${description}">-->
+<!--                                    <entity-find entity-name="moqui.basic.Enumeration">-->
+<!--                                        <econdition field-name="enumTypeId" value="WorkEffortPurpose"/>-->
+<!--                                        <econdition field-name="parentEnumId" value="WetTask"/>-->
+<!--                                        <order-by field-name="description"/>-->
+<!--                                    </entity-find>-->
+<!--                                </entity-options>-->
+<!--                            </drop-down>-->
+<!--                        </default-field></field>-->
+<!--                        <field name="statusId"><default-field title="Status">-->
+<!--                            <widget-template-include location="component://webroot/template/screen/BasicWidgetTemplates.xml#statusDropDown">-->
+<!--                                <set field="statusTypeId" value="WorkEffort"/></widget-template-include>-->
+<!--                        </default-field></field>-->
+<!--                        <field name="description"><default-field title="Description"><text-area rows="10" cols="60"/></default-field></field>-->
+                        <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
+                    </form-single>
+                </container-dialog>
+            </box-toolbar><box-body>
+                <form-list name="MyTasks" list="myTaskList">
+                    <entity-find entity-name="mantle.work.effort.PartyTaskSummary" list="myTaskList" distinct="true">
+                        <date-filter/><econdition field-name="partyId"/>
+                        <econdition field-name="statusId" operator="not-in" value="WeClosed,WeCancelled"/>
+                        <econdition field-name="purposeEnumId" operator="not-equals" value="WepPlaceholder"/>
+<!--                        <econdition field-name="partyStatusId" operator="in" value="WeptAssigned,WeptArrived"/>-->
+                        <select-field field-name="workEffortName"/>
+                    </entity-find>
+
+                    <field name="workEffortId"><default-field title="Task">
+                        <link text="WorkEffortNameTemplate" url="editTask" link-type="anchor"/>
+                    </default-field></field>
+<!--                    <field name="purposeEnumId"><default-field title="Purpose">-->
+<!--                        <display-entity entity-name="moqui.basic.Enumeration" also-hidden="false"/></default-field></field>-->
+<!--                    <field name="statusId"><default-field title="Status">-->
+<!--                        <display-entity entity-name="moqui.basic.StatusItem"/></default-field></field>-->
+                </form-list>
+            </box-body></container-box>
+        </container>
+    </widgets>
+</screen>

@@ -13,9 +13,11 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Posts" default-menu-index="4">
+        default-menu-title="Posts" default-menu-index="5" default-menu-include="false">
 
     <parameter name="partyId" required="true"/>
+
+    <always-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></always-actions>
 
     <transition name="setTalentProfile"><service-call name="resistmanagement.ProfileServices.store#TalentProfile"/>
         <default-response url="."/></transition>
@@ -39,8 +41,6 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="updateProfilePicture"><service-call name="resistmanagement.ProfileServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId, contentFile:contentFile]"/>
         <default-response url="."/></transition>
-
-    <pre-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></pre-actions>
 
     <actions>
 

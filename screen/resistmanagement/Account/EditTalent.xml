@@ -17,6 +17,8 @@ along with this software (see the LICENSE.md file). If not, see
 
     <parameter name="partyId" required="true"/>
 
+    <always-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></always-actions>
+
     <transition name="setTalentProfile"><service-call name="resistmanagement.ProfileServices.store#TalentProfile"/>
         <default-response url="."/></transition>
     <transition name="deleteTalentProfile"><service-call name="delete#mantle.humanres.position.EmplPositionClassParty"/>
@@ -29,8 +31,6 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="setPartySkill"><service-call name="resistmanagement.ProfileServices.set#PartySkills"/>
         <default-response url="." save-current-screen="true"/></transition>
 
-    <pre-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></pre-actions>
-
     <actions>
         <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
             <econdition field-name="partyId"/><date-filter/><order-by field-name="-fromDate"/></entity-find>
@@ -40,26 +40,27 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
 
         <set field="talentList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
+
+        <entity-find entity-name="mantle.humanres.position.EmplPositionClass" list="epcList">
+            <econdition field-name="emplPositionClassId" operator="not-in" from="epcpcList?.emplPositionClassId"/>
+            <order-by field-name="title"/></entity-find>
     </actions>
     <widgets>
         <container-row><row-col lg="12">
             <form-list name="SetTalent" list="talentList" skip-header="true" skip-form="true">
                 <field name="title"><default-field><label text="Talents" type="h2"/></default-field></field>
-                <field name="buttonText"><default-field>
+                <field name="buttonText"><conditional-field condition="epcList?.size() &gt; 0">
                     <container-dialog id="SetTalentProfileDialog" button-text="Add Talent">
                         <form-single name="SetTalentProfileForm" transition="setTalentProfile">
                             <field name="partyId"><default-field><hidden/></default-field></field>
                             <field name="emplPositionClassId"><default-field title="Type">
                                 <drop-down allow-empty="true" submit-on-select="true">
-                                    <entity-options key="${emplPositionClassId}" text="${title}">
-                                        <entity-find entity-name="mantle.humanres.position.EmplPositionClass">
-                                            <econdition field-name="emplPositionClassId" operator="not-in" from="epcpcList?.emplPositionClassId"/>
-                                            <order-by field-name="title"/></entity-find></entity-options>
+                                    <list-options list="epcList" key="${emplPositionClassId}" text="${title}"/>
                                 </drop-down>
                             </default-field></field>
                         </form-single>
                     </container-dialog>
-                </default-field></field>
+                </conditional-field></field>
             </form-list>
             <section-iterate name="ProfileSectionIterate" list="epcpcList" entry="epcpc">
                 <actions>
