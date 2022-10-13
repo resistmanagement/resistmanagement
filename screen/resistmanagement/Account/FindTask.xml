@@ -21,17 +21,14 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="findTask"><default-response url="."/></transition>
     <transition name="editTask"><default-response url="../../Task/TaskSummary"/></transition>
-    <!--    <transition name="projectSummary"><default-response url="../../Project/ProjectSummary"/></transition>-->
-    <!--    <transition name="milestoneSummary"><default-response url="../../Project/MilestoneSummary"/></transition>-->
 
-    <transition name="createTask"><service-call name="mantle.work.TaskServices.create#Task" in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId]"/>
+    <transition name="createTask"><service-call name="mantle.work.TaskServices.create#Task"
+            in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
         <default-response url="."/></transition>
 
     <!-- row selection action form transitions -->
     <transition name="updateTask"><service-call name="mantle.work.TaskServices.update#Task" in-map="context"/>
         <default-response url="."/></transition>
-<!--    <transition name="addWorkEffortParty"><service-call name="mantle.work.WorkEffortServices.add#WorkEffortParty" in-map="context"/>-->
-<!--        <default-response url="."/></transition>-->
     <transition name="removeWorkEffortParty"><service-call name="mantle.work.WorkEffortServices.remove#WorkEffortParty" in-map="context"/>
         <default-response url="."/></transition>
 
@@ -40,12 +37,15 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="myProjectList">
             <date-filter/><econdition field-name="partyId"/>
+            <econdition field-name="roleTypeId" value="Manager"/>
             <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
             <order-by field-name="workEffortId"/>
         </entity-find>
         <set field="myProjectIds" from="myProjectList.workEffortId"/>
 
-        <entity-find entity-name="mantle.work.effort.PartyTaskSummary" list="taskList">
+<!--        <log level="warn" message="myProjectIds ${myProjectIds.toString()}"/>-->
+
+        <entity-find entity-name="mantle.work.effort.PartyTaskSummary" list="taskList" distinct="true">
             <search-form-inputs default-order-by="priority,workEffortId">
                 <default-parameters statusId="WeInPlanning,WeApproved,WeInProgress,WeOnHold,WeComplete" statusId_op="in"/></search-form-inputs>
             <econdition field-name="workEffortTypeEnumId" value="WetTask"/>
@@ -53,6 +53,8 @@ along with this software (see the LICENSE.md file). If not, see
             <select-field field-name="rootWorkEffortId,workEffortId,workEffortTypeEnumId,workEffortName,description,lastUpdatedStamp"/>
             <order-by field-name="-lastUpdatedStamp"/>
         </entity-find>
+
+<!--        <log level="warn" message="taskList ${taskList.toString()}"/>-->
 
         <set field="taskTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
