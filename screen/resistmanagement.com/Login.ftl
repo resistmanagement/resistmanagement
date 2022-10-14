@@ -41,13 +41,13 @@
             <#-- people know what to do <p class="text-muted text-center">${ec.l10n.localize("Enter your username and password to sign in")}</p> -->
             <#-- not needed for this request: <input type="hidden" name="moquiSessionToken" value="${ec.web.sessionToken}"> -->
             <input type="text" name="username" value="${(username!"")?html}"
-                   <#if username?has_content && secondFactorRequired>disabled="disabled"</#if>
+                   <#if username?has_content && secondFactorRequired>disabled="disabled"<#else>autofocus</#if>
                    required="required" class="form-control top" id="login_form_username"
                    placeholder="${ec.l10n.localize("Username")}" aria-label="${ec.l10n.localize("Username")}">
             <#-- secondFactorRequired will only be set if a user is pre-authenticated, and in that case password not required again -->
             <#if secondFactorRequired>
                 <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required="required"
-                       placeholder="${ec.l10n.localize("Authentication Code")}" class="form-control bottom"
+                       placeholder="${ec.l10n.localize("Authentication Code")}" class="form-control bottom" autofocus
                        aria-label="${ec.l10n.localize("Authentication Code")}">
             <#else>
                 <input type="password" name="password" required="required" class="form-control <#if secondFactorRequired>middle<#else>bottom</#if>"

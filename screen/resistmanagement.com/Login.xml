@@ -224,7 +224,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <input type="hidden" name="password" value="moqui">
                     <button class="btn btn-sm btn-primary" type="submit" id="TestLoginLink_button">Test Login (John Doe)</button>
                     </form>
-                    <script>$("#TestLoginLink_button").focus();</script>
                     ]]></text></render-mode></widgets>
             </section>
         </container></container></container>

@@ -85,7 +85,7 @@ along with this software (see the LICENSE.md file). If not, see
             <section-iterate name="PostsSection" list="postList" entry="intermediatePostList">
                 <widgets>
                     <form-list name="PostFormList" list="postTitleList" skip-form="true" skip-header="true">
-                        <field name="content0"><default-field><image url="downloadContent" url-type="transition" width="120px" parameter-map="[partyContentId:intermediatePostList?.get(0)]"/></default-field></field>
+                        <field name="content0"><default-field><image url="downloadContent" url-type="transition" width="80px" parameter-map="[partyContentId:intermediatePostList?.get(0)]"/></default-field></field>
                         <field name="content1"><conditional-field condition="intermediatePostList.size() &gt; 1"><image url="downloadContent" url-type="transition" width="120px" parameter-map="[partyContentId:intermediatePostList?.get(1)]"/></conditional-field></field>
                         <field name="content2"><conditional-field condition="intermediatePostList.size() &gt; 2"><image url="downloadContent" url-type="transition" width="120px" parameter-map="[partyContentId:intermediatePostList?.get(2)]"/></conditional-field></field>
                     </form-list>
