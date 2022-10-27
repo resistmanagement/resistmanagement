@@ -365,10 +365,10 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
 <!--            <service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/>-->
 
-            <log level="warn" message="update#Account pseudoId ${pseudoId}"/>
+<!--            <log level="warn" message="update#Account pseudoId ${pseudoId}"/>-->
             <if condition="pseudoId">
                 <!-- no special characters, no spaces, all lowercase, max 30 characters -->
-                <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z]+', '')"/>
+                <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z0-9]+', '')"/>
                 <if condition="pseudoId.length() &gt; 30"><return type="info" error="true" message="Profile name cannot be above 30 characters. It is currently ${pseudoId.length()} characters; lease shorten it."/></if>
 
                 <!-- pseudoId is intended to be unique. Check for existing pseudoId with same characters. -->
