@@ -50,7 +50,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-parameters statusId="WeInPlanning,WeApproved,WeInProgress,WeOnHold,WeComplete" statusId_op="in"/></search-form-inputs>
             <econdition field-name="workEffortTypeEnumId" value="WetTask"/>
             <econdition field-name="rootWorkEffortId" operator="in" from="myProjectIds" or-null="true"/><!-- only tasks in allowed projects -->
-            <select-field field-name="rootWorkEffortId,workEffortId,workEffortTypeEnumId,workEffortName,description,lastUpdatedStamp"/>
+            <select-field field-name="rootWorkEffortId,workEffortId,workEffortTypeEnumId,workEffortName,description,estimatedStartDate,estimatedWorkDuration,lastUpdatedStamp"/>
             <order-by field-name="-lastUpdatedStamp"/>
         </entity-find>
 
@@ -66,8 +66,15 @@ along with this software (see the LICENSE.md file). If not, see
                     <container-dialog id="NewTaskContainer" button-text="New Task">
                         <form-single name="NewTaskForm" transition="createTask" pass-through-parameters="true">
                             <field name="workEffortName"><default-field title="Task Name"><text-line/></default-field></field>
+                            <field name="estimatedStartDate" from="ec.user.nowTimestamp"><default-field title="Start Date"><date-time/></default-field></field>
+                            <field name="estimatedWorkDuration" from="'1'"><default-field title="Estimated Hours"><text-line size="8"/></default-field></field>
                             <field name="description"><default-field title="Description"><text-area rows="10" cols="60"/></default-field></field>
                             <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
+                            <field-layout>
+                                <field-row><field-ref name="workEffortName"/></field-row>
+                                <field-row><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/></field-row>
+                                <fields-not-referenced/>
+                            </field-layout>
                         </form-single>
                     </container-dialog>
                 </default-field></field>
@@ -80,8 +87,15 @@ along with this software (see the LICENSE.md file). If not, see
                     <form-single name="UpdateTaskForm" transition="updateTask" pass-through-parameters="true">
                         <field name="workEffortId"><default-field><hidden/></default-field></field>
                         <field name="workEffortName"><default-field title="Task Name"><text-line/></default-field></field>
+                        <field name="estimatedStartDate" from="estimatedStartDate"><default-field title="Start Date"><date-time/></default-field></field>
+                        <field name="estimatedWorkDuration" from="estimatedWorkDuration"><default-field title="Estimated Hours"><text-line size="8"/></default-field></field>
                         <field name="description"><default-field title="Description"><text-area rows="10" cols="60"/></default-field></field>
                         <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
+                        <field-layout>
+                            <field-row><field-ref name="workEffortName"/></field-row>
+                            <field-row><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/></field-row>
+                            <fields-not-referenced/>
+                        </field-layout>
                     </form-single>
                 </container-dialog></default-field></field>
                 <field name="description"><default-field><label text="${description}"/></default-field></field>
