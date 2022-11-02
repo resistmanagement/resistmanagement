@@ -214,7 +214,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <log level="warn" message="neither exist ${epcs.skillTypeEnumId}"/>
                 </else-if></if>
             </iterate>
-
         </actions>
     </service>
 
@@ -361,28 +360,47 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="partyId" required="true"/>
             <parameter name="pseudoId"/>
+            <parameter name="bio"/>
         </in-parameters>
         <out-parameters>
             <parameter name="partyId"/>
             <parameter name="pseudoId"/>
+            <parameter name="partyContentId"/>
         </out-parameters>
         <actions>
 <!--            <service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/>-->
 
-            <log level="warn" message="update#Account pseudoId ${pseudoId}"/>
+<!--            <log level="warn" message="update#Account pseudoId ${pseudoId}"/>-->
             <if condition="pseudoId">
                 <!-- no special characters, no spaces, all lowercase, max 30 characters -->
                 <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z]+', '')"/>
                 <if condition="pseudoId.length() &gt; 30"><return type="info" error="true" message="Profile name cannot be above 30 characters. It is currently ${pseudoId.length()} characters; lease shorten it."/></if>
 
                 <!-- pseudoId is intended to be unique. Check for existing pseudoId with same characters. -->
-                <entity-find-count entity-name="mantle.party.Party" count-field="partyCount">
-                    <econdition field-name="pseudoId"/></entity-find-count>
-                <if condition="partyCount &gt; 0"><return type="info" error="true" message="Profile name ${pseudoId} is not available. Please choose another."/></if>
+                <entity-find-one entity-name="mantle.party.Party" value-field="party" auto-field-map="[partyId:partyId]"/>
+                <if condition="party != null &amp;&amp; party.pseudoId != pseudoId"><then>
+                    <entity-find-count entity-name="mantle.party.Party" count-field="partyCount">
+                        <econdition field-name="pseudoId"/></entity-find-count>
+                    <if condition="partyCount &gt; 0"><return type="info" error="true" message="Profile name ${pseudoId} is not available. Please choose another."/></if>
+                </then><else>
+                    <service-call name="update#mantle.party.Party" in-map="[partyId:partyId, pseudoId:pseudoId]" out-map="outMap"/>
+                </else></if>
 
-                <service-call name="update#mantle.party.Party" in-map="[partyId:partyId, pseudoId:pseudoId]" out-map="outMap"/>
 <!--                <log level="warn" message="update#Account pseudoId ${pseudoId}"/>-->
 <!--                <log level="warn" message="update#Account outMap.pseudoId ${outMap.pseudoId}"/>-->
+            </if>
+            <if condition="bio">
+                <entity-find entity-name="mantle.party.PartyContent" list="partyContentList">
+                    <econdition field-name="partyId"/>
+                    <econdition field-name="partyContentTypeEnumId" value="PcntBio"/>
+                    <order-by field-name="-contentDate"/></entity-find>
+                <if condition="partyContentList"><then>
+<!--                    <log level="warn" message="true partyContentList ${partyContentList}"/>-->
+                    <service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:partyContentList.getFirst().partyContentId, description:bio]" out-map="context"/>
+                </then><else>
+<!--                    <log level="warn" message="false partyContentList ${partyContentList}"/>-->
+                    <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:'PcntBio', description:bio]" out-map="context"/>
+                </else></if>
             </if>
         </actions>
     </service>
@@ -396,7 +414,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- no special characters, no spaces, all lowercase, max 30 characters -->
-            <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z]+', '')"/>
+            <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z0-9]+', '')"/>
             <if condition="pseudoId.length() &gt; 30"><return type="info" error="true" message="Profile name cannot be above 30 characters. It is currently ${pseudoId.length()} characters; lease shorten it."/></if>
 
             <!-- pseudoId is intended to be unique. Check for existing pseudoId with same characters. -->

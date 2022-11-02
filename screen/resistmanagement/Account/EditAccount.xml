@@ -41,6 +41,11 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
             <order-by field-name="-contentDate"/></entity-find>
         <set field="partyProfilePictureList" from="[[partyContentId:partyContentList.getFirst()?.partyContentId, partyText:party?.pseudoId ?: (party?.person?.firstName + ' ' + party?.person?.lastName) ?: party?.organization?.organizationName]]"/>
+        <entity-find entity-name="mantle.party.PartyContent" list="partyContentBioList">
+            <econdition field-name="partyId"/>
+            <econdition field-name="partyContentTypeEnumId" value="PcntBio"/>
+            <order-by field-name="-contentDate"/></entity-find>
+        <set field="bio" from="partyContentBioList?.getFirst()?.description"/>
     </actions>
     <widgets>
         <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true">
@@ -58,7 +63,8 @@ along with this software (see the LICENSE.md file). If not, see
         </form-list>
         <form-single name="PartyProfileEditSection" transition="updateProfile">
             <field name="partyId"><default-field><hidden/></default-field></field>
-            <field name="pseudoId"><default-field><text-line default-value="${party.pseudoId}"/></default-field></field>
+            <field name="pseudoId"><default-field title="Id"><text-line default-value="${party.pseudoId}"/></default-field></field>
+            <field name="bio"><default-field><text-area/></default-field></field>
             <field name="submit"><default-field><submit text="Submit"/></default-field></field>
         </form-single>
     </widgets>
