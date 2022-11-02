@@ -331,7 +331,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-count>
             <if condition="postCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>
 
-            <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[inputImage:contentFile, imageOutputFormat:'jpg']" out-map="context"/>
+            <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[inputImage:contentFile?.getStoreLocation(), outputImageFormat:'jpeg']" out-map="context"/>
             <set field="contentFile" from="imageOutput"/>
 
 <!--            <service-call name="resistmanagement.ProfileServices.upload#PartyContent" in-map="context + [partyContentTypeEnumId:'PcntPost']" out-map="context"/>-->
