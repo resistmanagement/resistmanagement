@@ -3,4 +3,5 @@
         name="resistmanagement" version="1.0.0">
     <depends-on name="moqui-fop" version="1.1.2"/>
     <depends-on name="SimpleScreens" version="2.2.0"/>
+    <depends-on name="moqui-image" version="0.1.0"/>
 </component>
