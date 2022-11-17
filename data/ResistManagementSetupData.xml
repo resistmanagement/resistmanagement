@@ -74,6 +74,11 @@ along with this software (see the LICENSE.md file). If not, see
     <mantle.party.RoleType roleTypeId="ClientManager" description="Client"/>
 
     <moqui.basic.Enumeration enumId="PcntPost" description="Post" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
+    <moqui.basic.Enumeration enumId="PcntPostImageOriginal" description="Post Image Original (highest quality)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
+    <moqui.basic.Enumeration enumId="PcntPostImageLarge" description="Post Image Large (~2160p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
+    <moqui.basic.Enumeration enumId="PcntPostImageMedium" description="Post Image Medium (~1080p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
+    <moqui.basic.Enumeration enumId="PcntPostImageSmall" description="Post Image Small (~360p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
+    <moqui.basic.Enumeration enumId="PcntPostImageThumbnail" description="Post Image Thumbnail (~165p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
 
     <moqui.basic.Uom abbreviation="lb" description="Pound" uomId="WT_lb" uomTypeEnumId="UT_WEIGHT_MEASURE"/>
 
