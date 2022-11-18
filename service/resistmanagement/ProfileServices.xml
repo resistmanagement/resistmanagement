@@ -331,14 +331,14 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
             <parameter name="outputImageFormat" required="true" default-value="jpg"></parameter>
             <parameter name="saveOriginal" type="Boolean" default="true" required="true"><description>If true, will save the original image.</description></parameter>
-            <parameter name="contentTypeOriginal" default-value="PcntPostImageOriginal" required="true"><description>Party Content Type Enum Id for the Original image.</description></parameter>
             <parameter name="saveLarge" type="Boolean" default="false" required="true"><description>If true, will save a large image.</description></parameter>
-            <parameter name="contentTypeLarge" default-value="PcntPostImageLarge" required="true"><description>Party Content Type Enum Id for the Large image.</description></parameter>
             <parameter name="saveMedium" type="Boolean" default="true" required="true"><description>If true, will save a medium image.</description></parameter>
-            <parameter name="contentTypeMedium" default-value="PcntPostImageMedium" required="true"><description>Party Content Type Enum Id for the Medium image.</description></parameter>
             <parameter name="saveSmall" type="Boolean" default="true" required="true"><description>If true, will save a small image.</description></parameter>
-            <parameter name="contentTypeSmall" default-value="PcntPostImageSmall" required="true"><description>Party Content Type Enum Id for the Small image.</description></parameter>
             <parameter name="saveThumbnail" type="Boolean" default="false" required="true"><description>If true, will save the thumbnail image.</description></parameter>
+            <parameter name="contentTypeOriginal" default-value="PcntPostImageOriginal" required="true"><description>Party Content Type Enum Id for the Original image.</description></parameter>
+            <parameter name="contentTypeLarge" default-value="PcntPostImageLarge" required="true"><description>Party Content Type Enum Id for the Large image.</description></parameter>
+            <parameter name="contentTypeMedium" default-value="PcntPostImageMedium" required="true"><description>Party Content Type Enum Id for the Medium image.</description></parameter>
+            <parameter name="contentTypeSmall" default-value="PcntPostImageSmall" required="true"><description>Party Content Type Enum Id for the Small image.</description></parameter>
             <parameter name="contentTypeThumbnail" default-value="PcntPostImageThumbnail" required="true"><description>Party Content Type Enum Id for the Thumbnail image.</description></parameter>
         </in-parameters>
         <out-parameters>
@@ -374,20 +374,19 @@ along with this software (see the LICENSE.md file). If not, see
 <!--            <set field="partyContentId" from="pcDuplicateList?.getFirst()?.partyContentId"/>-->
 <!--            <if condition="!partyContentId &amp;&amp; pcDuplicateList?.size() == 0">-->
 
+            <set field="fileNameNoExtension" from="contentFile.getName().take(contentFile.getName().lastIndexOf('.'))"/>
 
+            <set field="Original" type="NewMap"/><set field="contentLocationOriginal"/>
+            <set field="Large" type="NewMap"/><set field="contentLocationLarge"/>
+            <set field="Medium" type="NewMap"/><set field="contentLocationMedium"/>
+            <set field="Small" type="NewMap"/><set field="contentLocationSmall"/>
+            <set field="Thumbnail" type="NewMap"/><set field="contentLocationThumbnail"/>
 
-
-            <set field="Original"/><set field="contentLocationOriginal"/>
-            <set field="Large"/><set field="contentLocationLarge"/>
-            <set field="Medium"/><set field="contentLocationMedium"/>
-            <set field="Small"/><set field="contentLocationSmall"/>
-            <set field="Thumbnail"/><set field="contentLocationThumbnail"/>
-
-            <if condition="saveOriginal"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeOriginal]" out-map="Original"/><set field="contentLocationOriginal" value="${contentRoot}/party/${partyId}/content_${Original.partyContentId}/${contentFile?.getName() - ('.' + outputImageFormat) + '_Original.' + outputImageFormat}"/></if>
-            <if condition="saveLarge"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeLarge]" out-map="Large"/><set field="contentLocationLarge" value="${contentRoot}/party/${partyId}/content_${Large.partyContentId}/${contentFile?.getName() - ('.' + outputImageFormat) + '_Large.' + outputImageFormat}"/></if>
-            <if condition="saveMedium"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeMedium]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/party/${partyId}/content_${Medium.partyContentId}/${contentFile?.getName() - ('.' + outputImageFormat) + '_Medium.' + outputImageFormat}"/></if>
-            <if condition="saveSmall"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeSmall]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/party/${partyId}/content_${Small.partyContentId}/${contentFile?.getName() - ('.' + outputImageFormat) + '_Small.' + outputImageFormat}"/></if>
-            <if condition="saveThumbnail"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeThumbnail]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/party/${partyId}/content_${Thumbnail.partyContentId}/${contentFile?.getName() - ('.' + outputImageFormat) + '_Thumbnail.' + outputImageFormat}"/></if>
+            <if condition="saveOriginal"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeOriginal]" out-map="Original"/><set field="contentLocationOriginal" value="${contentRoot}/party/${partyId}/content_${Original.partyContentId}/${fileNameNoExtension + '_Original.' + outputImageFormat}"/></if>
+            <if condition="saveLarge"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeLarge]" out-map="Large"/><set field="contentLocationLarge" value="${contentRoot}/party/${partyId}/content_${Large.partyContentId}/${fileNameNoExtension + '_Large.' + outputImageFormat}"/></if>
+            <if condition="saveMedium"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeMedium]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/party/${partyId}/content_${Medium.partyContentId}/${fileNameNoExtension + '_Medium.' + outputImageFormat}"/></if>
+            <if condition="saveSmall"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeSmall]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/party/${partyId}/content_${Small.partyContentId}/${fileNameNoExtension + '_Small.' + outputImageFormat}"/></if>
+            <if condition="saveThumbnail"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeThumbnail]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/party/${partyId}/content_${Thumbnail.partyContentId}/${fileNameNoExtension + '_Thumbnail.' + outputImageFormat}"/></if>
 
 <!--            </if>-->
 
@@ -405,6 +404,8 @@ along with this software (see the LICENSE.md file). If not, see
 <!--            </else></if>-->
 <!--            <log level="warn" message="ec.resource.getLocationReference(contentLocationOriginal).getSize() ${ec.resource.getLocationReference(contentLocationOriginal).getSize()}"/>-->
 
+<!--            <log level="warn" message="context.toString() ${context.toString()}"/>-->
+
             <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
                 inputImageStream:contentFile.getInputStream(),
                 outputImageFormat:outputImageFormat,
@@ -413,15 +414,15 @@ along with this software (see the LICENSE.md file). If not, see
                 outputResourceReferenceMedium:ec.resource.getLocationReference(contentLocationMedium),
                 outputResourceReferenceSmall:ec.resource.getLocationReference(contentLocationSmall),
                 outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
-            ]" out-map="context" async="true"/>
+            ]" out-map="context"/>
+
+<!--            <log level="warn" message="post context.toString() ${context.toString()}"/>-->
 
             <if condition="saveOriginal"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Original.partyContentId, contentLocation:contentLocationOriginal, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveLarge"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Large.partyContentId, contentLocation:contentLocationLarge, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveMedium"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Medium.partyContentId, contentLocation:contentLocationMedium, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveSmall"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Small.partyContentId, contentLocation:contentLocationSmall, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveThumbnail"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Thumbnail.partyContentId, contentLocation:contentLocationThumbnail, contentDate:ec.user.nowTimestamp]"/></if>
-
-            <service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:partyContentId, contentLocation:contentLocation, contentDate:ec.user.nowTimestamp]"/>
         </actions>
     </service>
 
