@@ -68,9 +68,23 @@ along with this software (see the LICENSE.md file). If not, see
     <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="ExpertUser" workTypeEnumId="WktpRequirements"/>
     <delete-mantle.humanres.position.EmplPositionClass title="Expert User" emplPositionClassId="ExpertUser"/>
 
-    <parties lastUpdatedStamp="1667849221708" pseudoId="mloneusk" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100000">
-        <toRelationships lastUpdatedStamp="1667849221708" fromPartyId="EX_JOHN_DOE" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1667849221743" partyRelationshipId="100051" relationshipTypeEnumId="PrtManager" toPartyId="100000"/>
+    <parties lastUpdatedStamp="1667849221708" pseudoId="mloneusk" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="mloneusk">
+        <toRelationships lastUpdatedStamp="1667849221708" fromPartyId="EX_JOHN_DOE" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1667849221743" partyRelationshipId="100051" relationshipTypeEnumId="PrtManager" toPartyId="mloneusk"/>
         <roles lastUpdatedStamp="1667849221708" roleTypeId="Customer"/>
         <roles lastUpdatedStamp="1667849221708" roleTypeId="ClientManager"/>
     </parties>
+
+    <workEfforts workEffortId="GoToStore" workEffortTypeEnumId="WetProject" estimatedStartDate="1669144020000" statusId="WeInPlanning" workEffortName="Go to the Store" estimatedWorkDuration="1" lastUpdatedStamp="1669144266005" ownerPartyId="mloneusk" visibilityEnumId="WevAllUsers">
+        <description><![CDATA[Get:
+- Zebra Patterned Fabric
+- 15ft by 20ft of Grasslands Fabric
+- Golden Horn with Elastic Band
+- Leather Diary]]></description>
+        <parties lastUpdatedStamp="1669144266005" roleTypeId="Manager" fromDate="1669144266135" statusId="WeptAssigned" partyId="mloneusk">
+            <role description="Manager" lastUpdatedStamp="1669143657868"/>
+            <party lastUpdatedStamp="1667849221708" pseudoId="mloneusk" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N"/>
+            <status lastUpdatedStamp="1669143657977" statusId="WeptAssigned" sequenceNum="2" statusTypeId="WorkEffortParty" description="Assigned"/>
+        </parties>
+        <status lastUpdatedStamp="1669143657977" statusId="WeInPlanning" sequenceNum="1" statusTypeId="WorkEffort" description="In Planning"/>
+    </workEfforts>
 </entity-facade-xml>
