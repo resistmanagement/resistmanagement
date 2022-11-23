@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Projects" default-menu-index="5" default-menu-include="true" standalone="true" menu-image="/ssstatic/images/project-business120.png">
+
+    <pre-actions><set field="html_title" value="Find Project"/></pre-actions>
+
+    <actions>
+        <entity-find entity-name="mantle.work.effort.WorkEffortDetailAndPartyDetailWithRole" list="projectList" distinct="true">
+            <date-filter/>
+            <econdition field-name="partyRoleTypeId" operator="in" from="['ClientManager','Talent']"/>
+            <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
+            <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
+            <order-by field-name="-lastUpdatedStamp"/>
+        </entity-find>
+
+<!--        <log level="warn" message="projectList ${projectList}"/>-->
+
+        <set field="projectTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
+    </actions>
+    <widgets>
+        <container-row><row-col lg="12">
+            <form-list name="SetProject" list="projectTitleList" skip-header="true" skip-form="true">
+                <field name="title"><default-field><label text="Projects" type="h2"/></default-field></field>
+            </form-list>
+
+            <form-list name="ListProjects" list="projectList" skip-form="true">
+                <field name="pseudoId"><default-field title="Profile"><display/></default-field></field>
+                <field name="workEffortName"><default-field title="Name"><container-dialog id="UpdateProjectContainer" button-text="${workEffortName}">
+                    <form-single name="UpdateProjectForm">
+                        <field name="estimatedStartDate"><default-field><label text="Start Date: ${ec.l10n.format(estimatedStartDate, 'MMM dd, yyyy hh:mm a')}" type="h6"/></default-field></field>
+                        <field name="estimatedWorkDuration"><default-field><label text="Estimated Hours: ${estimatedWorkDuration}" type="h6"/></default-field></field>
+                        <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
+                        <field-layout>
+                            <field-row><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/></field-row>
+                            <fields-not-referenced/>
+                        </field-layout>
+                    </form-single>
+                </container-dialog></default-field></field>
+                <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
+            </form-list>
+        </row-col></container-row>
+    </widgets>
+</screen>
