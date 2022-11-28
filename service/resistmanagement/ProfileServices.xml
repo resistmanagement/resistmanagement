@@ -340,18 +340,19 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="contentTypeMedium" default-value="PcntPostImageMedium" required="true"><description>Party Content Type Enum Id for the Medium image.</description></parameter>
             <parameter name="contentTypeSmall" default-value="PcntPostImageSmall" required="true"><description>Party Content Type Enum Id for the Small image.</description></parameter>
             <parameter name="contentTypeThumbnail" default-value="PcntPostImageThumbnail" required="true"><description>Party Content Type Enum Id for the Thumbnail image.</description></parameter>
+            <parameter name="fileMimeTypeList" type="List" default="ec.service.sync().name('org.moqui.impl.ImageServices.get#ImageReaderMIMETypes').call()?.imageReaderMIMETypes" required="true"/>
         </in-parameters>
         <out-parameters>
             <parameter name="partyContentId"/>
             <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
         </out-parameters>
         <actions>
-<!--            <if condition="contentFile != null &amp;&amp; !fileMimeTypeList.contains(contentFile.getContentType())">-->
-<!--                &lt;!&ndash; see: https://www.javacodeexamples.com/solution-java-util-regex-patternsyntaxexception-dangling-meta-character-near-index-0/3446 for why not split('+') and is split('\\+') &ndash;&gt;-->
-<!--                &lt;!&ndash; see: https://freemarker.apache.org/docs/dgui_misc_autoescaping.html for why not split('\\+') and is split('\\\\+') &ndash;&gt;-->
-<!--                <return error="true" message="The file type you used: ${contentFile.getContentType().split('/')[1].split('\\\\+')[0] } is not supported. Please upload a ${fileMimeTypeList.collect{ fileMimeTypeList.indexOf(it) &lt; fileMimeTypeList.size() -1 ? it.split('/')[1].split('\\\\+')[0] : 'or ' + it.split('/')[1].split('\\\\+')[0] }.join(', ')} file format."/>-->
-<!--            </if>-->
-<!--            <if condition="!defaultFileName &amp;&amp; !defaultFileRenderLocation &amp;&amp; contentFile == null"><return message="File not uploaded"/></if>-->
+            <if condition="contentFile != null &amp;&amp; !fileMimeTypeList.contains(contentFile.getContentType())">
+                <!-- see: https://www.javacodeexamples.com/solution-java-util-regex-patternsyntaxexception-dangling-meta-character-near-index-0/3446 for why not split('+') and is split('\\+') -->
+                <!-- see: https://freemarker.apache.org/docs/dgui_misc_autoescaping.html for why not split('\\+') and is split('\\\\+') -->
+                <return error="true" message="The file type you used: ${contentFile.getContentType().split('/')[1].split('\\\\+')[0] } is not supported. Please upload a ${fileMimeTypeList.collect{ fileMimeTypeList.indexOf(it) &lt; fileMimeTypeList.size() -1 ? it.split('/')[1].split('\\\\+')[0] : 'or ' + it.split('/')[1].split('\\\\+')[0] }.join(', ')} file format."/>
+            </if>
+            <if condition="!defaultFileName &amp;&amp; !defaultFileRenderLocation &amp;&amp; contentFile == null"><return message="File not uploaded"/></if>
 
             <!-- TODO: Handle contentFile uploads with mime types that aren't supported -->
             <if condition="org.moqui.resource.ResourceReference.isTextFilename(contentFile?.getName())"><then>
@@ -360,21 +361,24 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
             </else></if>
 
-<!--            <entity-find-count entity-name="mantle.party.PartyContent" count-field="pcCount">-->
-<!--                <econdition field-name="partyId"/>-->
-<!--                <econdition field-name="partyContentTypeEnumId"/>-->
-<!--                </entity-find-count>-->
-<!--            <if condition="pcCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>-->
+            <entity-find-count entity-name="mantle.party.PartyContent" count-field="pcCount">
+                <econdition field-name="partyId"/>
+                <econdition field-name="contentLocation" operator="is-not-null"/>
+                <econdition field-name="partyContentTypeEnumId" value="PcntPostImageSmall"/>
+            </entity-find-count>
+            <if condition="pcCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>
 
+            <set field="fileNameNoExtension" from="contentFile.getName().take(contentFile.getName().lastIndexOf('.'))"/>
+
+            <!-- TODO: Use checksum from original to check for duplicates. -->
 <!--            <entity-find entity-name="mantle.party.PartyContent" list="pcDuplicateList">-->
 <!--                <econdition field-name="partyId"/>-->
 <!--                <econdition field-name="partyContentTypeEnumId"/>-->
-<!--                <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${filename}"/>-->
+<!--                <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${fileNameNoExtension}_Original.${outputImageFormat}" ignore-if-empty="true"/>-->
 <!--                <order-by field-name="-contentDate"/></entity-find>-->
 <!--            <set field="partyContentId" from="pcDuplicateList?.getFirst()?.partyContentId"/>-->
 <!--            <if condition="!partyContentId &amp;&amp; pcDuplicateList?.size() == 0">-->
 
-            <set field="fileNameNoExtension" from="contentFile.getName().take(contentFile.getName().lastIndexOf('.'))"/>
 
             <set field="Original" type="NewMap"/><set field="contentLocationOriginal"/>
             <set field="Large" type="NewMap"/><set field="contentLocationLarge"/>
@@ -382,11 +386,11 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="Small" type="NewMap"/><set field="contentLocationSmall"/>
             <set field="Thumbnail" type="NewMap"/><set field="contentLocationThumbnail"/>
 
-            <if condition="saveOriginal"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeOriginal]" out-map="Original"/><set field="contentLocationOriginal" value="${contentRoot}/party/${partyId}/content_${Original.partyContentId}/${fileNameNoExtension + '_Original.' + outputImageFormat}"/></if>
-            <if condition="saveLarge"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeLarge]" out-map="Large"/><set field="contentLocationLarge" value="${contentRoot}/party/${partyId}/content_${Large.partyContentId}/${fileNameNoExtension + '_Large.' + outputImageFormat}"/></if>
-            <if condition="saveMedium"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeMedium]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/party/${partyId}/content_${Medium.partyContentId}/${fileNameNoExtension + '_Medium.' + outputImageFormat}"/></if>
-            <if condition="saveSmall"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeSmall]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/party/${partyId}/content_${Small.partyContentId}/${fileNameNoExtension + '_Small.' + outputImageFormat}"/></if>
-            <if condition="saveThumbnail"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeThumbnail]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/party/${partyId}/content_${Thumbnail.partyContentId}/${fileNameNoExtension + '_Thumbnail.' + outputImageFormat}"/></if>
+            <if condition="saveOriginal"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeOriginal]" out-map="Original"/><set field="contentLocationOriginal" value="${contentRoot}/party/${partyId}/content_${Original.partyContentId}/${fileNameNoExtension}_Original.${outputImageFormat}"/></if>
+            <if condition="saveLarge"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeLarge]" out-map="Large"/><set field="contentLocationLarge" value="${contentRoot}/party/${partyId}/content_${Large.partyContentId}/${fileNameNoExtension}_Large.${outputImageFormat}"/></if>
+            <if condition="saveMedium"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeMedium]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/party/${partyId}/content_${Medium.partyContentId}/${fileNameNoExtension}_Medium.${outputImageFormat}"/></if>
+            <if condition="saveSmall"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeSmall]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/party/${partyId}/content_${Small.partyContentId}/${fileNameNoExtension}_Small.${outputImageFormat}"/></if>
+            <if condition="saveThumbnail"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeThumbnail]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/party/${partyId}/content_${Thumbnail.partyContentId}/${fileNameNoExtension}_Thumbnail.${outputImageFormat}"/></if>
 
 <!--            </if>-->
 
