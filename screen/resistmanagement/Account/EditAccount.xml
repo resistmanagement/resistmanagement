@@ -49,9 +49,12 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true">
+            <row-actions>
+                <set field="contentUrl" from="sri.buildUrl('downloadContent').addParameter('partyContentId', partyContentId).getUrlWithParams()"/>
+            </row-actions>
             <field name="content"><default-field>
                 <container-dialog id="UpdateProfilePicture" button-text="Update Picture">
-                    <template v-slot="button"><image url="downloadContent" url-type="transition" width="100px" parameter-map="[partyContentId:partyContentList.getFirst()?.partyContentId]"/></template>
+                    <text><![CDATA[<template v-slot:button><img src="${contentUrl}" width="100px"/></template>]]></text>
                     <form-single name="UpdateProfilePictureForm" transition="updateProfilePicture">
                         <field name="partyId"><default-field><hidden/></default-field></field>
                         <field name="contentFile"><default-field><file/></default-field></field>
