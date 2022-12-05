@@ -15,12 +15,16 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Projects" default-menu-index="5" default-menu-include="true" standalone="true" menu-image="/ssstatic/images/project-business120.png">
 
+    <transition name="createProject"><service-call name="mantle.work.ProjectServices.create#Project"
+                                                   in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
+        <default-response url="."/></transition>
+
     <pre-actions><set field="html_title" value="Find Project"/></pre-actions>
 
     <actions>
         <entity-find entity-name="mantle.work.effort.WorkEffortDetailAndPartyDetailWithRole" list="projectList" distinct="true">
             <date-filter/>
-            <econdition field-name="partyRoleTypeId" operator="in" from="['ClientManager','Talent']"/>
+            <econdition field-name="partyRoleTypeId" operator="in" from="['ClientManager']"/>
             <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
             <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
             <order-by field-name="-lastUpdatedStamp"/>
@@ -28,12 +32,57 @@ along with this software (see the LICENSE.md file). If not, see
 
 <!--        <log level="warn" message="projectList ${projectList}"/>-->
 
+        <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">
+            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+            <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
+            <date-filter/>
+            <select-field field-name="partyRelationshipId, fromPartyId, fromRoleTypeId, toPartyId, toRoleTypeId, toPseudoId"/>
+        </entity-find>
+        <entity-find entity-name="mantle.party.RoleType" list="rtList">
+            <econdition field-name="roleTypeId" operator="in" from="pfatrList?.toRoleTypeId + pfatrList?.fromRoleTypeId"/>
+        </entity-find>
+        <!-- TODO: This is probably more complicated than it has to be because of using the PartyFromAndToRelationship view entity. -->
+        <set field="pfatrKeyValueList" from="pfatrList?.groupBy{ it.toPseudoId }.collectEntries{ key, value -> [(key):[partyRelationshipIdList:value*.partyRelationshipId, fromRoleTypeIdList:value*.fromRoleTypeId, toPartyIdList:value*.toPartyId, toRoleTypeIdList:value*.toRoleTypeId]] }"/>
+
+<!--        <log level="warn" message="pfatrKeyValueList?.toPartyId?.getFirst() ${pfatrKeyValueList*.key}"/>-->
+
         <set field="projectTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
     <widgets>
         <container-row><row-col lg="12">
             <form-list name="SetProject" list="projectTitleList" skip-header="true" skip-form="true">
                 <field name="title"><default-field><label text="Projects" type="h2"/></default-field></field>
+                <field name="createProject"><conditional-field condition="pfatrKeyValueList != null &amp;&amp; pfatrKeyValueList?.size() &gt; 0">
+                    <container-dialog id="NewProjectContainer" button-text="New Project">
+                        <form-single name="NewProjectForm" transition="createProject" pass-through-parameters="true">
+                            <field name="partyId"><conditional-field condition="pfatrKeyValueList?.size() &gt; 1" title="Account">
+                                    <drop-down required-manual-select="true"><list-options list="pfatrKeyValueList*.key"/></drop-down></conditional-field>
+                                <default-field><hidden default-value="${pfatrKeyValueList?.entrySet()?.iterator()?.next()?.key}"/></default-field></field>
+                            <field name="workEffortName"><default-field title="Project Name"><text-line/></default-field></field>
+                            <field name="visibilityEnumId"><default-field title="Visibility"><drop-down>
+                                <entity-options key="${enumId}" text="${description}">
+                                    <entity-find entity-name="moqui.basic.Enumeration" cache="true">
+                                        <econdition field-name="enumId" operator="in" from="['WevRestricted','WevAllUsers']"/>
+                                        <econdition field-name="enumTypeId" value="WorkEffortVisibility"/>
+                                    </entity-find></entity-options>
+                            </drop-down></default-field></field>
+                            <field name="estimatedStartDate" from="ec.user.nowTimestamp"><default-field title="Start Date"><date-time/></default-field></field>
+                            <field name="estimatedWorkDuration" from="'1'"><default-field title="Estimated Hours"><text-line size="8"/></default-field></field>
+                            <field name="description"><default-field title="Description"><text-area rows="10" cols="60"/></default-field></field>
+                            <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
+                            <field-layout>
+                                <field-row><field-ref name="partyId"/></field-row>
+                                <field-row><field-ref name="workEffortName"/><field-ref name="visibilityEnumId"/></field-row>
+                                <field-row><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/></field-row>
+                                <fields-not-referenced/>
+                            </field-layout>
+                        </form-single>
+                    </container-dialog>
+                    </conditional-field>
+                    <default-field>
+                        <link url="../Account/FindAccount" text="Must create Account to create Project"/>
+                    </default-field>
+                </field>
             </form-list>
 
             <form-list name="ListProjects" list="projectList" skip-form="true">
