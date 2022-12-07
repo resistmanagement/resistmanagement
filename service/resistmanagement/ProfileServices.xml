@@ -438,13 +438,31 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="partyId"/>
         </out-parameters>
         <actions>
-            <entity-find-count entity-name="mantle.party.PartyFromAndToRelationship" count-field="pfatrCount">
+            <entity-find-count entity-name="mantle.party.PartyFromAndToRelationship" count-field="pfatrCount" cache="true">
                 <econdition field-name="toPartyId" from="partyId"/>
                 <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
                 <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
                 <date-filter/></entity-find-count>
 
-            <if condition="pfatrCount == 0"><return type="danger" error="true" message="No Party found with id ${partyId}"/></if>
+            <if condition="pfatrCount == null || pfatrCount == 0"><return type="danger" error="true" message="No Party found with id ${partyId}"/></if>
+        </actions>
+    </service>
+
+    <service verb="check" noun="ProjectView" authz-action="view">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workEffortId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailAndPartyDetailWithRole" count-field="wfdapdwfCount" cache="true">
+                <econdition field-name="partyRoleTypeId" operator="in" from="['ClientManager']"/>
+                <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
+                <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
+                <date-filter/></entity-find-count>
+
+            <if condition="wfdapdwfCount == null || wfdapdwfCount == 0"><return type="danger" error="true" message="No Project found with id ${workEffortId}"/></if>
         </actions>
     </service>
 
@@ -497,7 +515,10 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="create" noun="CreatePersonProfile">
+    <service verb="create" noun="PersonProfile">
+        <description>
+            This service makes sure that the caller can't set the fromPartyId to not themselves
+        </description>
         <in-parameters>
             <parameter name="pseudoId" required="true"/>
         </in-parameters>
@@ -505,6 +526,26 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="partyId"/>
         </out-parameters>
         <actions>
+            <service-call name="resistmanagement.ProfileServices.create#PersonProfileInternal" in-map="[pseudoId:pseudoId]" out-map="context"/>
+        </actions>
+    </service>
+
+
+    <service verb="create" noun="PersonProfileInternal">
+        <in-parameters>
+            <parameter name="pseudoId" required="true"/>
+            <parameter name="fromPartyId" default="ec.user.userAccount?.partyId"/>
+            <parameter name="fromDate" required="true" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyId"/>
+        </out-parameters>
+        <actions>
+            <!-- fromPartyId required -->
+            <if condition="fromPartyId == null || !fromPartyId">
+                <log level="warn" message="Must be logged in to create Profile."/>
+                <return/></if>
+
             <!-- no special characters, no spaces, all lowercase, max 30 characters -->
             <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z0-9]+', '')"/>
             <if condition="pseudoId.length() &gt; 30"><return type="info" error="true" message="Profile name cannot be above 30 characters. It is currently ${pseudoId.length()} characters; lease shorten it."/></if>
@@ -518,8 +559,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Customer']"/>
             <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'ClientManager']"/>
             <service-call name="create#mantle.party.PartyRelationship" in-map="[relationshipTypeEnumId:'PrtManager',
-                fromPartyId:ec.user.userAccount.partyId, fromRoleTypeId:'Administrator', toPartyId:partyId, toRoleTypeId:'ClientManager',
-                fromDate:ec.user.nowTimestamp]"/>
+                fromPartyId:fromPartyId, fromRoleTypeId:'Administrator', toPartyId:partyId, toRoleTypeId:'ClientManager',
+                fromDate:fromDate]"/>
             <service-call name="resistmanagement.ProfileServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId]"/>
         </actions>
     </service>

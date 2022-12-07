@@ -13,7 +13,7 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Projects" default-menu-index="5" default-menu-include="true" standalone="true" menu-image="/ssstatic/images/project-business120.png">
+        default-menu-title="Projects" default-menu-index="5" default-menu-include="false" standalone="true" menu-image="/ssstatic/images/project-business120.png">
 
     <transition name="createProject"><service-call name="mantle.work.ProjectServices.create#Project"
                                                    in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
@@ -80,24 +80,15 @@ along with this software (see the LICENSE.md file). If not, see
                     </container-dialog>
                     </conditional-field>
                     <default-field>
-                        <link url="../Account/FindAccount" text="Must create Account to create Project"/>
+                        <link url="../Account/FindAccount" text="You must create an account before new projects. Click here to create an account."/>
                     </default-field>
                 </field>
             </form-list>
 
             <form-list name="ListProjects" list="projectList" skip-form="true">
                 <field name="pseudoId"><default-field title="Profile"><display/></default-field></field>
-                <field name="workEffortName"><default-field title="Name"><container-dialog id="UpdateProjectContainer" button-text="${workEffortName}">
-                    <form-single name="UpdateProjectForm">
-                        <field name="estimatedStartDate"><default-field><label text="Start Date: ${ec.l10n.format(estimatedStartDate, 'MMM dd, yyyy hh:mm a')}" type="h6"/></default-field></field>
-                        <field name="estimatedWorkDuration"><default-field><label text="Estimated Hours: ${estimatedWorkDuration}" type="h6"/></default-field></field>
-                        <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
-                        <field-layout>
-                            <field-row><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/></field-row>
-                            <fields-not-referenced/>
-                        </field-layout>
-                    </form-single>
-                </container-dialog></default-field></field>
+                <field name="workEffortName"><default-field title="Name"><link url="../ViewProject" text="${workEffortName}" parameter-map="[workEffortId:workEffortId]"/>
+                    </default-field></field>
                 <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
             </form-list>
         </row-col></container-row>
