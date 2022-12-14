@@ -16,7 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Projects" default-menu-index="5" default-menu-include="false" standalone="true" menu-image="/ssstatic/images/project-business120.png">
 
     <transition name="createProject"><service-call name="mantle.work.ProjectServices.create#Project"
-                                                   in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
+        in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
         <default-response url="."/></transition>
 
     <pre-actions><set field="html_title" value="Find Project"/></pre-actions>
@@ -42,9 +42,9 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="roleTypeId" operator="in" from="pfatrList?.toRoleTypeId + pfatrList?.fromRoleTypeId"/>
         </entity-find>
         <!-- TODO: This is probably more complicated than it has to be because of using the PartyFromAndToRelationship view entity. -->
-        <set field="pfatrKeyValueList" from="pfatrList?.groupBy{ it.toPseudoId }.collectEntries{ key, value -> [(key):[partyRelationshipIdList:value*.partyRelationshipId, fromRoleTypeIdList:value*.fromRoleTypeId, toPartyIdList:value*.toPartyId, toRoleTypeIdList:value*.toRoleTypeId]] }"/>
+        <set field="pfatrKeyValueList" from="pfatrList?.groupBy{ it.toPartyId }.collectEntries{ key, value -> [(key):[partyRelationshipIdList:value*.partyRelationshipId, fromRoleTypeIdList:value*.fromRoleTypeId, toPartyIdList:value*.toPartyId, toRoleTypeIdList:value*.toRoleTypeId]] }"/>
 
-<!--        <log level="warn" message="pfatrKeyValueList?.toPartyId?.getFirst() ${pfatrKeyValueList*.key}"/>-->
+<!--        <log level="warn" message="pfatrKeyValueList?.toPartyId?.getFirst() ${pfatrKeyValueList}"/>-->
 
         <set field="projectTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
@@ -55,9 +55,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="createProject"><conditional-field condition="pfatrKeyValueList != null &amp;&amp; pfatrKeyValueList?.size() &gt; 0">
                     <container-dialog id="NewProjectContainer" button-text="New Project">
                         <form-single name="NewProjectForm" transition="createProject" pass-through-parameters="true">
-                            <field name="partyId"><conditional-field condition="pfatrKeyValueList?.size() &gt; 1" title="Account">
+                            <field name="partyId" from="pfatrKeyValueList?.entrySet()?.iterator()?.next()?.key"><conditional-field condition="pfatrKeyValueList?.size() &gt; 1" title="Account">
                                     <drop-down required-manual-select="true"><list-options list="pfatrKeyValueList*.key"/></drop-down></conditional-field>
-                                <default-field><hidden default-value="${pfatrKeyValueList?.entrySet()?.iterator()?.next()?.key}"/></default-field></field>
+                                <default-field title="Account"><hidden/></default-field></field>
                             <field name="workEffortName"><default-field title="Project Name"><text-line/></default-field></field>
                             <field name="visibilityEnumId"><default-field title="Visibility"><drop-down>
                                 <entity-options key="${enumId}" text="${description}">
@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </container-dialog>
                     </conditional-field>
                     <default-field>
-                        <link url="../Account/FindAccount" text="You must create an account before new projects. Click here to create an account."/>
+                        <link url="../../Account/FindAccount" text="You must create an account before new projects. Click here to create an account."/>
                     </default-field>
                 </field>
             </form-list>

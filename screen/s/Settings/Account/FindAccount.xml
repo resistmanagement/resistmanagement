@@ -13,14 +13,10 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Find Accounts" default-menu-include="false">
+        default-menu-title="Find Accounts" default-menu-include="false" standalone="true">
 
     <transition name="createPersonAccount"><service-call name="resistmanagement.ResistServices.create#PersonProfile"/>
         <default-response url="."/></transition>
-<!--    <transition name="createOrganizationalAccount"><service-call name="resistmanagement.ResistServices.create#CreateOrganizationProfile"/>-->
-<!--        <default-response url="."/></transition>-->
-<!--    <transition name="deletePersonAccount"><service-call name="store#mantle.party.PartyRelationship" in-map="[partyRelationshipId:partyRelationshipId, thruDate:ec.user.nowTimestamp]"/>-->
-<!--        <default-response url="."/></transition>-->
 
     <actions>
         <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">
@@ -34,7 +30,10 @@ along with this software (see the LICENSE.md file). If not, see
         </entity-find>
         <!-- TODO: This is probably more complicated than it has to be because of using the PartyFromAndToRelationship view entity. -->
         <set field="pfatrKeyValueList" from="pfatrList?.groupBy{ it.toPseudoId }.collectEntries{ key, value -> [(key):[partyRelationshipIdList:value*.partyRelationshipId, fromRoleTypeIdList:value*.fromRoleTypeId, toPartyIdList:value*.toPartyId, toRoleTypeIdList:value*.toRoleTypeId]] }"/>
-<!--        <log level="warn" message="pfatrKeyValueList ${pfatrKeyValueList.toString()}"/>-->
+
+        <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
+
+<!--        <log level="warn" message="partySettingType.type ${partySettingType?.type?.children}"/>-->
     </actions>
 
     <widgets>
@@ -44,8 +43,16 @@ along with this software (see the LICENSE.md file). If not, see
                 <container-box><box-header title="Accounts"/><box-toolbar>
                     <container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Personal">
                         <form-single name="SetPersonalTalentAccountForm" transition="createPersonAccount">
+                            <field name="partySettingTypeId"><default-field><hidden default-value="PartyVisibility"/></default-field></field>
                             <field name="pseudoId"><default-field title="Account Username"><text-line/></default-field></field>
+                            <field name="settingValue" from="partySettingType?.defaultValue"><default-field title="Account Visibility">
+                                <drop-down><list-options list="partySettingType?.type?.children" key="${enumId}" text="${description}"/></drop-down>
+                            </default-field></field>
                             <field name="submitButton"><default-field title="Set"><submit/></default-field></field>
+                            <field-layout>
+                                <field-row><field-ref name="pseudoId"/><field-ref name="settingValue"/></field-row>
+                                <field-ref name="submitButton"/>
+                            </field-layout>
                         </form-single>
                     </container-dialog>
 <!--                    <container-dialog id="SetOrganizationalTalentAccountDialog" button-text="Create Organizational">-->

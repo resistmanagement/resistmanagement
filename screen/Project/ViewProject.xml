@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Project" default-menu-index="5" default-menu-include="true" standalone="true">
+
+    <parameter name="workEffortId" required="true"/>
+    <parameter name="chatPartyId"/>
+
+    <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]"/></always-actions>
+
+    <transition name="createMessage"><service-call name="resistmanagement.ResistServices.create#ProjectMessage"/>
+        <default-response url="."/></transition>
+
+    <actions>
+        <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>
+
+<!--        <log level="warn" message="projectList ${project?.parties}"/>-->
+
+<!--        <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:project.ownerPartyId]" out-map="context"/>-->
+<!--        <set field="projectPartyList" from="project.parties"/>-->
+<!--        <set field="wecedList" from="[]"/>-->
+<!--        <if condition="allowed &amp;&amp; chatPartyId != null">-->
+<!--            <entity-find entity-name="mantle.work.effort.WorkEffortCommEventDetail" list="wecedList">-->
+<!--                <econdition field-name="workEffortId"/>-->
+<!--                <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>-->
+<!--                <econdition field-name="toPartyId" from="project?.ownerPartyId"/>-->
+<!--            </entity-find>-->
+<!--        <else>-->
+<!--            <entity-find entity-name="mantle.work.effort.WorkEffortCommEventDetail" list="wecedList">-->
+<!--                <econdition field-name="workEffortId"/>-->
+<!--                <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>-->
+<!--                <econdition field-name="toPartyId" from="project?.ownerPartyId"/>-->
+<!--            </entity-find>-->
+<!--        </else></if>-->
+
+<!--        <log level="warn" message="project ${project}"/>-->
+    </actions>
+    <widgets>
+        <container-row><row-col lg="12">
+            <form-single name="UpdateProjectForm" map="project">
+                <field name="workEffortName"><default-field><label text="${workEffortName}" type="h2"/></default-field></field>
+                <field name="estimatedStartDate"><default-field><label text="Start Date: ${ec.l10n.format(estimatedStartDate, 'MMM dd, yyyy hh:mm a')}" type="h6"/></default-field></field>
+                <field name="estimatedWorkDuration"><default-field><label text="Estimated Hours: ${estimatedWorkDuration}" type="h6"/></default-field></field>
+                <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
+                <field-layout>
+                    <field-row><field-ref name="workEffortName"/></field-row>
+                    <field-row><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/></field-row>
+                    <fields-not-referenced/>
+                </field-layout>
+            </form-single>
+
+<!--            <label text="Messages" type="h4"/>-->
+<!--            <form-list name="ListMessages" list="wecedList" skip-form="true">-->
+<!--                <field name="body"><default-field title=""><container style="text-right"><label text="${body}"/></container></default-field></field>-->
+<!--            </form-list>-->
+<!--            <form-list name="CreateMessage" transition="createMessage" skip-header="true" list="[project]">-->
+<!--                <field name="workEffortId"><default-field><hidden/></default-field></field>-->
+<!--                <field name="toPartyId" from="project?.ownerPartyId"><conditional-field condition="allowed">-->
+<!--                    <drop-down><list-options list="projectPartyList" key="${partyId}" text="${pseudoId}"/></drop-down>-->
+<!--                </conditional-field><default-field title="To"><display text="${project?.owner?.pseudoId}"/></default-field></field>-->
+<!--                <field name="body"><default-field title="Message"><text-area cols="80"/></default-field></field>-->
+<!--                <field name="submitButton"><default-field title="Send"><submit/></default-field></field>-->
+<!--            </form-list>-->
+
+        </row-col></container-row>
+    </widgets>
+</screen>

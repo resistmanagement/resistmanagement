@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Find Accounts" default-menu-include="false">
+
+    <transition-include name="downloadContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
+    <transition name="createPersonAccount"><service-call name="resistmanagement.ResistServices.create#PersonProfile"/><default-response url="."/></transition>
+
+    <actions>
+        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSetting" list="accountList" distinct="true">
+            <econdition field-name="roleTypeId" value="ClientManager"/>
+<!--            <econdition field-name="partySettingTypeId" value="PartyVisibility"/>-->
+<!--            <econditions combine="or">-->
+<!--                <econdition field-name="settingValue" value="PtyAllUsers"/>-->
+<!--                <econditions>-->
+<!--                    <econdition field-name="settingValue" operator="is-not-null"/>-->
+<!--                    <econdition field-name="defaultValue" value="PtyAllUsers"/>-->
+<!--                </econditions>-->
+<!--            </econditions>-->
+            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="contentLocation" operator="is-not-null"/>
+            <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+            <order-by field-name="-contentDate"/>
+        </entity-find>
+
+<!--        <log level="warn" message="accountList ${accountList.toString()}"/>-->
+
+        <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
+
+        <set field="accountTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
+    </actions>
+
+    <widgets>
+        <container-row><row-col lg="12">
+            <form-list name="SetAccount" list="accountTitleList" skip-header="true" skip-form="true">
+                <field name="title"><default-field><label text="Accounts" type="h2"/></default-field></field>
+                <field name="createAccount"><default-field><container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Account">
+                    <form-single name="SetPersonalTalentAccountForm" transition="createPersonAccount">
+                        <field name="partySettingTypeId"><default-field><hidden default-value="PartyVisibility"/></default-field></field>
+                        <field name="pseudoId"><default-field title="Account Username"><text-line/></default-field></field>
+                        <field name="settingValue" from="partySettingType?.defaultValue"><default-field title="Account Visibility">
+                            <drop-down><list-options list="partySettingType?.type?.children" key="${enumId}" text="${description}"/></drop-down>
+                        </default-field></field>
+                        <field name="submitButton"><default-field title="Set"><submit/></default-field></field>
+                        <field-layout>
+                            <field-row><field-ref name="pseudoId"/><field-ref name="settingValue"/></field-row>
+                            <field-ref name="submitButton"/>
+                        </field-layout>
+                    </form-single>
+                </container-dialog></default-field></field>
+            </form-list>
+
+            <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">
+                <row-actions>
+                    <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyId]" out-map="context"/>
+                </row-actions>
+                <field name="profilePicture"><default-field><image url="downloadContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/></default-field></field>
+                <field name="pseudoId"><default-field><link url="../ViewAccount" text="${pseudoId}" parameter-map="[partyId:partyId, canViewAccount:allowed]"/></default-field></field>
+            </form-list>
+        </row-col></container-row>
+    </widgets>
+</screen>

@@ -27,11 +27,32 @@ along with this software (see the LICENSE.md file). If not, see
         <authz artifactAuthzId="YOUR_ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
 
-    <!-- Artifact group and authz for Your Account App -->
+    <!-- Artifact group and authz for Settings App -->
+    <artifactGroups artifactGroupId="SETTINGS" description="Settings App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/s.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="SETTINGS_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="SETTINGS_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- Artifact group and authz for Account App -->
+    <artifactGroups artifactGroupId="ACCOUNT" description="Accounts App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/Account.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="ACCOUNT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- Artifact group and authz for Resist Management App -->
     <artifactGroups artifactGroupId="RESIST_MANAGEMENT" description="Resist Management App (via root screen)">
         <artifacts artifactName="component://resistmanagement/screen/resistmanagement.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
         <authz artifactAuthzId="RESIST_MANAGEMENT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
         <authz artifactAuthzId="RESIST_MANAGEMENT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- Artifact group and authz for Projects App -->
+    <artifactGroups artifactGroupId="PROJECT" description="Project App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/Project.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="PROJECT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="PROJECT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
 
     <!-- Administrators User Group -->
@@ -73,12 +94,28 @@ along with this software (see the LICENSE.md file). If not, see
     <mantle.party.RoleType roleTypeId="Talent" description="Talent"/>
     <mantle.party.RoleType roleTypeId="ClientManager" description="Client"/>
 
+    <!-- Party Visibility -->
+    <moqui.basic.EnumerationType description="Party Visibility" enumTypeId="PartyVisibility"/>
+    <!-- if set to all users then may show in posts/etc for all users -->
+    <moqui.basic.Enumeration description="All Users" enumId="PtyAllUsers" enumTypeId="PartyVisibility"/>
+    <!-- for these settings will show only if associated with something, but will have limited visibility based on this setting -->
+<!--    <moqui.basic.Enumeration description="General (public access)" enumId="PtyGeneral" enumTypeId="PartyVisibility"/>-->
+<!--    <moqui.basic.Enumeration description="Work Group (group only access)" enumId="PtyWorkGroup" enumTypeId="PartyVisibility"/>-->
+    <moqui.basic.Enumeration description="Restricted (private access)" enumId="PtyRestricted" enumTypeId="PartyVisibility"/>
+<!--    <moqui.basic.Enumeration description="Top Secret (confidential access)" enumId="PtyConfidential" enumTypeId="PartyVisibility"/>-->
+
+    <mantle.party.PartySettingType partySettingTypeId="PartyVisibility" description="Party's Visibility" enumTypeId="PartyVisibility" defaultValue="PtyAllUsers">
+        <roles roleTypeId="Talent"/>
+        <roles roleTypeId="ClientManager"/>
+    </mantle.party.PartySettingType>
+
     <moqui.basic.Enumeration enumId="PcntPost" description="Post" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageOriginal" description="Post Image Original (highest quality)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageLarge" description="Post Image Large (~2160p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageMedium" description="Post Image Medium (~1080p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageSmall" description="Post Image Small (~360p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageThumbnail" description="Post Image Thumbnail (~165p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
+    <moqui.basic.Enumeration enumId="PcntBio" parentEnumId="PcntUserDefined"/>
 
     <moqui.basic.Uom abbreviation="lb" description="Pound" uomId="WT_lb" uomTypeEnumId="UT_WEIGHT_MEASURE"/>
 

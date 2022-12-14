@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Messages" default-menu-index="7" default-menu-include="false" standalone="true">
+
+    <parameter name="workEffortId" required="true"/>
+
+    <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]"/></always-actions>
+
+    <transition name="createMessage"><service-call name="resistmanagement.ResistServices.create#ProjectMessage"/>
+        <default-response url="."/></transition>
+
+    <actions>
+        <entity-find-one entity-name="mantle.work.effort.WorkEffortDetailAndPartyDetailWithRole" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>
+
+        <entity-find entity-name="mantle.work.effort.WorkEffortCommEventDetail" list="wecedList">
+            <econdition field-name="workEffortId"/>
+            <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
+            <econdition field-name="toPartyId" from="project.ownerPartyId"/>
+        </entity-find>
+
+<!--        <log level="warn" message="project ${project}"/>-->
+
+        <set field="messageTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
+    </actions>
+    <widgets>
+        <container-row><row-col lg="12">
+            <form-list name="Title" list="messageTitleList" skip-header="true" skip-form="true">
+                <field name="title"><default-field><label text="Messages" type="h2"/></default-field></field>
+            </form-list>
+            <form-list name="ListMessages" list="wecedList" skip-form="true">
+                <field name="body"><default-field title=""><text><![CDATA[<div class="text-right">${body}</div>]]></text></default-field></field>
+            </form-list>
+            <form-single name="CreateMessage" transition="createMessage">
+                <field name="workEffortId"><default-field><hidden/></default-field></field>
+                <field name="toPartyId" from="project.ownerPartyId"><default-field title="To"><drop-down>
+                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/>
+                </drop-down></default-field></field>
+                <field name="body"><default-field title="Message"><text-area/></default-field></field>
+                <field name="submitButton"><default-field title="Send"><submit/></default-field></field>
+                <field-layout>
+                    <field-row><field-ref name="body"/><field-ref name="submitButton"/></field-row>
+                </field-layout>
+            </form-single>
+        </row-col></container-row>
+    </widgets>
+</screen>

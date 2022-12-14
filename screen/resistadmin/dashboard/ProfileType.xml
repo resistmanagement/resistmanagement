@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="setPartyClassification"><service-call name="mantle.party.PartyServices.set#PartyClassification"/>
         <default-response url="."/></transition>
 
-    <transition name="createTalentProfileType"><service-call name="resistmanagement.ProfileServices.store#TalentProfileType"/>
+    <transition name="createTalentProfileType"><service-call name="resistmanagement.ResistServices.store#TalentProfileType"/>
         <default-response url="."/></transition>
 
     <transition name="setPartyWorkEffort"><service-call name="store#mantle.work.effort.WorkEffort"/>

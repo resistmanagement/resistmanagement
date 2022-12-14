@@ -7,16 +7,16 @@
                              location="component://resistmanagement/screen/resistadmin.xml"/>
         </screen>
         <screen location="component://webroot/screen/webroot/apps.xml">
-            <subscreens-item name="resistmanagement" menu-title="Resist Management" menu-index="4"
-                             location="component://resistmanagement/screen/resistmanagement.xml"/>
+            <subscreens-item name="Project" menu-title="Projects" menu-index="5"
+                             location="component://resistmanagement/screen/Project.xml"/>
         </screen>
         <screen location="component://webroot/screen/webroot/apps.xml">
-            <subscreens-item name="YourAccount" menu-title="Your Account" menu-index="5"
-                             location="component://resistmanagement/screen/YourAccount.xml"/>
-            <!-- Not needed generally, but here commented for convenience:
-            <subscreens-item name="SimpleScreens" menu-title="Simple Screens" menu-index="95"
-                    location="component://SimpleScreens/screen/SimpleScreens.xml"/>
-            -->
+            <subscreens-item name="Account" menu-title="Accounts" menu-index="6"
+                             location="component://resistmanagement/screen/Account.xml"/>
+        </screen>
+        <screen location="component://webroot/screen/webroot/apps.xml">
+            <subscreens-item name="Settings" menu-title="Settings" menu-index="7"
+                             location="component://resistmanagement/screen/s.xml"/>
         </screen>
         <screen location="component://webroot/screen/webroot.xml" default-subscreen="r">
             <subscreens-item name="r" menu-include="false" no-sub-path="true" location="component://resistmanagement/screen/resistmanagement.com.xml"/>

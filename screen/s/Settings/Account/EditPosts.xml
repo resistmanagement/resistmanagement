@@ -24,13 +24,6 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="deleteTalentProfile"><service-call name="delete#mantle.humanres.position.EmplPositionClassParty"/>
         <default-response url="."/></transition>
 
-    <transition name="setPartyDimension"><service-call name="store#mantle.party.PartyDimension"/>
-        <default-response url="."/></transition>
-    <transition name="setPartyClassificationAppl"><service-call name="resistmanagement.ResistServices.store#PartyClassificationAppl"/>
-        <default-response url="." save-current-screen="true"/></transition>
-    <transition name="setPartySkill"><service-call name="resistmanagement.ResistServices.set#PartySkills"/>
-        <default-response url="." save-current-screen="true"/></transition>
-
     <transition name="downloadContent" read-only="true">
         <parameter name="partyContentId"/>
         <actions><entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent"/>

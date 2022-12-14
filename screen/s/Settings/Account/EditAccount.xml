@@ -19,19 +19,17 @@ along with this software (see the LICENSE.md file). If not, see
 
     <always-actions><service-call name="resistmanagement.ResistServices.check#AccountEditError" in-map="[partyId:partyId]"/></always-actions>
 
-    <transition name="downloadContent" read-only="true">
-        <parameter name="partyContentId"/>
-        <actions><entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent"/>
-            <script>ec.web.sendResourceResponse(partyContent?.contentLocation)</script></actions>
-        <default-response type="none"/>
-    </transition>
+    <transition-include name="downloadContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
     <transition name="updateProfilePicture"><service-call name="resistmanagement.ResistServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId, contentFile:contentFile]"/>
         <default-response url="."/></transition>
-
     <transition name="updateProfile"><service-call name="resistmanagement.ResistServices.update#Account"/>
         <default-response url="."/></transition>
 
     <actions>
+<!--        <log level="warn" message="partyId ${partyId}"/>-->
+<!--        <log level="warn" message="partyContentList ${partyContentList}"/>-->
+<!--        <log level="warn" message="partyProfilePictureList ${partyProfilePictureList}"/>-->
+
         <entity-find-one entity-name="mantle.party.Party" value-field="party">
             <field-map field-name="partyId"/></entity-find-one>
 
@@ -46,6 +44,11 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="partyContentTypeEnumId" value="PcntBio"/>
             <order-by field-name="-contentDate"/></entity-find>
         <set field="bio" from="partyContentBioList?.getFirst()?.description"/>
+
+        <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
+        <entity-find-one entity-name="mantle.party.PartySetting" value-field="partyVisibilitySetting" auto-field-map="[partyId:partyId,partySettingTypeId:partySettingType.partySettingTypeId]"/>
+
+<!--        <log level="warn" message="partyVisibilitySetting ${partyVisibilitySetting}"/>-->
     </actions>
     <widgets>
         <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true">
@@ -56,14 +59,23 @@ along with this software (see the LICENSE.md file). If not, see
                     <form-single name="UpdateProfilePictureForm" transition="updateProfilePicture">
                         <field name="partyId"><default-field><hidden/></default-field></field>
                         <field name="contentFile"><default-field><file/></default-field></field>
-                        <field name="submit"><default-field><submit/></default-field></field></form-single></container-dialog>
+                        <field name="submit"><default-field><submit/></default-field></field>
+                    </form-single></container-dialog>
             </default-field></field>
         </form-list>
         <form-single name="PartyProfileEditSection" transition="updateProfile">
             <field name="partyId"><default-field><hidden/></default-field></field>
             <field name="pseudoId"><default-field title="Id"><text-line default-value="${party.pseudoId}"/></default-field></field>
+            <field name="settingValue" from="partyVisibilitySetting?.settingValue ?: partySettingType?.defaultValue"><default-field title="Account Visibility">
+                <drop-down><list-options list="partySettingType?.type?.children" key="${enumId}" text="${description}"/></drop-down>
+            </default-field></field>
             <field name="bio"><default-field><text-area/></default-field></field>
             <field name="submit"><default-field><submit text="Submit"/></default-field></field>
+
+            <field-layout>
+                <field-row><field-ref name="pseudoId"/><field-ref name="settingValue"/></field-row>
+                <fields-not-referenced/>
+            </field-layout>
         </form-single>
     </widgets>
 </screen>

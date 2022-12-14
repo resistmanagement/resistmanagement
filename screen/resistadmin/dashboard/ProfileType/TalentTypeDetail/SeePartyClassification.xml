@@ -18,7 +18,7 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="emplPositionClassId" required="true"/>
     <parameter name="classificationTypeEnumId" required="true"/>
 
-    <transition name="setTalentProfileTypeClassificationTypeAttribute"><service-call name="resistmanagement.ProfileServices.store#TalentProfileTypeClassificationTypeAttribute"/>
+    <transition name="setTalentProfileTypeClassificationTypeAttribute"><service-call name="resistmanagement.ResistServices.store#TalentProfileTypeClassificationTypeAttribute"/>
         <default-response type="none" save-current-screen="true"/></transition>
     <transition name="removeTalentProfileTypeClassificationTypeAttribute"><service-call name="delete#mantle.party.PartyClassification"/>
         <default-response url="none" save-current-screen="true"/></transition>

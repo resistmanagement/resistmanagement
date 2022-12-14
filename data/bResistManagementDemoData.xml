@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="demo">
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="QualityAnalyst" workTypeEnumId="WktpTesting"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="Quality Analyst" emplPositionClassId="QualityAnalyst"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="QualityLead" workTypeEnumId="WktpTesting"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="Quality Lead" emplPositionClassId="QualityLead"/>
+
+    <delete-mantle.work.effort.WorkEffortParty workEffortId="HM" partyId="ORG_ZIZI_JD" roleTypeId="Assignee"
+                                        emplPositionClassId="Programmer" fromDate="1265184000000" statusId="WeptAssigned"/>
+    <delete-mantle.work.effort.WorkEffortParty workEffortId="HM" partyId="ORG_ZIZI_BD" roleTypeId="Assignee"
+                                        emplPositionClassId="Programmer" fromDate="1265184000000" statusId="WeptAssigned"/>
+    <delete-mantle.humanres.rate.RateAmount rateAmountId="Default-StClPg" rateTypeEnumId="RatpStandard" ratePurposeEnumId="RaprClient"
+                                     timePeriodUomId="TF_hr" workEffortId="" partyId="" emplPositionClassId="Programmer"
+                                     fromDate="1265184000000" thruDate="" rateAmount="60.00" rateCurrencyUomId="USD"/>
+    <delete-mantle.humanres.rate.RateAmount rateAmountId="Default-StVnPg" rateTypeEnumId="RatpStandard" ratePurposeEnumId="RaprVendor"
+                                     timePeriodUomId="TF_hr" workEffortId="" partyId="" emplPositionClassId="Programmer"
+                                     fromDate="1265184000000" thruDate="" rateAmount="40.00" rateCurrencyUomId="USD"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="Programmer" workTypeEnumId="WktpProgramming"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="Programmer" emplPositionClassId="Programmer"/>
+
+    <delete-mantle.work.time.TimeEntry timeEntryId="100000" partyId="EX_JOHN_DOE" hours="8" breakHours="2"
+                                workEffortId="HM-004" comments="Create Task and My Tasks first pass" rateTypeEnumId="RatpStandard"
+                                rateAmountId="Default-StClSrPg" vendorRateAmountId="Default-StVnSrPg" fromDate="2013-03-02 08:00:00" thruDate="2013-03-02 18:00:00"/>
+    <delete-mantle.work.time.TimeEntry timeEntryId="100001" partyId="EX_JOHN_DOE" hours="5.75" breakHours="1.25"
+                                workEffortId="HM-004" comments="Create Task and My Tasks add more fields" rateTypeEnumId="RatpStandard"
+                                rateAmountId="Default-StClSrPg" vendorRateAmountId="Default-StVnSrPg" fromDate="2013-03-04 10:00:00" thruDate="2013-03-04 17:00:00"/>
+    <delete-mantle.work.time.TimeEntry timeEntryId="100002" partyId="ORG_ZIZI_JD" hours="2" breakHours="0"
+                                workEffortId="HM-004" comments="study code" rateTypeEnumId="RatpStandard"
+                                rateAmountId="Default-StClPg" vendorRateAmountId="Default-StVnPg" fromDate="2013-03-05 10:00:00" thruDate="2013-03-05 12:00:00"/>
+    <delete-mantle.work.effort.WorkEffortParty workEffortId="HM" partyId="EX_JOHN_DOE" roleTypeId="Manager"
+                                        emplPositionClassId="ProgrammerLead" fromDate="1265184000000" statusId="WeptAssigned"/>
+    <delete-mantle.humanres.rate.RateAmount rateAmountId="Default-StClSrPg" rateTypeEnumId="RatpStandard" ratePurposeEnumId="RaprClient"
+                                     timePeriodUomId="TF_hr" workEffortId="" partyId="" emplPositionClassId="ProgrammerLead"
+                                     fromDate="1265184000000" thruDate="" rateAmount="100.00" rateCurrencyUomId="USD"/>
+    <delete-mantle.humanres.rate.RateAmount rateAmountId="Default-StVnSrPg" rateTypeEnumId="RatpStandard" ratePurposeEnumId="RaprVendor"
+                                     timePeriodUomId="TF_hr" workEffortId="" partyId="" emplPositionClassId="ProgrammerLead"
+                                     fromDate="1265184000000" thruDate="" rateAmount="65.00" rateCurrencyUomId="USD"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="ProgrammerLead" workTypeEnumId="WktpProgramming"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="Programmer Lead" emplPositionClassId="ProgrammerLead"/>
+
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="ProjectManager" workTypeEnumId="WktpManagement"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="Project Manager" emplPositionClassId="ProjectManager"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="GeneralManager" workTypeEnumId="WktpManagement"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="General Manager" emplPositionClassId="GeneralManager"/>
+
+    <delete-mantle.humanres.position.EmplPositionClass title="System Administrator" emplPositionClassId="SysAdmin"/>
+
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="SysArchitect" workTypeEnumId="WktpRequirements"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="SysArchitect" workTypeEnumId="WktpSystemDesign"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="SysArchitect" workTypeEnumId="WktpProgramming"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="System Architect" emplPositionClassId="SysArchitect"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="BusinessAnalyst" workTypeEnumId="WktpRequirements"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="BusinessAnalyst" workTypeEnumId="WktpSystemDesign"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="Business Analyst" emplPositionClassId="BusinessAnalyst"/>
+    <delete-mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="ExpertUser" workTypeEnumId="WktpRequirements"/>
+    <delete-mantle.humanres.position.EmplPositionClass title="Expert User" emplPositionClassId="ExpertUser"/>
+
+    <contactMechs lastUpdatedStamp="1670441119726" trustLevelEnumId="CmtlNew" infoString="ElonMusk1@moqui.org" contactMechTypeEnumId="CmtEmailAddress" contactMechId="100052"/>
+    <parties lastUpdatedStamp="1670441119726" pseudoId="100001" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100001">
+        <userAccounts emailAddress="ElonMusk1@moqui.org" disabled="N" passwordSalt="Nqx3QNH-" passwordSetDate="1670441119928" lastUpdatedStamp="1670441119726" passwordBase64="N" userFullName="Elon Musk" userId="100001" passwordHashType="SHA-256" currentPassword="046f4ba907abfe054612f03b1dadbbced0e988b7eb34bae980214c133e3b83b3" requirePasswordChange="N" username="ElonMusk1@moqui.org">
+            <moqui.security.UserPasswordHistory fromDate="1670441119927" lastUpdatedStamp="1670441119726"/>
+            <groups userGroupId="RESIST_APP_USERS" fromDate="1670441119960" lastUpdatedStamp="1670441119726"/>
+        </userAccounts>
+        <contactMechs lastUpdatedStamp="1670441119726" contactMechId="100052" fromDate="1670441119840" contactMechPurposeId="EmailPrimary"/>
+        <person lastName="Musk" lastUpdatedStamp="1670441119726" firstName="Elon"/>
+    </parties>
+    <parties lastUpdatedStamp="1670441131340" pseudoId="elonmusk" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100002">
+        <settings lastUpdatedStamp="1670885135848" partySettingTypeId="PartyVisibility"/>
+        <mantle.humanres.ability.PartySkill lastUpdatedStamp="1670965825648" skillTypeEnumId="StInfluencer"/>
+        <roles lastUpdatedStamp="1670441131340" roleTypeId="Customer"/>
+        <roles lastUpdatedStamp="1670441131340" roleTypeId="ClientManager"/>
+        <roles lastUpdatedStamp="1670441142468" roleTypeId="Supplier"/>
+        <roles lastUpdatedStamp="1670441142468" roleTypeId="Talent"/>
+        <mantle.humanres.position.EmplPositionClassParty fromDate="1670441142590" lastUpdatedStamp="1670441142468" emplPositionClassId="Model"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670964478574" partyClassificationId="PctBrown"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670965802672" partyClassificationId="PctGreen"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670965808593" partyClassificationId="PctMale"/>
+        <mantle.party.PartyDimension lastUpdatedStamp="1670965771163" uomId="LEN_in" value="72" dimensionDate="1670965757060" uomDimensionTypeId="Height"/>
+    </parties>
+    <mantle.party.PartyRelationship lastUpdatedStamp="1670441131340" fromPartyId="100001" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1670441131366" partyRelationshipId="100051" relationshipTypeEnumId="PrtManager" toPartyId="100002"/>
+    <mantle.party.PartyRelationship lastUpdatedStamp="1670441142468" fromPartyId="100001" toRoleTypeId="Talent" fromRoleTypeId="Administrator" fromDate="1670441142588" partyRelationshipId="100052" relationshipTypeEnumId="PrtManager" toPartyId="100002"/>
+    <workEfforts workEffortId="100006" workEffortTypeEnumId="WetProject" estimatedStartDate="1670442060000" statusId="WeInPlanning" workEffortName="Go to the Store" estimatedWorkDuration="1" lastUpdatedStamp="1670442803509" ownerPartyId="100002" visibilityEnumId="WevAllUsers">
+        <description><![CDATA[Get:
+- Zebra Patterned Fabric
+- 15ft by 20ft of Grasslands Fabric
+- Golden Horn with Elastic Band
+- Leather Diary]]></description>
+        <parties lastUpdatedStamp="1670442101584" roleTypeId="Manager" fromDate="1670442101683" statusId="WeptAssigned" partyId="100001"/>
+        <parties lastUpdatedStamp="1670442101584" roleTypeId="Manager" fromDate="1670442101684" statusId="WeptAssigned" partyId="100002"/>
+    </workEfforts>
+    <resistmanagement.ResistServices.upload-ProfilePictureAttachmentInternal partyId="100002"/>
+    <resistmanagement.ResistServices.upload-PostAttachmentResourceInternal partyId="100002" contentFileLocation="component://moqui-image/data/images/Wolf_Moving_Amination.gif"/>
+
+    <contactMechs lastUpdatedStamp="1670442895895" trustLevelEnumId="CmtlNew" infoString="HarrisonFord1@moqui.org" contactMechTypeEnumId="CmtEmailAddress" contactMechId="100053"/>
+    <parties lastUpdatedStamp="1670442895895" pseudoId="100003" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100003">
+        <userAccounts emailAddress="HarrisonFord1@moqui.org" disabled="N" passwordSalt="nwh-lDVg" passwordSetDate="1670442896068" lastUpdatedStamp="1670442895895" passwordBase64="N" userFullName="Harrison Ford" userId="100002" passwordHashType="SHA-256" currentPassword="f219640deb9713e4e856d657d896511826e44dfdc21e1ef95241b5c6e6531b19" requirePasswordChange="N" username="HarrisonFord1@moqui.org">
+            <moqui.security.UserPasswordHistory fromDate="1670442896068" lastUpdatedStamp="1670442895895"/>
+            <groups userGroupId="RESIST_APP_USERS" fromDate="1670442896092" lastUpdatedStamp="1670442895895"/>
+        </userAccounts>
+        <contactMechs lastUpdatedStamp="1670442895895" contactMechId="100053" fromDate="1670442896032" contactMechPurposeId="EmailPrimary"/>
+        <person lastName="Ford" lastUpdatedStamp="1670442895895" firstName="Harrison"/>
+    </parties>
+    <parties lastUpdatedStamp="1670442925705" pseudoId="harrisonford" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100004">
+        <settings lastUpdatedStamp="1670885135848" settingValue="PtyRestricted" partySettingTypeId="PartyVisibility"/>
+        <mantle.humanres.ability.PartySkill lastUpdatedStamp="1670966571067" skillTypeEnumId="StInfluencer"/>
+        <roles lastUpdatedStamp="1670442925705" roleTypeId="Customer"/>
+        <roles lastUpdatedStamp="1670442925705" roleTypeId="ClientManager"/>
+        <mantle.humanres.position.EmplPositionClassParty fromDate="1670441142590" lastUpdatedStamp="1670441142468" emplPositionClassId="Model"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670964478574" partyClassificationId="PctBrown"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670966540921" partyClassificationId="PctMale"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670966544563" partyClassificationId="PctHazel"/>
+        <contents partyContentId="100051" contentDate="1670886966728" lastUpdatedStamp="1670886966570" partyContentTypeEnumId="PcntBio" userId="100002"><description><![CDATA[Harrison Ford (born July 13, 1942) is an American actor. His films have grossed more than $5.4 billion in North America and more than $9.3 billion worldwide, making him the seventh-highest-grossing actor in North America. He is the recipient of various accolades, including the AFI Life Achievement Award and the Cecil B. DeMille Award, in addition to nominations for an Academy Award and four Golden Globe Awards. He has been a leading man in films of several genres and is regarded as an American cultural icon.]]></description></contents>
+        <mantle.party.PartyDimension lastUpdatedStamp="1670966549232" uomId="LEN_in" value="72" dimensionDate="1670966544657" uomDimensionTypeId="Height"/>
+    </parties>
+    <mantle.party.PartyRelationship lastUpdatedStamp="1670442925705" fromPartyId="100003" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1670442925712" partyRelationshipId="100053" relationshipTypeEnumId="PrtManager" toPartyId="100004"/>
+    <workEfforts workEffortId="100007" workEffortTypeEnumId="WetProject" estimatedStartDate="1670442900000" statusId="WeInPlanning" workEffortName="Safari Fantasy Shoot" estimatedWorkDuration="1" lastUpdatedStamp="1670443145680" ownerPartyId="100004" visibilityEnumId="WevAllUsers">
+        <description><![CDATA[Need to Get:
+- Animal Costume
+- Safari Background
+- Spell Book
+- Magical Artifact
+
+Need to Setup:
+- Monopod
+- Lights calibrated for sunny Safari day
+
+Need to Bring:
+- Water
+- Food]]></description>
+        <parties lastUpdatedStamp="1670443145680" roleTypeId="Manager" fromDate="1670443145795" statusId="WeptAssigned" partyId="100003"/>
+        <parties lastUpdatedStamp="1670443145680" roleTypeId="Manager" fromDate="1670443145795" statusId="WeptAssigned" partyId="100004"/>
+    </workEfforts>
+    <resistmanagement.ResistServices.upload-ProfilePictureAttachmentInternal partyId="100004"/>
+    <resistmanagement.ResistServices.upload-PostAttachmentResourceInternal partyId="100004" contentFileLocation="component://moqui-image/data/images/autumn.tif"/>
+</entity-facade-xml>
+

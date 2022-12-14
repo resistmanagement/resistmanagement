@@ -13,25 +13,29 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Talents" default-menu-index="3">
+        default-menu-title="Talents" default-menu-index="3" >
 
     <parameter name="partyId" required="true"/>
+    <parameter name="canViewAccount" required="true"/>
 
-    <always-actions><service-call name="resistmanagement.ResistServices.check#AccountEditError" in-map="[partyId:partyId]"/></always-actions>
+    <always-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyId]" out-map="accountView"/>
+        <if condition="!accountView?.allowed"><return error="true" type="danger" message="Not allowed"/></if></always-actions>
 
     <transition name="setTalentProfile"><service-call name="resistmanagement.ResistServices.store#TalentProfile"/>
         <default-response url="."/></transition>
-    <transition name="deleteTalentProfile"><service-call name="delete#mantle.humanres.position.EmplPositionClassParty"/>
+    <transition name="deleteTalentProfile"><service-call name="resistmanagement.ResistServices.delete#TalentProfile"/>
         <default-response url="."/></transition>
 
-    <transition name="setPartyDimension"><service-call name="store#mantle.party.PartyDimension"/>
+    <transition name="setPartyDimension"><service-call name="resistmanagement.ResistServices.store#PartyDimension"/>
         <default-response url="."/></transition>
     <transition name="setPartyClassificationAppl"><service-call name="resistmanagement.ResistServices.store#PartyClassificationAppl"/>
-        <default-response url="." save-current-screen="true"/></transition>
+        <default-response url="."/></transition>
     <transition name="setPartySkill"><service-call name="resistmanagement.ResistServices.set#PartySkills"/>
-        <default-response url="." save-current-screen="true"/></transition>
+        <default-response url="."/></transition>
 
     <actions>
+        <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="accountEdit"/>
+
         <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
             <econdition field-name="partyId"/><date-filter/><order-by field-name="-fromDate"/></entity-find>
 
@@ -39,19 +43,20 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find entity-name="mantle.party.PartyDetail" list="pdList">
             <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
 
-        <set field="talentTaskList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
-
         <entity-find entity-name="mantle.humanres.position.EmplPositionClass" list="epcList">
             <econdition field-name="emplPositionClassId" operator="not-in" from="epcpcList?.emplPositionClassId"/>
             <order-by field-name="title"/></entity-find>
+
+
+        <set field="talentTaskList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
     <widgets>
         <container-row><row-col lg="12">
             <form-list name="SetTalent" list="talentTaskList" skip-header="true" skip-form="true">
                 <field name="title"><default-field><label text="Talents" type="h2"/></default-field></field>
-                <field name="buttonText"><conditional-field condition="epcList?.size() &gt; 0">
+                <field name="buttonText"><conditional-field condition="accountEdit?.allowed &amp;&amp; epcList?.size() &gt; 0">
                     <container-dialog id="SetTalentProfileDialog" button-text="Add Talent">
-                        <form-single name="SetTalentProfileForm" transition="setTalentProfile">
+                        <form-single name="SetTalentProfileForm" transition="setTalentProfile" pass-through-parameters="true">
                             <field name="partyId"><default-field><hidden/></default-field></field>
                             <field name="emplPositionClassId"><default-field title="Type">
                                 <drop-down allow-empty="true" submit-on-select="true">
@@ -77,15 +82,18 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <set field="epcdpList" from="[]"/>
                     <iterate list="epcdList" entry="epcd">
+<!--                        <log level="warn" message="epcd.getMap() ${epcd.getMap()} epcdpList ${epcdpList}"/>-->
                         <entity-find entity-name="mantle.party.PartyDimension" list="pdList">
                             <econdition field-name="partyId"/>
                             <econdition field-name="uomDimensionTypeId" from="epcd.uomDimensionTypeId"/>
                             <order-by field-name="-dimensionDate"/></entity-find>
-                        <if condition="pdList?.getFirst()"><then>
+                        <if condition="pdList?.getFirst() &amp;&amp; pdList.getFirst().getMap()?.value"><then>
                             <script>epcdpList.add(pdList.getFirst().getMap() + [uomDescription:pdList.getFirst().uom.description, uomTypeDescription:pdList.getFirst().type.description])</script>
-                        </then><else>
+<!--                            <log level="warn" message="pdList epcdpList ${epcdpList}"/>-->
+                        </then><else-if condition="epcd.getMap()?.uomDimensionTypeId">
                             <script>epcdpList.add(epcd.getMap() + [partyId:partyId, uomId:epcd.type.defaultUomId, uomDescription:epcd.type.defaultUom.description, uomTypeDescription:epcd.type.description])</script>
-                        </else></if>
+<!--                            <log level="warn" message="epcd epcdpList ${epcdpList}"/>-->
+                        </else-if></if>
                     </iterate>
 
                     <entity-find entity-name="mantle.party.EmplPositionClassPtyClsTp" list="epcpctList">
@@ -93,17 +101,20 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <set field="epcpctpList" from="[]"/>
                     <iterate list="epcpctList" entry="epcpct">
+<!--                        <log level="warn" message="epcpct.getMap() ${epcpct.getMap()} epcpctpList ${epcpctpList}"/>-->
                         <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="pcapList">
                             <econdition field-name="partyId"/>
                             <econdition field-name="classificationTypeEnumId" from="epcpct.classificationTypeEnumId"/>
                             <date-filter/><order-by field-name="-thruDate,-fromDate"/></entity-find>
-
                         <set field="classificationTypeDescription" from="epcpct.type.description"/>
-                        <if condition="pcapList?.getFirst()"><then>
+<!--                        <log level="warn" message="pcapList?.getFirst() ${pcapList?.getFirst()}"/>-->
+                        <if condition="pcapList?.getFirst() &amp;&amp; pcapList.getFirst()?.partyClassificationId"><then>
                             <script>epcpctpList.add(pcapList.getFirst().getMap() + [classificationTypeDescription:classificationTypeDescription])</script>
-                        </then><else>
-                            <script>epcpctpList.add(epcpct.getMap() + [partyId:partyId, classificationTypeDescription:classificationTypeDescription])</script>
-                        </else></if>
+<!--                            <log level="warn" message="pcapList epcpctpList ${epcpctpList}"/>-->
+                        </then><else-if condition="epcpct.getMap()?.classificationTypeEnumId">
+                            <script>epcpctpList.add(epcpct.getMap() + [partyId:partyId, classificationTypeDescription:classificationTypeDescription, description:''])</script>
+<!--                            <log level="warn" message="epcpct epcpctpList ${epcpctpList}"/>-->
+                        </else-if></if>
                     </iterate>
 
                     <entity-find entity-name="mantle.humanres.position.EmplPositionClassSkill" list="epcsList">
@@ -111,43 +122,53 @@ along with this software (see the LICENSE.md file). If not, see
                     <entity-find entity-name="mantle.humanres.ability.PartySkill" list="psList">
                         <econdition field-name="skillTypeEnumId" operator="in" from="epcsList.skillTypeEnumId"/>
                         <econdition field-name="partyId"/></entity-find>
+                    <set field="psList1" from="[]"/>
+                    <set field="psList2" from="[]"/>
+                    <if condition="accountEdit?.allowed"><set field="psList1" from="psList"/>
+                    <else><set field="psList2" from="psList"/></else></if>
 
                     <set field="epcspList" from="[]"/>
                     <iterate list="epcsList" entry="epcs"><script>epcspList.add(epcs.getMap() + [partyId:partyId, skillTypeDescription:epcs.skillTypeEnum.description])</script></iterate>
+
+<!--                    <log level="warn" message="context ${context.toString()}"/>-->
                 </actions>
                 <widgets>
                     <container-box><box-header title="${emplPositionClass.title}"></box-header><box-toolbar>
                         <link url="deleteTalentProfile" text="Delete ${emplPositionClass.title}" parameter-map="[partyId:partyId, emplPositionClassId:emplPositionClassId, fromDate:fromDate]"
-                              confirmation="Are you sure you want to delete the ${emplPositionClass.title} Profile?"/>
+                              confirmation="Are you sure you want to delete the ${emplPositionClass.title} Profile?" condition="accountEdit?.allowed"/>
                     </box-toolbar><box-body-nopad>
                         <form-list name="TalentProfileTypeDimensionForm" list="epcdpList" transition="setPartyDimension" skip-header="true">
-                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
                             <field name="partyId"><default-field><hidden/></default-field></field>
                             <field name="uomDimensionTypeId"><default-field><display text="${uomTypeDescription}"/></default-field></field>
-                            <field name="dimensionDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
-                            <field name="value"><default-field><text-line/></default-field></field>
+                            <field name="value"><conditional-field condition="accountEdit?.allowed"><text-line/></conditional-field>
+                                <default-field><display/></default-field></field>
                             <field name="uomId"><default-field><display text="${uomDescription}"/></default-field></field>
-                            <field name="submitButton"><default-field title="Update"><submit/></default-field></field>
+                            <field name="submitButton"><conditional-field condition="accountEdit?.allowed" title="Update"><submit/></conditional-field></field>
                         </form-list>
-                        <form-list name="TalentProfileTypeclassificationTypeForm" list="epcpctpList" transition="setPartyClassificationAppl" skip-header="true">
+                        <form-list name="TalentProfileTypeClassificationTypeForm" list="epcpctpList" list-entry="epcpctp" transition="setPartyClassificationAppl" skip-header="true">
                             <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
                             <field name="partyId"><default-field><hidden/></default-field></field>
                             <field name="classificationTypeEnumId"><default-field><display text="${classificationTypeDescription}"/></default-field></field>
-                            <field name="partyClassificationId"><default-field title="${classificationTypeDescription}"><drop-down allow-empty="true" submit-on-select="true">
+                            <field name="partyClassificationId"><conditional-field condition="accountEdit?.allowed" title="${classificationTypeDescription}"><drop-down allow-empty="true" submit-on-select="true">
                                 <entity-options key="${partyClassificationId}" text="${description}">
                                     <entity-find entity-name="mantle.party.PartyClassification" list="pcList">
                                         <econdition field-name="classificationTypeEnumId"/></entity-find></entity-options>
-                            </drop-down></default-field></field>
+                            </drop-down></conditional-field><default-field><display text="${description ?: 'N/A'}"/></default-field></field>
                         </form-list>
-                        <form-single name="TalentProfileTypeSkillForm" transition="setPartySkill">
-                            <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                            <field name="partyId"><default-field><hidden/></default-field></field>
-                            <field name="skillTypeEnumIdList" from="psList.skillTypeEnumId"><default-field title="Skills"><drop-down allow-empty="false" allow-multiple="true" submit-on-select="true">
+                        <form-single name="TalentProfileTypeSkillForm" transition="setPartySkill" pass-through-parameters="true">
+                            <field name="emplPositionClassId"><conditional-field condition="accountEdit?.allowed"><hidden/></conditional-field></field>
+                            <field name="partyId"><conditional-field condition="accountEdit?.allowed"><hidden/></conditional-field></field>
+                            <field name="skillTypeEnumIdList" from="psList1*.skillTypeEnumId"><conditional-field condition="accountEdit?.allowed" title="Skills"><drop-down allow-empty="false" allow-multiple="true" submit-on-select="true">
                                 <list-options list="epcspList" key="${skillTypeEnumId}" text="${skillTypeDescription}"/>
-                            </drop-down></default-field></field>
+                            </drop-down></conditional-field></field>
                         </form-single>
-                    </box-body-nopad>
-                    </container-box>
+                        <form-list name="TalentProfileTypeSkillForm2" list="psList2" list-entry="partySkill" skip-header="true" skip-form="true">
+                            <field name="emplPositionClassId"><conditional-field condition="!accountEdit?.allowed"><hidden/></conditional-field></field>
+                            <field name="partyId"><conditional-field condition="!accountEdit?.allowed"><hidden/></conditional-field></field>
+                            <field name="title"><conditional-field condition="!accountEdit?.allowed"><label text="Skill"/></conditional-field></field>
+                            <field name="skillTypeEnumId"><conditional-field condition="!accountEdit?.allowed"><display text="${partySkill.skillTypeEnum.description}"/></conditional-field></field>
+                        </form-list>
+                    </box-body-nopad></container-box>
                 </widgets>
             </section-iterate>
 

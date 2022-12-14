@@ -17,7 +17,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <parameter name="partyId" required="true"/>
 
-    <always-actions><service-call name="resistmanagement.ProfileServices.check#AccountEdit" in-map="[partyId:partyId]"/></always-actions>
+    <always-actions><service-call name="resistmanagement.ResistServices.check#AccountEditError" in-map="[partyId:partyId]"/></always-actions>
 
     <transition name="createProject"><service-call name="mantle.work.ProjectServices.create#Project"
                                                    in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
