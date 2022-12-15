@@ -51,7 +51,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="partySettingTypeId"><default-field><hidden default-value="PartyVisibility"/></default-field></field>
                         <field name="pseudoId"><default-field title="Account Username"><text-line/></default-field></field>
                         <field name="settingValue" from="partySettingType?.defaultValue"><default-field title="Account Visibility">
-                            <drop-down><list-options list="partySettingType?.type?.children" key="${enumId}" text="${description}"/></drop-down>
+                            <drop-down><list-options list="partySettingType?.type?.enums" key="${enumId}" text="${description}"/></drop-down>
                         </default-field></field>
                         <field name="submitButton"><default-field title="Set"><submit/></default-field></field>
                         <field-layout>
