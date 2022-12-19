@@ -306,7 +306,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="!defaultFileName &amp;&amp; !defaultFileRenderLocation &amp;&amp; contentFile == null"><return error="true" message="File upload is required."/></if>
 
-            <set field="filename" from="contentFile?.getFileName() ?: defaultFileName"/>
+            <set field="filename" from="contentFile?.getName() ?: defaultFileName"/>
             <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
             </then><else>
@@ -330,7 +330,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
             <script>
-                fileStream = contentFile?.getFileName() ? contentFile.getInputStream() : new ByteArrayInputStream(ec.screen.makeRender().rootScreen(defaultFileRenderLocation).webappName(null).renderMode('text').render().getBytes())
+                fileStream = contentFile?.getName() ? contentFile.getInputStream() : new ByteArrayInputStream(ec.screen.makeRender().rootScreen(defaultFileRenderLocation).webappName(null).renderMode('text').render().getBytes())
                 try { docRr.putStream(fileStream) } finally { fileStream.close() }
             </script>
 
@@ -450,7 +450,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-count>
             <if condition="pcCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>
 
-            <set field="fileNameNoExtension" from="contentFile.getFileName().take(contentFile.getFileName().lastIndexOf('.'))"/>
+            <set field="fileNameNoExtension" from="contentFile?.getFileName()?.take(contentFile?.getFileName()?.lastIndexOf('.'))"/>
 
             <!-- TODO: Use checksum from original to check for duplicates. -->
             <!--            <entity-find entity-name="mantle.party.PartyContent" list="pcDuplicateList">-->
