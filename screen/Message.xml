@@ -13,10 +13,10 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Dashboard" default-menu-index="1" menu-image="fa fa-dashboard" menu-image-type="icon">
+        default-menu-title="Message" default-menu-index="99" menu-image="fa fa-message" menu-image-type="icon" default-menu-include="true">
 
+    <subscreens default-item="FindMessage"></subscreens>
     <widgets>
-        <link url="../Project" text="Project"/>
-        <link url="../Account" text="Account"/>
+        <subscreens-panel id="MessagePanel" type="tab"/>
     </widgets>
 </screen>

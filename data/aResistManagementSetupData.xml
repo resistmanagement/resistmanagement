@@ -27,11 +27,11 @@ along with this software (see the LICENSE.md file). If not, see
         <authz artifactAuthzId="YOUR_ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
 
-    <!-- Artifact group and authz for Settings App -->
-    <artifactGroups artifactGroupId="SETTINGS" description="Settings App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/s.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <authz artifactAuthzId="SETTINGS_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
-        <authz artifactAuthzId="SETTINGS_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    <!-- Artifact group and authz for Projects App -->
+    <artifactGroups artifactGroupId="PROJECT" description="Project App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/Project.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="PROJECT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="PROJECT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
 
     <!-- Artifact group and authz for Account App -->
@@ -41,6 +41,20 @@ along with this software (see the LICENSE.md file). If not, see
         <authz artifactAuthzId="ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
 
+    <!-- Artifact group and authz for Message App -->
+    <artifactGroups artifactGroupId="MESSAGE" description="Messages App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/Message.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="MESSAGE_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="MESSAGE_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- Artifact group and authz for Settings App -->
+    <artifactGroups artifactGroupId="SETTINGS" description="Settings App (via root screen)">
+        <artifacts artifactName="component://resistmanagement/screen/s.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="SETTINGS_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+        <authz artifactAuthzId="SETTINGS_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
     <!-- Artifact group and authz for Resist Management App -->
     <artifactGroups artifactGroupId="RESIST_MANAGEMENT" description="Resist Management App (via root screen)">
         <artifacts artifactName="component://resistmanagement/screen/resistmanagement.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
@@ -48,12 +62,6 @@ along with this software (see the LICENSE.md file). If not, see
         <authz artifactAuthzId="RESIST_MANAGEMENT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
 
-    <!-- Artifact group and authz for Projects App -->
-    <artifactGroups artifactGroupId="PROJECT" description="Project App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/Project.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <authz artifactAuthzId="PROJECT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
-        <authz artifactAuthzId="PROJECT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-    </artifactGroups>
 
     <!-- Administrators User Group -->
     <userGroups userGroupId="ResistManagementAdmin" description="Resist Management Administrators" groupTypeEnumId="UgtResistManagement">

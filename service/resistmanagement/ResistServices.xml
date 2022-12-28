@@ -555,16 +555,6 @@ along with this software (see the LICENSE.md file). If not, see
 
             <set field="fileNameNoExtension" from="contentFile.getName().take(contentFile.getName().lastIndexOf('.'))"/>
 
-            <!-- TODO: Use checksum from original to check for duplicates. -->
-<!--            <entity-find entity-name="mantle.party.PartyContent" list="pcDuplicateList">-->
-<!--                <econdition field-name="partyId"/>-->
-<!--                <econdition field-name="partyContentTypeEnumId"/>-->
-<!--                <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${fileNameNoExtension}_Original.${outputImageFormat}" ignore-if-empty="true"/>-->
-<!--                <order-by field-name="-contentDate"/></entity-find>-->
-<!--            <set field="partyContentId" from="pcDuplicateList?.getFirst()?.partyContentId"/>-->
-<!--            <if condition="!partyContentId &amp;&amp; pcDuplicateList?.size() == 0">-->
-
-
             <set field="Original" type="NewMap"/><set field="contentLocationOriginal"/>
             <set field="Large" type="NewMap"/><set field="contentLocationLarge"/>
             <set field="Medium" type="NewMap"/><set field="contentLocationMedium"/>
@@ -576,24 +566,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="saveMedium"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeMedium]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/party/${partyId}/content_${Medium.partyContentId}/${fileNameNoExtension}_Medium.${outputImageFormat}"/></if>
             <if condition="saveSmall"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeSmall]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/party/${partyId}/content_${Small.partyContentId}/${fileNameNoExtension}_Small.${outputImageFormat}"/></if>
             <if condition="saveThumbnail"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeThumbnail]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/party/${partyId}/content_${Thumbnail.partyContentId}/${fileNameNoExtension}_Thumbnail.${outputImageFormat}"/></if>
-
-<!--            </if>-->
-
-<!--            <set field="inputImage" from="contentFile?.getStoreLocation()"/>-->
-<!--            <script>import java.nio.file.Files</script>-->
-<!--            <if condition="inputImage"><then>-->
-<!--                <log level="warn" message="inputImage?.getParent() ${inputImage?.getParent()}"/>-->
-<!--                <log level="warn" message="inputImage?.getParent() ${inputImage?.getParent()}"/>-->
-<!--                <log level="warn" message="inputImage?.getPath() ${inputImage?.getPath()}"/>-->
-<!--                <log level="warn" message="contentFile?.getContentType() ${contentFile?.getContentType()}"/>-->
-<!--                <log level="warn" message="Files.probeContentType(inputImage?.toPath()) ${Files.probeContentType(inputImage?.toPath())}"/>-->
-<!--                <log level="warn" message="Files.size(inputImage?.toPath()) ${Files.size(inputImage?.toPath())}"/>-->
-<!--            </then><else>-->
-<!--                <log level="warn" message="inputImage in memory"/>-->
-<!--            </else></if>-->
-<!--            <log level="warn" message="ec.resource.getLocationReference(contentLocationOriginal).getSize() ${ec.resource.getLocationReference(contentLocationOriginal).getSize()}"/>-->
-
-<!--            <log level="warn" message="context.toString() ${context.toString()}"/>-->
 
             <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
                 inputImageStream:contentFile.getInputStream(),
@@ -612,6 +584,8 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="saveMedium"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Medium.partyContentId, contentLocation:contentLocationMedium, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveSmall"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Small.partyContentId, contentLocation:contentLocationSmall, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveThumbnail"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Thumbnail.partyContentId, contentLocation:contentLocationThumbnail, contentDate:ec.user.nowTimestamp]"/></if>
+
+            <script>ec.artifactExecution.logProfilingDetail()</script>
         </actions>
     </service>
 
@@ -824,6 +798,27 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="count" noun="PartyAccountOwned">
+        <in-parameters></in-parameters>
+        <out-parameters>
+            <parameter name="accountCount"/>
+        </out-parameters>
+        <actions>
+            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" count-field="accountCount" distinct="true">
+                <econdition field-name="roleTypeId" value="ClientManager"/>
+                <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
+                <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+                <econdition field-name="contentLocation" operator="is-not-null"/>
+                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                <econdition field-name="fromRoleTypeId" value="Administrator"/>
+                <econdition field-name="toRoleTypeId" value="ClientManager"/>
+                <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
+                <date-filter/>
+            </entity-find-count>
+            <log level="warn" message="accountCount ${accountCount}"/>
+        </actions>
+    </service>
+
     <service verb="create" noun="PersonProfileInternal">
         <in-parameters>
             <parameter name="pseudoId" required="true"/>
@@ -838,9 +833,10 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- fromPartyId required -->
-            <if condition="fromPartyId == null || !fromPartyId">
-                <log level="warn" message="Must be logged in to create Profile."/>
-                <return/></if>
+            <if condition="fromPartyId == null || !fromPartyId"><return type="warning" message="Must be logged in to create Profile."/></if>
+
+            <service-call name="resistmanagement.ResistServices.count#PartyAccountOwned" out-map="context"/>
+            <if condition="accountCount &gt; 0"><return type="warning" message="Can only create one Account per User."/></if>
 
             <!-- no special characters, no spaces, all lowercase, max 30 characters -->
             <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z0-9]+', '')"/>

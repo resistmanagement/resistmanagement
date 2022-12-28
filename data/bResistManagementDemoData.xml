@@ -70,7 +70,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <contactMechs lastUpdatedStamp="1670441119726" trustLevelEnumId="CmtlNew" infoString="ElonMusk1@moqui.org" contactMechTypeEnumId="CmtEmailAddress" contactMechId="100052"/>
     <parties lastUpdatedStamp="1670441119726" pseudoId="100001" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100001">
-        <userAccounts emailAddress="ElonMusk1@moqui.org" disabled="N" passwordSalt="Nqx3QNH-" passwordSetDate="1670441119928" lastUpdatedStamp="1670441119726" passwordBase64="N" userFullName="Elon Musk" userId="100001" passwordHashType="SHA-256" currentPassword="046f4ba907abfe054612f03b1dadbbced0e988b7eb34bae980214c133e3b83b3" requirePasswordChange="N" username="ElonMusk1@moqui.org">
+        <userAccounts emailAddress="ElonMusk1@moqui.org" disabled="N" passwordSalt="gXr7s8xj" passwordSetDate="1670441119928" lastUpdatedStamp="1670441119726" passwordBase64="N" userFullName="Elon Musk" userId="100001" passwordHashType="SHA-256" currentPassword="67f1aecebe0434b04b773ce74b15d88b1409af8f7da839662809739d70df1e68" requirePasswordChange="N" username="ElonMusk1@moqui.org">
             <moqui.security.UserPasswordHistory fromDate="1670441119927" lastUpdatedStamp="1670441119726"/>
             <groups userGroupId="RESIST_APP_USERS" fromDate="1670441119960" lastUpdatedStamp="1670441119726"/>
         </userAccounts>

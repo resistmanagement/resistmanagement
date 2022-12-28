@@ -28,7 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="-contentDate"/>
         </entity-find>
 
-<!--        <log level="warn" message="accountList ${accountList.toString()}"/>-->
+        <service-call name="resistmanagement.ResistServices.count#PartyAccountOwned" out-map="context"/>
 
         <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
 
@@ -39,7 +39,7 @@ along with this software (see the LICENSE.md file). If not, see
         <container-row><row-col lg="12">
             <form-list name="SetAccount" list="accountTitleList" skip-header="true" skip-form="true">
                 <field name="title"><default-field><label text="Accounts" type="h2"/></default-field></field>
-                <field name="createAccount"><default-field><container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Account">
+                <field name="createAccount"><conditional-field condition="accountCount == 0"><container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Account">
                     <form-single name="SetPersonalTalentAccountForm" transition="createPersonAccount">
                         <field name="partySettingTypeId"><default-field><hidden default-value="PartyVisibility"/></default-field></field>
                         <field name="pseudoId"><default-field title="Account Username"><text-line/></default-field></field>
@@ -52,7 +52,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <field-ref name="submitButton"/>
                         </field-layout>
                     </form-single>
-                </container-dialog></default-field></field>
+                </container-dialog></conditional-field></field>
             </form-list>
 
             <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">

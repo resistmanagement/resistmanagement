@@ -18,7 +18,8 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="workEffortId" required="true"/>
     <parameter name="chatPartyId"/>
 
-    <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]"/></always-actions>
+    <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="checkProjectView"/>
+        <if condition="!checkProjectView.allowed"><return message="Not allowed" error="true" type="danger"/></if></always-actions>
 
     <transition name="createMessage"><service-call name="resistmanagement.ResistServices.create#ProjectMessage"/>
         <default-response url="."/></transition>
