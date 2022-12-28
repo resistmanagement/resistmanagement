@@ -110,7 +110,7 @@ along with this software (see the LICENSE.md file). If not, see
 <!--        <log level="warn" message="bio ${bio} partyContentBioList ${partyContentBioList}"/>-->
     </actions>
     <widgets>
-        <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true">
+        <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true" paginate="false" saved-finds="false" header-dialog="false">
             <row-actions><set field="contentUrl" from="sri.buildUrl('downloadContent').addParameter('partyContentId', partyContentId).getUrlWithParams()"/></row-actions>
             <field name="content"><conditional-field condition="accountEdit?.allowed"><container-dialog id="UpdateProfilePicture" button-text="Update Picture">
                     <text><![CDATA[<template v-slot:button><img src="${contentUrl}" width="100px"/></template>]]></text>
@@ -129,6 +129,13 @@ along with this software (see the LICENSE.md file). If not, see
                     </form-single>
                 </container-dialog>
             </conditional-field></field>
+            <field name="messageAccount"><default-field>
+                <link url="../../Message/FindMessage" text="Message" parameter-map="[toPartyId:partyId]"/>
+<!--                <form-single name="MessageAccountForm" transition="">-->
+<!--                    <field name="partyId"><default-field><hidden/></default-field></field>-->
+<!--                    <field name="submit"><default-field><submit/></default-field></field>-->
+<!--                </form-single>-->
+            </default-field></field>
         </form-list>
         <form-single name="PartyProfileEditSection" transition="updateProfile" map="party" pass-through-parameters="true">
             <field name="partyId"><default-field><hidden/></default-field></field>
