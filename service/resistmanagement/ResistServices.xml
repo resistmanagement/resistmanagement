@@ -276,7 +276,32 @@ along with this software (see the LICENSE.md file). If not, see
         <actions></actions>
     </service>
 
-    <service verb="upload" noun="PartyContent">
+    <service verb="upload" noun="ProfilePictureAttachment">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="defaultFileName" default-value="DefaultProfilePicture.svg" required="true"/>
+            <parameter name="defaultFileRenderLocation" default-value="component://resistmanagement/screen/resistmanagement/DefaultProfilePicture.xml" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="partyContentId"/>
+            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
+        </out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="context"/>
+            <if condition="!allowed"><return type="danger" error="true" message="Not allowed to edit this account"/></if>
+
+            <if condition="contentFile == null">
+                <service-call name="resistmanagement.ResistServices.upload#ProfilePictureResource" in-map="context + [
+                    partyContentTypeEnumId:'PcntPrimaryImage', defaultFileName:'DefaultProfilePicture.svg',
+                    defaultFileRenderLocation:'component://resistmanagement/screen/resistmanagement/DefaultProfilePicture.xml']" out-map="context"/>
+                <else>
+                    <service-call name="resistmanagement.ResistServices.upload#ProfilePictureAttachmentInternal" in-map="context" out-map="context"/>
+                </else></if>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="ProfilePictureResource">
         <description>
             Upload a file for a Party to create a PartyContent entry.
 
@@ -296,9 +321,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
         </out-parameters>
         <actions>
-<!--            <set field="test" from="fileMimeTypeList.collect{ fileMimeTypeList.indexOf(it) &lt; fileMimeTypeList.size() -1 ? it.split('/')[1].split('\\+')[0] : 'or ' + it.split('/')[1].split('\\+')[0] }.join(', ')"/>-->
-<!--            <log level="warn" message="test ${test}"/>-->
-
             <if condition="contentFile != null &amp;&amp; !fileMimeTypeList.contains(contentFile.getContentType())">
                 <!-- see: https://www.javacodeexamples.com/solution-java-util-regex-patternsyntaxexception-dangling-meta-character-near-index-0/3446 for why not split('+') and is split('\\+') -->
                 <!-- see: https://freemarker.apache.org/docs/dgui_misc_autoescaping.html for why not split('\\+') and is split('\\\\+') -->
@@ -314,16 +336,14 @@ along with this software (see the LICENSE.md file). If not, see
             </else></if>
 
             <entity-find entity-name="mantle.party.PartyContent" list="pcList">
-                <econdition field-name="partyId"/>
+                <econdition field-name="partyId"/><econdition field-name="contentLocation" operator="is-not-null"/>
                 <econdition field-name="partyContentTypeEnumId"/>
-                <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${filename}"/>
-                <order-by field-name="-contentDate"/>
-            </entity-find>
+                <select-field field-name="partyContentId"/><select-field field-name="contentLocation"/>
+                <order-by field-name="contentDate"/></entity-find>
+            <iterate list="pcList" entry="partyContent">
+                <script>ec.resource.getLocationReference(partyContent.contentLocation)?.delete()</script>
+                <service-call name="delete#mantle.party.PartyContent" in-map="[partyContentId:partyContent.partyContentId]"/></iterate>
 
-            <if condition="pcList?.size() &gt; 0">
-                <service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:pcList.getFirst().partyContentId, contentDate:ec.user.nowTimestamp]" out-map="context"/>
-                <return message="Using existing file with the name ${filename}"/>
-            </if>
             <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:partyContentTypeEnumId]" out-map="context"/>
 
             <set field="contentLocation" value="${contentRoot}/party/${partyId}/content_${partyContentId}/${filename}"/>
@@ -336,24 +356,6 @@ along with this software (see the LICENSE.md file). If not, see
 
             <if condition="saveContentLocation"><service-call name="update#mantle.party.PartyContent"
                                                               in-map="[partyContentId:partyContentId, contentLocation:contentLocation]"/></if>
-<!--            <log level="warn" message="partyContentId ${partyContentId}"/>-->
-        </actions>
-    </service>
-
-    <service verb="upload" noun="ProfilePictureAttachment">
-        <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="partyContentId"/>
-            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
-        </out-parameters>
-        <actions>
-            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="context"/>
-            <if condition="!allowed"><return type="danger" error="true" message="Not allowed to edit this account"/></if>
-
-            <service-call name="resistmanagement.ResistServices.upload#ProfilePictureAttachmentInternal" in-map="context" out-map="context"/>
         </actions>
     </service>
 
@@ -361,74 +363,24 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="partyId" required="true"/>
             <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="partyContentId"/>
-            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
-        </out-parameters>
-        <actions>
-            <service-call name="resistmanagement.ResistServices.upload#PartyContent" in-map="context + [
-                partyContentTypeEnumId:'PcntPrimaryImage', defaultFileName:'DefaultProfilePicture.svg',
-                defaultFileRenderLocation:'component://resistmanagement/screen/resistmanagement/DefaultProfilePicture.xml']" out-map="context"/>
-            <!--            <log level="warn" message="upload partyContentId ${partyContentId}"/>-->
-        </actions>
-    </service>
-
-    <service verb="upload" noun="PostAttachmentResource">
-        <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <parameter name="contentFileLocation" required="true"/>
             <parameter name="outputImageFormat" required="true" default-value="jpg"></parameter>
-            <parameter name="saveOriginal" type="Boolean" default="true"><description>If true, will save the original image.</description></parameter>
-            <parameter name="saveLarge" type="Boolean" default="false"><description>If true, will save a large image.</description></parameter>
-            <parameter name="saveMedium" type="Boolean" default="true"><description>If true, will save a medium image.</description></parameter>
-            <parameter name="saveSmall" type="Boolean" default="true"><description>If true, will save a small image.</description></parameter>
-            <parameter name="saveThumbnail" type="Boolean" default="false"><description>If true, will save the thumbnail image.</description></parameter>
-            <parameter name="contentTypeOriginal" default-value="PcntPostImageOriginal" required="true"><description>Party Content Type Enum Id for the Original image.</description></parameter>
-            <parameter name="contentTypeLarge" default-value="PcntPostImageLarge" required="true"><description>Party Content Type Enum Id for the Large image.</description></parameter>
-            <parameter name="contentTypeMedium" default-value="PcntPostImageMedium" required="true"><description>Party Content Type Enum Id for the Medium image.</description></parameter>
-            <parameter name="contentTypeSmall" default-value="PcntPostImageSmall" required="true"><description>Party Content Type Enum Id for the Small image.</description></parameter>
-            <parameter name="contentTypeThumbnail" default-value="PcntPostImageThumbnail" required="true"><description>Party Content Type Enum Id for the Thumbnail image.</description></parameter>
-            <parameter name="fileMimeTypeList" type="List" default="ec.service.sync().name('org.moqui.impl.ImageServices.get#ImageReaderMIMETypes').call()?.imageReaderMIMETypes"/>
+            <parameter name="saveOriginal" type="Boolean" default="false" required="true"><description>If true, will save the original image.</description></parameter>
+            <parameter name="saveLarge" type="Boolean" default="false" required="true"><description>If true, will save a large image.</description></parameter>
+            <parameter name="saveMedium" type="Boolean" default="false" required="true"><description>If true, will save a medium image.</description></parameter>
+            <parameter name="saveSmall" type="Boolean" default="true" required="true"><description>If true, will save a small image.</description></parameter>
+            <parameter name="saveThumbnail" type="Boolean" default="false" required="true"><description>If true, will save the thumbnail image.</description></parameter>
+            <parameter name="contentTypeOriginal" default-value="PcntPrimaryImage" required="true"><description>Party Content Type Enum Id for the Original image.</description></parameter>
+            <parameter name="contentTypeLarge" default-value="PcntPrimaryImage" required="true"><description>Party Content Type Enum Id for the Large image.</description></parameter>
+            <parameter name="contentTypeMedium" default-value="PcntPrimaryImage" required="true"><description>Party Content Type Enum Id for the Medium image.</description></parameter>
+            <parameter name="contentTypeSmall" default-value="PcntPrimaryImage" required="true"><description>Party Content Type Enum Id for the Small image.</description></parameter>
+            <parameter name="contentTypeThumbnail" default-value="PcntPrimaryImage" required="true"><description>Party Content Type Enum Id for the Thumbnail image.</description></parameter>
+            <parameter name="fileMimeTypeList" type="List" default="ec.service.sync().name('org.moqui.impl.ImageServices.get#ImageReaderMIMETypes').call()?.imageReaderMIMETypes" required="true"/>
         </in-parameters>
         <out-parameters>
             <parameter name="partyContentId"/>
             <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
         </out-parameters>
         <actions>
-            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="context"/>
-            <if condition="!allowed"><return type="danger" error="true" message="Not allowed to edit this account"/></if>
-
-            <service-call name="resistmanagement.ResistServices.upload#PostAttachmentResourceInternal" in-map="context" out-map="context"/>
-        </actions>
-    </service>
-
-
-    <service verb="upload" noun="PostAttachmentResourceInternal">
-        <in-parameters>
-            <parameter name="partyId" required="true"/>
-            <parameter name="contentFileLocation" required="true"/>
-            <parameter name="outputImageFormat" required="true" default-value="jpg"></parameter>
-            <parameter name="saveOriginal" type="Boolean" default="true"><description>If true, will save the original image.</description></parameter>
-            <parameter name="saveLarge" type="Boolean" default="false"><description>If true, will save a large image.</description></parameter>
-            <parameter name="saveMedium" type="Boolean" default="true"><description>If true, will save a medium image.</description></parameter>
-            <parameter name="saveSmall" type="Boolean" default="true"><description>If true, will save a small image.</description></parameter>
-            <parameter name="saveThumbnail" type="Boolean" default="false"><description>If true, will save the thumbnail image.</description></parameter>
-            <parameter name="contentTypeOriginal" default-value="PcntPostImageOriginal" required="true"><description>Party Content Type Enum Id for the Original image.</description></parameter>
-            <parameter name="contentTypeLarge" default-value="PcntPostImageLarge" required="true"><description>Party Content Type Enum Id for the Large image.</description></parameter>
-            <parameter name="contentTypeMedium" default-value="PcntPostImageMedium" required="true"><description>Party Content Type Enum Id for the Medium image.</description></parameter>
-            <parameter name="contentTypeSmall" default-value="PcntPostImageSmall" required="true"><description>Party Content Type Enum Id for the Small image.</description></parameter>
-            <parameter name="contentTypeThumbnail" default-value="PcntPostImageThumbnail" required="true"><description>Party Content Type Enum Id for the Thumbnail image.</description></parameter>
-            <parameter name="fileMimeTypeList" type="List" default="ec.service.sync().name('org.moqui.impl.ImageServices.get#ImageReaderMIMETypes').call()?.imageReaderMIMETypes"/>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="partyContentId"/>
-            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
-        </out-parameters>
-        <actions>
-            <!--            <log level="warn" message="contentFileLocation ${contentFileLocation}"/>-->
-            <set field="contentFile" from="ec.resource.getLocationReference(contentFileLocation)" type="moqui.org.resource.ResourceReference"/>
-            <!--            <log level="warn" message="contentFile ${contentFile.toString()} contentFile.getFileName() ${contentFile.getFileName()} contentFile.getContentType() ${contentFile.getContentType()}"/>-->
             <if condition="contentFile != null &amp;&amp; !fileMimeTypeList.contains(contentFile.getContentType())">
                 <!-- see: https://www.javacodeexamples.com/solution-java-util-regex-patternsyntaxexception-dangling-meta-character-near-index-0/3446 for why not split('+') and is split('\\+') -->
                 <!-- see: https://freemarker.apache.org/docs/dgui_misc_autoescaping.html for why not split('\\+') and is split('\\\\+') -->
@@ -437,29 +389,19 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!defaultFileName &amp;&amp; !defaultFileRenderLocation &amp;&amp; contentFile == null"><return message="File not uploaded"/></if>
 
             <!-- TODO: Handle contentFile uploads with mime types that aren't supported -->
-            <if condition="org.moqui.resource.ResourceReference.isTextFilename(contentFile?.getFileName())"><then>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(contentFile?.getName())"><then>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
             </then><else>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
             </else></if>
 
-            <entity-find-count entity-name="mantle.party.PartyContent" count-field="pcCount">
-                <econdition field-name="partyId"/>
-                <econdition field-name="contentLocation" operator="is-not-null"/>
-                <econdition field-name="partyContentTypeEnumId" value="PcntPostImageSmall"/>
-            </entity-find-count>
-            <if condition="pcCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>
+<!--            -->
+<!--            <if condition="pcList?.size() &gt; 0">-->
+<!--                <service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:pcList.getFirst().partyContentId, contentDate:ec.user.nowTimestamp]" out-map="context"/>-->
+<!--                <return message="Using existing file with the name ${filename}"/>-->
+<!--            </if>-->
 
-            <set field="fileNameNoExtension" from="contentFile?.getFileName()?.take(contentFile?.getFileName()?.lastIndexOf('.'))"/>
-
-            <!-- TODO: Use checksum from original to check for duplicates. -->
-            <!--            <entity-find entity-name="mantle.party.PartyContent" list="pcDuplicateList">-->
-            <!--                <econdition field-name="partyId"/>-->
-            <!--                <econdition field-name="partyContentTypeEnumId"/>-->
-            <!--                <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${fileNameNoExtension}_Original.${outputImageFormat}" ignore-if-empty="true"/>-->
-            <!--                <order-by field-name="-contentDate"/></entity-find>-->
-            <!--            <set field="partyContentId" from="pcDuplicateList?.getFirst()?.partyContentId"/>-->
-            <!--            <if condition="!partyContentId &amp;&amp; pcDuplicateList?.size() == 0">-->
+            <set field="fileNameNoExtension" from="contentFile.getName().take(contentFile.getName().lastIndexOf('.'))"/>
 
             <set field="Original" type="NewMap"/><set field="contentLocationOriginal"/>
             <set field="Large" type="NewMap"/><set field="contentLocationLarge"/>
@@ -467,31 +409,71 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="Small" type="NewMap"/><set field="contentLocationSmall"/>
             <set field="Thumbnail" type="NewMap"/><set field="contentLocationThumbnail"/>
 
-            <if condition="saveOriginal"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeOriginal]" out-map="Original"/><set field="contentLocationOriginal" value="${contentRoot}/party/${partyId}/content_${Original.partyContentId}/${fileNameNoExtension}_Original.${outputImageFormat}"/></if>
-            <if condition="saveLarge"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeLarge]" out-map="Large"/><set field="contentLocationLarge" value="${contentRoot}/party/${partyId}/content_${Large.partyContentId}/${fileNameNoExtension}_Large.${outputImageFormat}"/></if>
-            <if condition="saveMedium"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeMedium]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/party/${partyId}/content_${Medium.partyContentId}/${fileNameNoExtension}_Medium.${outputImageFormat}"/></if>
-            <if condition="saveSmall"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeSmall]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/party/${partyId}/content_${Small.partyContentId}/${fileNameNoExtension}_Small.${outputImageFormat}"/></if>
-            <if condition="saveThumbnail"><service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeThumbnail]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/party/${partyId}/content_${Thumbnail.partyContentId}/${fileNameNoExtension}_Thumbnail.${outputImageFormat}"/></if>
+<!--            <if condition="pcList?.size() &gt; 0">-->
+<!--                <service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:pcList.getFirst().partyContentId, contentDate:ec.user.nowTimestamp]" out-map="context"/>-->
+<!--                <return message="Using existing file with the name ${filename}"/>-->
+<!--            </if>-->
 
-            <!--            </if>-->
+<!--            <log level="warn" message="saveOriginal ${saveOriginal} saveLarge ${saveLarge} saveMedium ${saveMedium} saveSmall ${saveSmall} saveThumbnail ${saveThumbnail}"/>-->
 
-            <!--            <set field="inputImage" from="contentFile?.getStoreLocation()"/>-->
-            <!--            <script>import java.nio.file.Files</script>-->
-            <!--            <if condition="inputImage"><then>-->
-            <!--                <log level="warn" message="inputImage?.getParent() ${inputImage?.getParent()}"/>-->
-            <!--                <log level="warn" message="inputImage?.getParent() ${inputImage?.getParent()}"/>-->
-            <!--                <log level="warn" message="inputImage?.getPath() ${inputImage?.getPath()}"/>-->
-            <!--                <log level="warn" message="contentFile?.getContentType() ${contentFile?.getContentType()}"/>-->
-            <!--                <log level="warn" message="Files.probeContentType(inputImage?.toPath()) ${Files.probeContentType(inputImage?.toPath())}"/>-->
-            <!--                <log level="warn" message="Files.size(inputImage?.toPath()) ${Files.size(inputImage?.toPath())}"/>-->
-            <!--            </then><else>-->
-            <!--                <log level="warn" message="inputImage in memory"/>-->
-            <!--            </else></if>-->
-            <!--            <log level="warn" message="ec.resource.getLocationReference(contentLocationOriginal).getSize() ${ec.resource.getLocationReference(contentLocationOriginal).getSize()}"/>-->
-            <!--            <log level="warn" message="context.toString() ${context.toString()}"/>-->
+            <if condition="saveOriginal">
+                <entity-find entity-name="mantle.party.PartyContent" list="pcList">
+                    <econdition field-name="partyId"/><econdition field-name="contentLocation" operator="is-not-null"/>
+                    <econdition field-name="partyContentTypeEnumId" from="contentTypeOriginal"/>
+                    <select-field field-name="partyContentId"/><select-field field-name="contentLocation"/>
+                    <order-by field-name="contentDate"/></entity-find>
+                <iterate list="pcList" entry="partyContent">
+                    <script>ec.resource.getLocationReference(partyContent.contentLocation)?.delete()</script>
+                    <service-call name="delete#mantle.party.PartyContent" in-map="[partyContentId:partyContent.partyContentId]"/></iterate>
+
+                <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeOriginal]" out-map="Original"/><set field="contentLocationOriginal" value="${contentRoot}/party/${partyId}/content_${Original.partyContentId}/${fileNameNoExtension}_Original.${outputImageFormat}"/></if>
+            <if condition="saveLarge">
+                <entity-find entity-name="mantle.party.PartyContent" list="pcList">
+                    <econdition field-name="partyId"/><econdition field-name="contentLocation" operator="is-not-null"/>
+                    <econdition field-name="partyContentTypeEnumId" from="contentTypeLarge"/>
+                    <select-field field-name="partyContentId"/><select-field field-name="contentLocation"/>
+                    <order-by field-name="contentDate"/></entity-find>
+                <iterate list="pcList" entry="partyContent">
+                    <script>ec.resource.getLocationReference(partyContent.contentLocation)?.delete()</script>
+                    <service-call name="delete#mantle.party.PartyContent" in-map="[partyContentId:partyContent.partyContentId]"/></iterate>
+
+                <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeLarge]" out-map="Large"/><set field="contentLocationLarge" value="${contentRoot}/party/${partyId}/content_${Large.partyContentId}/${fileNameNoExtension}_Large.${outputImageFormat}"/></if>
+            <if condition="saveMedium">
+                <entity-find entity-name="mantle.party.PartyContent" list="pcList">
+                    <econdition field-name="partyId"/><econdition field-name="contentLocation" operator="is-not-null"/>
+                    <econdition field-name="partyContentTypeEnumId" from="contentTypeMedium"/>
+                    <select-field field-name="partyContentId"/><select-field field-name="contentLocation"/>
+                    <order-by field-name="contentDate"/></entity-find>
+                <iterate list="pcList" entry="partyContent">
+                    <script>ec.resource.getLocationReference(partyContent.contentLocation)?.delete()</script>
+                    <service-call name="delete#mantle.party.PartyContent" in-map="[partyContentId:partyContent.partyContentId]"/></iterate>
+
+                <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeMedium]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/party/${partyId}/content_${Medium.partyContentId}/${fileNameNoExtension}_Medium.${outputImageFormat}"/></if>
+            <if condition="saveSmall">
+                <entity-find entity-name="mantle.party.PartyContent" list="pcList">
+                    <econdition field-name="partyId"/><econdition field-name="contentLocation" operator="is-not-null"/>
+                    <econdition field-name="partyContentTypeEnumId" from="contentTypeSmall"/>
+                    <select-field field-name="partyContentId"/><select-field field-name="contentLocation"/>
+                    <order-by field-name="contentDate"/></entity-find>
+                <iterate list="pcList" entry="partyContent">
+                    <script>ec.resource.getLocationReference(partyContent.contentLocation)?.delete()</script>
+                    <service-call name="delete#mantle.party.PartyContent" in-map="[partyContentId:partyContent.partyContentId]"/></iterate>
+
+                <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeSmall]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/party/${partyId}/content_${Small.partyContentId}/${fileNameNoExtension}_Small.${outputImageFormat}"/></if>
+            <if condition="saveThumbnail">
+                <entity-find entity-name="mantle.party.PartyContent" list="pcList">
+                    <econdition field-name="partyId"/><econdition field-name="contentLocation" operator="is-not-null"/>
+                    <econdition field-name="partyContentTypeEnumId" from="contentTypeThumbnail"/>
+                    <select-field field-name="partyContentId"/><select-field field-name="contentLocation"/>
+                    <order-by field-name="contentDate"/></entity-find>
+                <iterate list="pcList" entry="partyContent">
+                    <script>ec.resource.getLocationReference(partyContent.contentLocation)?.delete()</script>
+                    <service-call name="delete#mantle.party.PartyContent" in-map="[partyContentId:partyContent.partyContentId]"/></iterate>
+
+                <service-call name="create#mantle.party.PartyContent" in-map="[partyId:partyId, partyContentTypeEnumId:contentTypeThumbnail]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/party/${partyId}/content_${Thumbnail.partyContentId}/${fileNameNoExtension}_Thumbnail.${outputImageFormat}"/></if>
 
             <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
-                inputImageStream:contentFile.openStream(),
+                inputImageStream:contentFile.getInputStream(),
                 outputImageFormat:outputImageFormat,
                 outputResourceReferenceOriginal:ec.resource.getLocationReference(contentLocationOriginal),
                 outputResourceReferenceLarge:ec.resource.getLocationReference(contentLocationLarge),
@@ -499,8 +481,6 @@ along with this software (see the LICENSE.md file). If not, see
                 outputResourceReferenceSmall:ec.resource.getLocationReference(contentLocationSmall),
                 outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
             ]" out-map="context"/>
-
-            <!--            <log level="warn" message="post context.toString() ${context.toString()}"/>-->
 
             <if condition="saveOriginal"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Original.partyContentId, contentLocation:contentLocationOriginal, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveLarge"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Large.partyContentId, contentLocation:contentLocationLarge, contentDate:ec.user.nowTimestamp]"/></if>
@@ -577,15 +557,11 @@ along with this software (see the LICENSE.md file). If not, see
                 outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
             ]" out-map="context"/>
 
-<!--            <log level="warn" message="post context.toString() ${context.toString()}"/>-->
-
             <if condition="saveOriginal"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Original.partyContentId, contentLocation:contentLocationOriginal, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveLarge"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Large.partyContentId, contentLocation:contentLocationLarge, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveMedium"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Medium.partyContentId, contentLocation:contentLocationMedium, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveSmall"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Small.partyContentId, contentLocation:contentLocationSmall, contentDate:ec.user.nowTimestamp]"/></if>
             <if condition="saveThumbnail"><service-call name="update#mantle.party.PartyContent" in-map="[partyContentId:Thumbnail.partyContentId, contentLocation:contentLocationThumbnail, contentDate:ec.user.nowTimestamp]"/></if>
-
-            <script>ec.artifactExecution.logProfilingDetail()</script>
         </actions>
     </service>
 
@@ -675,7 +651,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-count>
 
             <if condition="pdrsCount != null &amp;&amp; pdrsCount &gt; 0"><set field="allowed" from="true"/><return/></if>
-            <log level="warn" message="check#AccountView context: ${context.toString()}"/>
+<!--            <log level="warn" message="check#AccountView context: ${context.toString()}"/>-->
         </actions>
     </service>
 
@@ -815,7 +791,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
                 <date-filter/>
             </entity-find-count>
-            <log level="warn" message="accountCount ${accountCount}"/>
+<!--            <log level="warn" message="accountCount ${accountCount}"/>-->
         </actions>
     </service>
 
@@ -933,8 +909,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="create#mantle.party.communication.CommunicationEvent" in-map="context" out-map="context"/>
             <service-call name="create#mantle.work.effort.WorkEffortCommEvent" in-map="context" out-map="context"/>
 
-            <log level="warn" message="toPartyId ${toPartyId}"/>
-            <log level="warn" message="project.parties*.partyId?.contains(toPartyId) ${project.parties*.partyId}"/>
+<!--            <log level="warn" message="toPartyId ${toPartyId}"/>-->
+<!--            <log level="warn" message="project.parties*.partyId?.contains(toPartyId) ${project.parties*.partyId}"/>-->
             <if condition="!project.parties*.partyId?.contains(toPartyId)">
 <!--                <service-call name="mantle.work.WorkEffortServices.add#WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:toPartyId, roleTypeId:]"-->
             </if>
