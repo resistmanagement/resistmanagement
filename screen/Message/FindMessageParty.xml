@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Find Accounts" default-menu-include="false">
+
+    <transition-include name="downloadContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
+
+    <actions>
+        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true">
+            <econdition field-name="roleTypeId" value="ClientManager"/>
+            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="contentLocation" operator="is-not-null"/>
+            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+            <econdition field-name="fromRoleTypeId" value="Administrator"/>
+            <econdition field-name="toRoleTypeId" value="ClientManager"/>
+            <econdition field-name="fromPartyId" operator="not-equals" from="ec.user.userAccount?.partyId"/>
+            <date-filter/>
+            <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+            <order-by field-name="-contentDate"/>
+        </entity-find>
+
+        <log level="warn" message="accountList ${accountList.toString()}"/>
+    </actions>
+
+    <widgets>
+        <container-row><row-col lg="12">
+            <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">
+                <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyId]" out-map="context"/></row-actions>
+                <field name="profilePicture"><default-field><image url="downloadContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/></default-field></field>
+                <field name="pseudoId"><default-field><link url="../FindMessage" text="${pseudoId}" parameter-map="[toPartyId:partyId]"/></default-field></field>
+            </form-list>
+        </row-col></container-row>
+    </widgets>
+</screen>
