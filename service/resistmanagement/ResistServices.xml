@@ -693,16 +693,19 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="workEffortId" required="true"/>
         </in-parameters>
         <out-parameters>
-            <parameter name="workEffortId"/>
+            <parameter name="allowed" default="false"/>
         </out-parameters>
         <actions>
             <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailAndPartyDetailWithRole" count-field="wfdapdwfCount" cache="true">
+                <econdition field-name="workEffortId"/>
                 <econdition field-name="partyRoleTypeId" operator="in" from="['ClientManager']"/>
                 <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
                 <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
                 <date-filter/></entity-find-count>
 
-            <if condition="wfdapdwfCount == null || wfdapdwfCount == 0"><return type="danger" error="true" message="No Project found with id ${workEffortId}"/></if>
+            <if condition="wfdapdwfCount != null &amp;&amp; wfdapdwfCount == 1">
+                <set field="allowed" from="true"/>
+            <else><return type="danger" error="true" message="No Project found with id ${workEffortId}"/></else></if>
         </actions>
     </service>
 
