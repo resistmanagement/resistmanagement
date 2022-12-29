@@ -38,7 +38,7 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
 
     <actions>
-        <!-- <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party"/> -->
+        <entity-find-one entity-name="mantle.party.PartyDetail" value-field="toParty" auto-field-map="[partyId:toPartyId]"/>
         <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList">
             <econditions combine="or">
                 <econditions>
@@ -57,9 +57,13 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="entryDate"/>
         </entity-find>
 
-<!--        <log level="warn" message="commEventList ${commEventList}"/>-->
+        <set field="messageTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
     <widgets>
+        <form-list name="ListMessage" list="messageTitleList" skip-header="true" skip-form="true">
+            <field name="title"><default-field><label text="${toParty.pseudoId}" type="h2"/></default-field></field>
+        </form-list>
+
         <form-list name="MessageList" list="commEventList" skip-form="true" header-dialog="true" saved-finds="true" paginate="false" skip-header="true">
             <row-actions>
                 <entity-find entity-name="mantle.party.communication.CommunicationEventPurpose" list="cepList">
@@ -71,19 +75,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field title="Date"><display format="MMMMM dd HH:mm"/></default-field>
             </field>
             <field name="fromPartyId">
-                <header-field title="Sender"><drop-down allow-empty="true">
-                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/>
-                </drop-down></header-field>
                 <default-field><display-entity entity-name="mantle.party.PartyDetail" also-hidden="false"
                                                key-field-name="partyId" text="PartyNameTemplate"/></default-field>
             </field>
-<!--            <field name="toPartyId">-->
-<!--                <header-field title="To"><drop-down allow-empty="true">-->
-<!--                    <dynamic-options transition="searchPartyList" server-search="true" min-length="2"/>-->
-<!--                </drop-down></header-field>-->
-<!--                <default-field><display-entity entity-name="mantle.party.PartyDetail" also-hidden="false"-->
-<!--                                               key-field-name="partyId" text="PartyNameTemplate"/></default-field>-->
-<!--            </field>-->
 
             <field name="body"><default-field title="Message"><label text="${body}"/></default-field></field>
 
