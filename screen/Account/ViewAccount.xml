@@ -129,13 +129,9 @@ along with this software (see the LICENSE.md file). If not, see
                     </form-single>
                 </container-dialog>
             </conditional-field></field>
-            <field name="messageAccount"><default-field>
+            <field name="messageAccount"><conditional-field condition="!accountEdit?.allowed">
                 <link url="../../Message/FindMessage" text="Message" parameter-map="[toPartyId:partyId]"/>
-<!--                <form-single name="MessageAccountForm" transition="">-->
-<!--                    <field name="partyId"><default-field><hidden/></default-field></field>-->
-<!--                    <field name="submit"><default-field><submit/></default-field></field>-->
-<!--                </form-single>-->
-            </default-field></field>
+            </conditional-field></field>
         </form-list>
         <form-single name="PartyProfileEditSection" transition="updateProfile" map="party" pass-through-parameters="true">
             <field name="partyId"><default-field><hidden/></default-field></field>
