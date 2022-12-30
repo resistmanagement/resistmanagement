@@ -186,7 +186,6 @@ along with this software (see the LICENSE.md file). If not, see
         <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StInfluencer"/>
     </mantle.humanres.position.EmplPositionClass>
     <mantle.humanres.position.EmplPositionClass emplPositionClassId="Photographer" title="Photographer">
-        <mantle.humanres.position.EmplPositionClassDimension uomDimensionTypeId="Height"/>
         <mantle.party.EmplPositionClassPtyClsTp classificationTypeEnumId="PctGender"/>
         <mantle.party.EmplPositionClassPtyClsTp classificationTypeEnumId="PctCamera"/>
         <mantle.humanres.position.EmplPositionClassSkill skillTypeEnumId="StWedding"/>
