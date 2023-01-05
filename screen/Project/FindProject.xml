@@ -18,6 +18,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createProject"><service-call name="mantle.work.ProjectServices.create#Project"
         in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
         <default-response url="."/></transition>
+    <transition-include name="createPersonAccount" location="component://resistmanagement/screen/Account/FindAccount.xml"/>
 
     <pre-actions><set field="html_title" value="Find Project"/></pre-actions>
 
@@ -44,7 +45,8 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- TODO: This is probably more complicated than it has to be because of using the PartyFromAndToRelationship view entity. -->
         <set field="pfatrKeyValueList" from="pfatrList?.groupBy{ it.toPartyId }.collectEntries{ key, value -> [(key):[partyRelationshipIdList:value*.partyRelationshipId, fromRoleTypeIdList:value*.fromRoleTypeId, toPartyIdList:value*.toPartyId, toRoleTypeIdList:value*.toRoleTypeId]] }"/>
 
-<!--        <log level="warn" message="pfatrKeyValueList?.toPartyId?.getFirst() ${pfatrKeyValueList}"/>-->
+        <service-call name="resistmanagement.ResistServices.count#PartyAccountOwned" out-map="context"/>
+        <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
 
         <set field="projectTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
@@ -77,11 +79,21 @@ along with this software (see the LICENSE.md file). If not, see
                                 <fields-not-referenced/>
                             </field-layout>
                         </form-single>
-                    </container-dialog>
-                    </conditional-field>
-                    <default-field>
-                        <link url="../../Account/FindAccount" text="You must create an account before new projects. Click here to create an account."/>
-                    </default-field>
+                    </container-dialog></conditional-field>
+                    <conditional-field condition="accountCount == 0"><container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Account">
+                        <form-single name="SetPersonalTalentAccountForm" transition="createPersonAccount">
+                            <field name="partySettingTypeId"><default-field><hidden default-value="PartyVisibility"/></default-field></field>
+                            <field name="pseudoId"><default-field title="Account Username"><text-line/></default-field></field>
+                            <field name="settingValue" from="partySettingType?.defaultValue"><default-field title="Account Visibility">
+                                <drop-down><list-options list="partySettingType?.type?.enums" key="${enumId}" text="${description}"/></drop-down>
+                            </default-field></field>
+                            <field name="submitButton"><default-field title="Set"><submit/></default-field></field>
+                            <field-layout>
+                                <field-row><field-ref name="pseudoId"/><field-ref name="settingValue"/></field-row>
+                                <field-ref name="submitButton"/>
+                            </field-layout>
+                        </form-single>
+                    </container-dialog></conditional-field>
                 </field>
             </form-list>
 

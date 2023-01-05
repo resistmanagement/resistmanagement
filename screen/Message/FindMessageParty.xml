@@ -15,7 +15,7 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Find Accounts" default-menu-include="false">
 
-    <transition-include name="downloadContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
+    <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
 
     <actions>
         <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true">
@@ -55,7 +55,7 @@ along with this software (see the LICENSE.md file). If not, see
         <container-row><row-col lg="12">
             <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">
                 <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyId]" out-map="context"/></row-actions>
-                <field name="profilePicture"><default-field><image url="downloadContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/></default-field></field>
+                <field name="profilePicture"><default-field><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/></default-field></field>
                 <field name="pseudoId"><default-field><link url="../FindMessage" text="${pseudoId}" parameter-map="[toPartyId:partyId]"/></default-field></field>
             </form-list>
         </row-col></container-row>

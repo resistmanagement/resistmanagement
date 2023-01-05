@@ -18,14 +18,26 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="partyId" required="true"/>
     <parameter name="canViewAccount"/>
 
-    <transition name="downloadContent" read-only="true">
+    <transition name="downloadPartyContent" read-only="true">
         <parameter name="partyContentId"/>
-        <actions><service-call name="resistmanagement.ResistServices.check#AccountContentView" in-map="[partyContentId:partyContentId]" out-map="context"/>
+        <actions><service-call name="resistmanagement.ResistServices.check#AccountPartyContentView" in-map="[partyContentId:partyContentId]" out-map="context"/>
             <if condition="allowed">
                 <entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent" auto-field-map="[partyContentId:partyContentId,partyId:partyId]">
                     <select-field field-name="partyContentId, contentLocation"/></entity-find-one>
                 <script>ec.web.sendResourceResponse(partyContent?.contentLocation)</script>
             <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+    <transition name="downloadCommEventContent" read-only="true">
+        <parameter name="communicationEventContentId"/>
+        <actions><service-call name="resistmanagement.ResistServices.check#AccountCommEventContentView" in-map="[communicationEventContentId:communicationEventContentId]" out-map="context"/>
+            <if condition="allowed">
+                <entity-find-one entity-name="mantle.party.communication.CommunicationEventContent" value-field="communicationEventContent" auto-field-map="[communicationEventContentId:communicationEventContentId]">
+                    <select-field field-name="communicationEventContentId, contentLocation"/></entity-find-one>
+                <log level="warn" message="communicationEventContent ${communicationEventContent}"/>
+                <script>ec.web.sendResourceResponse(communicationEventContent?.contentLocation)</script>
+                <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
         </actions>
         <default-response type="none"/>
     </transition>
@@ -63,7 +75,17 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="-contentDate"/></entity-find>
             <filter-map-list list="partyContentList" to-list="profileContentList"><field-map field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/></filter-map-list>
             <filter-map-list list="partyContentList" to-list="partyContentBioList"><field-map field-name="partyContentTypeEnumId" value="PcntBio"/></filter-map-list>
-            <filter-map-list list="partyContentList" to-list="postContentList"><field-map field-name="partyContentTypeEnumId" value="PcntPostImageSmall"/></filter-map-list>
+
+            <entity-find entity-name="mantle.party.communication.CommunicationEventAndContent" list="postAllContentList">
+                <econdition field-name="fromPartyId" from="partyId"/>
+                <econdition field-name="communicationEventTypeId" value="Post"/>
+                <econdition field-name="contentLocation" operator="is-not-null"/>
+                <econdition field-name="contentTypeEnumId" operator="in" value="CmctImageMedium,CmctImageSmall"/>
+                <select-field field-name="communicationEventId,communicationEventContentId,contentLocation,contentTypeEnumId"/>
+                <order-by field-name="sequenceId,-contentDate,-entryDate"/>
+            </entity-find>
+            <filter-map-list list="postAllContentList" to-list="postContentList"><field-map field-name="contentTypeEnumId" value="CmctImageSmall"/></filter-map-list>
+            <filter-map-list list="postAllContentList" to-list="postDetailedContentList"><field-map field-name="contentTypeEnumId" value="CmctImageMedium"/></filter-map-list>
         <else>
             <entity-find entity-name="mantle.party.PartyContent" list="partyContentList">
                 <econdition field-name="partyId"/>
@@ -88,11 +110,11 @@ along with this software (see the LICENSE.md file). If not, see
 
         <!--        <log level="warn" message="postContentList?.size() ${postContentList?.size()} postContentList ${postContentList}"/>-->
         <if condition="postContentList?.size() &gt; 0">
-            <set field="postTitleList" from="[[partyContentId:postContentList?.first()?.partyContentId, partyText:party.pseudoId]]"/>
+            <set field="postTitleList" from="[[communicationEventContentId:postContentList?.first()?.communicationEventContentId]]"/>
 
-            <iterate list="postContentList" entry="partyContent">
-                <script>intermediatePostList.add(sri.buildUrl('downloadContent').addParameter('partyContentId', partyContent.partyContentId).getUrlWithParams())</script>
-                <if condition="partyContent_index % 3 == 2 || partyContent_index == postContentList.size() - 1">
+            <iterate list="postContentList" entry="communicationEventAndContent">
+                <script>intermediatePostList.add(sri.buildUrl('downloadCommEventContent').addParameter('communicationEventContentId', communicationEventAndContent.communicationEventContentId).getUrlWithParams())</script>
+                <if condition="communicationEventAndContent_index % 3 == 2 || communicationEventAndContent_index == postContentList.size() - 1">
                     <script>postList.add(intermediatePostList)</script>
                     <set field="intermediatePostList" from="[]"/>
                 </if>
@@ -111,7 +133,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true" paginate="false" saved-finds="false" header-dialog="false">
-            <row-actions><set field="contentUrl" from="sri.buildUrl('downloadContent').addParameter('partyContentId', partyContentId).getUrlWithParams()"/></row-actions>
+            <row-actions><set field="contentUrl" from="sri.buildUrl('downloadPartyContent').addParameter('partyContentId', partyContentId).getUrlWithParams()"/></row-actions>
             <field name="content"><conditional-field condition="accountEdit?.allowed"><container-dialog id="UpdateProfilePicture" button-text="Update Picture">
                     <text><![CDATA[<template v-slot:button><img src="${contentUrl}" width="100px"/></template>]]></text>
                     <form-single name="UpdateProfilePictureForm" transition="updateProfilePicture" pass-through-parameters="true">

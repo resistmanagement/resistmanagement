@@ -117,13 +117,21 @@ along with this software (see the LICENSE.md file). If not, see
         <roles roleTypeId="ClientManager"/>
     </mantle.party.PartySettingType>
 
+    <moqui.basic.Enumeration enumId="CmctImageOriginal" description="Image Original (original quality)" enumTypeId="CommunicationContentType" parentEnumId="CmctAttachment"/>
+    <moqui.basic.Enumeration enumId="CmctImageLarge" description="Image Large (~2160p)" enumTypeId="CommunicationContentType" parentEnumId="CmctAttachment"/>
+    <moqui.basic.Enumeration enumId="CmctImageMedium" description="Image Medium (~1080p)" enumTypeId="CommunicationContentType" parentEnumId="CmctAttachment"/>
+    <moqui.basic.Enumeration enumId="CmctImageSmall" description="Image Small (~360p)" enumTypeId="CommunicationContentType" parentEnumId="CmctAttachment"/>
+    <moqui.basic.Enumeration enumId="CmctImageThumbnail" description="Image Thumbnail (~165p)" enumTypeId="CommunicationContentType" parentEnumId="CmctAttachment"/>
+    <mantle.party.communication.CommunicationEventType communicationEventTypeId="Post" description="Post"/>
+    <moqui.basic.Enumeration enumId="PcntBio" parentEnumId="PcntUserDefined"/>
+
+    <!-- To get rid of -->
     <moqui.basic.Enumeration enumId="PcntPost" description="Post" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageOriginal" description="Post Image Original (highest quality)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageLarge" description="Post Image Large (~2160p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageMedium" description="Post Image Medium (~1080p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageSmall" description="Post Image Small (~360p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
     <moqui.basic.Enumeration enumId="PcntPostImageThumbnail" description="Post Image Thumbnail (~165p)" enumTypeId="PartyContentType" parentEnumId="PcntUserDefined"/>
-    <moqui.basic.Enumeration enumId="PcntBio" parentEnumId="PcntUserDefined"/>
 
     <moqui.basic.Uom abbreviation="lb" description="Pound" uomId="WT_lb" uomTypeEnumId="UT_WEIGHT_MEASURE"/>
 
