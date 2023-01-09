@@ -154,28 +154,28 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration enumId="PctEyeColor" description="Eye Color" enumTypeId="PartyClassificationType"/>
     <moqui.basic.Enumeration enumId="PctCamera" description="Camera" enumTypeId="PartyClassificationType"/>
 
-    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctBrown" description="Brown"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctBlonde" description="Blonde"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctBlack" description="Black"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctAuburn" description="Auburn"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctRed" description="Red"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctGrey" description="Grey"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctWhite" description="White"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PctBrown" description="Brown"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctMale" description="Male"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctFemale" description="Female"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PctNonBinary" description="Non Binary"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctBlue" description="Blue"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctGreen" description="Green"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctHazel" description="Hazel"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctAmber" description="Amber"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PctGray" description="Gray"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctDslr" description="DSLR"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctMirrorless" description="Mirrorless"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctPointAndShoot" description="Point and Shoot"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctPhone" description="Phone"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctFilm" description="Film"/>
-    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PctPolaroid" description="Polaroid"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PchcBlonde" description="Blonde"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PchcBlack" description="Black"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PchcAuburn" description="Auburn"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PchcRed" description="Red"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PchcGrey" description="Grey"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PchcWhite" description="White"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctHairColor" partyClassificationId="PchcBrown" description="Brown"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PcgMale" description="Male"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PcgFemale" description="Female"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctGender" partyClassificationId="PcgNonBinary" description="Non Binary"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PcecBrown" description="Brown"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PcecBlue" description="Blue"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PcecGreen" description="Green"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PcecHazel" description="Hazel"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PcecAmber" description="Amber"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctEyeColor" partyClassificationId="PcecGray" description="Gray"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PccDslr" description="DSLR"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PccMirrorless" description="Mirrorless"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PccPointAndShoot" description="Point and Shoot"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PccPhone" description="Phone"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PccFilm" description="Film"/>
+    <mantle.party.PartyClassification classificationTypeEnumId="PctCamera" partyClassificationId="PccPolaroid" description="Polaroid"/>
 
     <moqui.basic.Enumeration enumId="StProgrammer" description="Programmer" enumTypeId="SkillType"/>
     <moqui.basic.Enumeration enumId="StFashion" description="Fashion" enumTypeId="SkillType"/>

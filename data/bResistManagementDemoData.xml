@@ -85,9 +85,9 @@ along with this software (see the LICENSE.md file). If not, see
         <roles lastUpdatedStamp="1670441142468" roleTypeId="Supplier"/>
         <roles lastUpdatedStamp="1670441142468" roleTypeId="Talent"/>
         <mantle.humanres.position.EmplPositionClassParty fromDate="1670441142590" lastUpdatedStamp="1670441142468" emplPositionClassId="Model"/>
-        <classifications fromDate="1670441142590" lastUpdatedStamp="1670964478574" partyClassificationId="PctBrown"/>
-        <classifications fromDate="1670441142590" lastUpdatedStamp="1670965802672" partyClassificationId="PctGreen"/>
-        <classifications fromDate="1670441142590" lastUpdatedStamp="1670965808593" partyClassificationId="PctMale"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670964478574" partyClassificationId="PchcBrown"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670965802672" partyClassificationId="PcecGreen"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670965808593" partyClassificationId="PcgMale"/>
         <mantle.party.PartyDimension lastUpdatedStamp="1670965771163" uomId="LEN_in" value="72" dimensionDate="1670965757060" uomDimensionTypeId="Height"/>
     </parties>
     <mantle.party.PartyRelationship lastUpdatedStamp="1670441131340" fromPartyId="100001" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1670441131366" partyRelationshipId="100051" relationshipTypeEnumId="PrtManager" toPartyId="100002"/>
@@ -119,9 +119,9 @@ along with this software (see the LICENSE.md file). If not, see
         <roles lastUpdatedStamp="1670442925705" roleTypeId="Customer"/>
         <roles lastUpdatedStamp="1670442925705" roleTypeId="ClientManager"/>
         <mantle.humanres.position.EmplPositionClassParty fromDate="1670441142590" lastUpdatedStamp="1670441142468" emplPositionClassId="Model"/>
-        <classifications fromDate="1670441142590" lastUpdatedStamp="1670964478574" partyClassificationId="PctBrown"/>
-        <classifications fromDate="1670441142590" lastUpdatedStamp="1670966540921" partyClassificationId="PctMale"/>
-        <classifications fromDate="1670441142590" lastUpdatedStamp="1670966544563" partyClassificationId="PctHazel"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670964478574" partyClassificationId="PchcBrown"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670966540921" partyClassificationId="PcgMale"/>
+        <classifications fromDate="1670441142590" lastUpdatedStamp="1670966544563" partyClassificationId="PcecHazel"/>
         <contents partyContentId="100051" contentDate="1670886966728" lastUpdatedStamp="1670886966570" partyContentTypeEnumId="PcntBio" userId="100002"><description><![CDATA[Harrison Ford (born July 13, 1942) is an American actor. His films have grossed more than $5.4 billion in North America and more than $9.3 billion worldwide, making him the seventh-highest-grossing actor in North America. He is the recipient of various accolades, including the AFI Life Achievement Award and the Cecil B. DeMille Award, in addition to nominations for an Academy Award and four Golden Globe Awards. He has been a leading man in films of several genres and is regarded as an American cultural icon.]]></description></contents>
         <mantle.party.PartyDimension lastUpdatedStamp="1670966549232" uomId="LEN_in" value="72" dimensionDate="1670966544657" uomDimensionTypeId="Height"/>
     </parties>
