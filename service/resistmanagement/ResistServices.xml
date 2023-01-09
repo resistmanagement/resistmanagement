@@ -518,8 +518,15 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if condition="!defaultFileName &amp;&amp; !defaultFileRenderLocation &amp;&amp; contentFile == null"><return message="File not uploaded"/></if>
 
+            <set field="fileName"/>
+            <set field="uploaded" from="true"/>
+            <script><![CDATA[
+                try { fileName = contentFile?.getFileName() }
+                catch (Exception exception) { fileName = contentFile?.getName(); uploaded = false }
+                ]]></script>
+
             <!-- TODO: Handle contentFile uploads with mime types that aren't supported -->
-            <if condition="org.moqui.resource.ResourceReference.isTextFilename(contentFile?.getFileName() ?: contentFile?.getName())"><then>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(fileName)"><then>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
             </then><else>
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
@@ -535,7 +542,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <if condition="!communicationEventId"><return error="true" message="Something went wrong creating your post. Please try again." type="warning"/></if>
 
-            <set field="fileNameNoExtension" from="contentFile?.getFileName()?.take(contentFile?.getFileName()?.lastIndexOf('.')) ?: contentFile?.getName()?.take(contentFile?.getName()?.lastIndexOf('.'))"/>
+            <set field="fileNameNoExtension" from="fileName?.take(fileName?.lastIndexOf('.'))"/>
 
 <!-- TODO: Use checksum from original to check for duplicates. -->
 <!--            <entity-find entity-name="mantle.party.PartyContent" list="pcDuplicateList">-->
@@ -558,15 +565,27 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="saveSmall"><service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventId:communicationEventId,contentTypeEnumId:contentTypeSmall,sequenceNum:01]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${Small.communicationEventContentId}/${fileNameNoExtension}_Small.${outputImageFormat}"/></if>
             <if condition="saveThumbnail"><service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventId:communicationEventId,contentTypeEnumId:contentTypeThumbnail,sequenceNum:01]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${Thumbnail.communicationEventContentId}/${fileNameNoExtension}_Thumbnail.${outputImageFormat}"/></if>
 
-            <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
-                inputImageStream:contentFile?.openStream() ?: contentFile?.getInputStream(),
-                outputImageFormat:outputImageFormat,
-                outputResourceReferenceOriginal:ec.resource.getLocationReference(contentLocationOriginal),
-                outputResourceReferenceLarge:ec.resource.getLocationReference(contentLocationLarge),
-                outputResourceReferenceMedium:ec.resource.getLocationReference(contentLocationMedium),
-                outputResourceReferenceSmall:ec.resource.getLocationReference(contentLocationSmall),
-                outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
-            ]" out-map="context"/>
+            <if condition="uploaded">
+                <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
+                    inputImageStream:contentFile?.openStream(),
+                    outputImageFormat:outputImageFormat,
+                    outputResourceReferenceOriginal:ec.resource.getLocationReference(contentLocationOriginal),
+                    outputResourceReferenceLarge:ec.resource.getLocationReference(contentLocationLarge),
+                    outputResourceReferenceMedium:ec.resource.getLocationReference(contentLocationMedium),
+                    outputResourceReferenceSmall:ec.resource.getLocationReference(contentLocationSmall),
+                    outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
+                ]" out-map="context"/>
+            <else>
+                <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
+                    inputImageStream:contentFile?.getInputStream(),
+                    outputImageFormat:outputImageFormat,
+                    outputResourceReferenceOriginal:ec.resource.getLocationReference(contentLocationOriginal),
+                    outputResourceReferenceLarge:ec.resource.getLocationReference(contentLocationLarge),
+                    outputResourceReferenceMedium:ec.resource.getLocationReference(contentLocationMedium),
+                    outputResourceReferenceSmall:ec.resource.getLocationReference(contentLocationSmall),
+                    outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
+                ]" out-map="context"/>
+            </else></if>
 
             <if condition="saveOriginal"><service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventContentId:Original.communicationEventContentId, contentLocation:contentLocationOriginal]"/></if>
             <if condition="saveLarge"><service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventContentId:Large.communicationEventContentId, contentLocation:contentLocationLarge]"/></if>
