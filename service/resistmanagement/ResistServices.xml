@@ -771,7 +771,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- Allow party to edit itself -->
-            <if condition="partyId == ec.user.userAccount.partyId"><set field="allowed" from="true"/><return/></if>
+            <if condition="partyId == ec.user.userAccount?.partyId"><set field="allowed" from="true"/><return/></if>
             <entity-find-count entity-name="mantle.party.PartyFromAndToRelationship" count-field="pfatrCount" cache="true">
                 <econdition field-name="toPartyId" from="partyId"/>
                 <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
@@ -790,16 +790,44 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="allowed" default="false"/>
         </out-parameters>
         <actions>
-            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailAndPartyDetailWithRole" count-field="wfdapdwfCount" cache="true">
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount" cache="true">
                 <econdition field-name="workEffortId"/>
-                <econdition field-name="partyRoleTypeId" operator="in" from="['ClientManager']"/>
+                <econdition field-name="partyRoleTypeId" value="ClientManager"/>
                 <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
-                <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
-                <date-filter/></entity-find-count>
+                <econdition field-name="toRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                <econditions combine="or">
+                    <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
+                    <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
+                <date-filter/>
+                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+            </entity-find-count>
 
-            <if condition="wfdapdwfCount != null &amp;&amp; wfdapdwfCount == 1">
-                <set field="allowed" from="true"/>
-            <else><return type="danger" error="true" message="No Project found with id ${workEffortId}"/></else></if>
+            <if condition="wedprftrCount != null &amp;&amp; wedprftrCount == 1"><set field="allowed" from="true"/></if>
+        </actions>
+    </service>
+
+    <service verb="check" noun="ProjectEdit" authz-action="view">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="allowed"/>
+        </out-parameters>
+        <actions>
+            <set field="allowed" from="false"/>
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount" cache="true">
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="partyRoleTypeId" value="ClientManager"/>
+                <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
+                <econdition field-name="toRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
+                <date-filter/>
+                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+            </entity-find-count>
+
+            <if condition="wedprftrCount != null &amp;&amp; wedprftrCount == 1"><set field="allowed" from="true"/></if>
         </actions>
     </service>
 
@@ -981,6 +1009,53 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!allowed"><return type="danger" error="true" message="Not allowed to edit this account"/></if>
 
             <service-call name="delete#mantle.humanres.position.EmplPositionClassParty" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Project">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="ownerPartyId" default="partyId"/>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="visibilityEnumId"/>
+            <parameter name="estimatedWorkDuration"/>
+            <parameter name="description"/>
+            <parameter name="workEffortTypeEnumId" default-value="WetProject"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+
+<!--            <parameter name="clientPartyId"/>-->
+<!--            <parameter name="clientBillingPartyId"/>-->
+<!--            <parameter name="clientManagerPartyId"/>-->
+<!--            <parameter name="vendorPartyId"/>-->
+            <parameter name="vendorManagerPartyId" default="partyId"/>
+
+            <parameter name="assignToPartyId" default="ec.user.userAccount.partyId"/>
+            <parameter name="assignRoleTypeId" default-value="Assignee"/>
+            <parameter name="assignStatusId" default-value="WeptAssigned"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="AccountEdit"/>
+            <if condition="!AccountEdit?.allowed"><return error="true" message="Cannot create Project"/></if>
+
+            <service-call name="mantle.work.ProjectServices.create#Project" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="Project">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="visibilityEnumId"/>
+            <parameter name="description"/>
+        </in-parameters>
+        <actions>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="ProjectEdit"/>
+            <if condition="!ProjectEdit?.allowed"><return error="true" message="Cannot update Project"/></if>
+
+            <service-call name="mantle.work.ProjectServices.update#Project" in-map="context"/>
         </actions>
     </service>
 

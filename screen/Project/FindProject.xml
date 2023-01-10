@@ -15,35 +15,46 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Projects" default-menu-index="5" default-menu-include="false" standalone="true" menu-image="/ssstatic/images/project-business120.png">
 
-    <transition name="createProject"><service-call name="mantle.work.ProjectServices.create#Project"
-        in-map="context + [partyId:partyId, ownerPartyId:partyId, assignToPartyId:partyId, assignRoleTypeId:'Manager']"/>
+    <transition name="createProject"><service-call name="resistmanagement.ResistServices.create#Project"
+        in-map="[partyId:partyId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]"/>
         <default-response url="."/></transition>
     <transition-include name="createPersonAccount" location="component://resistmanagement/screen/Account/FindAccount.xml"/>
 
-    <pre-actions><set field="html_title" value="Find Project"/></pre-actions>
-
     <actions>
-        <entity-find entity-name="mantle.work.effort.WorkEffortDetailAndPartyDetailWithRole" list="projectList" distinct="true">
-            <date-filter/>
-            <econdition field-name="partyRoleTypeId" operator="in" from="['ClientManager']"/>
+        <!-- Find the Resist Projects that are visible to the logged in user -->
+        <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" list="projectList" cache="true">
+            <econdition field-name="partyRoleTypeId" value="ClientManager"/>
             <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
-            <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
+            <econdition field-name="toRoleTypeId" value="ClientManager"/>
+            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+            <econditions combine="or">
+                <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
+                <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
+            <date-filter/>
+            <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+            <select-field field-name="workEffortId,description,workEffortName,partyRelationshipId,fromRoleTypeId,toPartyId,toRoleTypeId,toPseudoId"/>
             <order-by field-name="-lastUpdatedStamp"/>
         </entity-find>
+        <filter-map-list list="projectList" to-list="editableProjectList"><field-map field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></filter-map-list>
 
 <!--        <log level="warn" message="projectList ${projectList}"/>-->
 
-        <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">
-            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-            <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
-            <date-filter/>
-            <select-field field-name="partyRelationshipId, fromPartyId, fromRoleTypeId, toPartyId, toRoleTypeId, toPseudoId"/>
-        </entity-find>
-        <entity-find entity-name="mantle.party.RoleType" list="rtList">
-            <econdition field-name="roleTypeId" operator="in" from="pfatrList?.toRoleTypeId + pfatrList?.fromRoleTypeId"/>
-        </entity-find>
-        <!-- TODO: This is probably more complicated than it has to be because of using the PartyFromAndToRelationship view entity. -->
-        <set field="pfatrKeyValueList" from="pfatrList?.groupBy{ it.toPartyId }.collectEntries{ key, value -> [(key):[partyRelationshipIdList:value*.partyRelationshipId, fromRoleTypeIdList:value*.fromRoleTypeId, toPartyIdList:value*.toPartyId, toRoleTypeIdList:value*.toRoleTypeId]] }"/>
+<!--        <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">-->
+<!--            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>-->
+<!--            <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>-->
+<!--            <date-filter/>-->
+<!--            <select-field field-name="partyRelationshipId, fromPartyId, fromRoleTypeId, toPartyId, toRoleTypeId, toPseudoId"/>-->
+<!--        </entity-find>-->
+
+<!--        <log level="warn" message="pfatrList roleTypeIds ${pfatrList.toRoleTypeId + pfatrList.fromRoleTypeId}"/>-->
+
+<!--        <entity-find entity-name="mantle.party.RoleType" list="rtList">-->
+<!--            <econdition field-name="roleTypeId" operator="in" from="pfatrList?.toRoleTypeId + pfatrList?.fromRoleTypeId"/>-->
+<!--        </entity-find>-->
+<!--        &lt;!&ndash; TODO: This is probably more complicated than it has to be because of using the PartyFromAndToRelationship view entity. &ndash;&gt;-->
+<!--        <set field="pfatrKeyValueList" from="pfatrList?.groupBy{ it.toPartyId }.collectEntries{ key, value -> [(key):[partyRelationshipIdList:value*.partyRelationshipId, fromRoleTypeIdList:value*.fromRoleTypeId, toPartyIdList:value*.toPartyId, toRoleTypeIdList:value*.toRoleTypeId]] }"/>-->
+
+<!--        <log level="warn" message="pfatrKeyValueList ${pfatrKeyValueList}"/>-->
 
         <service-call name="resistmanagement.ResistServices.count#PartyAccountOwned" out-map="context"/>
         <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
@@ -54,11 +65,11 @@ along with this software (see the LICENSE.md file). If not, see
         <container-row><row-col lg="12">
             <form-list name="SetProject" list="projectTitleList" skip-header="true" skip-form="true">
                 <field name="title"><default-field><label text="Projects" type="h2"/></default-field></field>
-                <field name="createProject"><conditional-field condition="pfatrKeyValueList != null &amp;&amp; pfatrKeyValueList?.size() &gt; 0">
+                <field name="createProject"><conditional-field condition="editableProjectList != null &amp;&amp; editableProjectList?.size() &gt; 0">
                     <container-dialog id="NewProjectContainer" button-text="New Project">
                         <form-single name="NewProjectForm" transition="createProject" pass-through-parameters="true">
-                            <field name="partyId" from="pfatrKeyValueList?.entrySet()?.iterator()?.next()?.key"><conditional-field condition="pfatrKeyValueList?.size() &gt; 1" title="Account">
-                                    <drop-down required-manual-select="true"><list-options list="pfatrKeyValueList*.key"/></drop-down></conditional-field>
+                            <field name="partyId" from="editableProjectList?.getFirst()?.toPartyId"><conditional-field condition="editableProjectList?.size() &gt; 1" title="Account">
+                                    <drop-down required-manual-select="true"><list-options list="editableProjectList*.toPartyId"/></drop-down></conditional-field>
                                 <default-field title="Account"><hidden/></default-field></field>
                             <field name="workEffortName"><default-field title="Project Name"><text-line/></default-field></field>
                             <field name="visibilityEnumId"><default-field title="Visibility"><drop-down>
@@ -98,9 +109,8 @@ along with this software (see the LICENSE.md file). If not, see
             </form-list>
 
             <form-list name="ListProjects" list="projectList" skip-form="true">
-                <field name="pseudoId"><default-field title="Profile"><display/></default-field></field>
-                <field name="workEffortName"><default-field title="Name"><link url="../ViewProject" text="${workEffortName}" parameter-map="[workEffortId:workEffortId]"/>
-                    </default-field></field>
+                <field name="toPseudoId"><default-field title="Profile"><display/></default-field></field>
+                <field name="workEffortName"><default-field title="Name"><link url="../ViewProject" text="${workEffortName}" parameter-map="[workEffortId:workEffortId]"/></default-field></field>
                 <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
             </form-list>
         </row-col></container-row>

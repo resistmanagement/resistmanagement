@@ -16,65 +16,48 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Project" default-menu-index="5" default-menu-include="true" standalone="true">
 
     <parameter name="workEffortId" required="true"/>
-    <parameter name="chatPartyId"/>
+    <parameter name="canViewAccount"/>
 
-    <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="checkProjectView"/>
-        <if condition="!checkProjectView.allowed"><return message="Not allowed" error="true" type="danger"/></if></always-actions>
+    <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
+        <if condition="!projectView?.allowed"><return message="Not allowed" error="true" type="danger"/></if></always-actions>
 
-    <transition name="createMessage"><service-call name="resistmanagement.ResistServices.create#ProjectMessage"/>
+    <transition name="updateProject"><service-call name="resistmanagement.ResistServices.update#Project"
+            in-map="[workEffortId:workEffortId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]"/>
         <default-response url="."/></transition>
 
     <actions>
         <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>
-
-<!--        <log level="warn" message="projectList ${project?.parties}"/>-->
-
-<!--        <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:project.ownerPartyId]" out-map="context"/>-->
-<!--        <set field="projectPartyList" from="project.parties"/>-->
-<!--        <set field="wecedList" from="[]"/>-->
-<!--        <if condition="allowed &amp;&amp; chatPartyId != null">-->
-<!--            <entity-find entity-name="mantle.work.effort.WorkEffortCommEventDetail" list="wecedList">-->
-<!--                <econdition field-name="workEffortId"/>-->
-<!--                <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>-->
-<!--                <econdition field-name="toPartyId" from="project?.ownerPartyId"/>-->
-<!--            </entity-find>-->
-<!--        <else>-->
-<!--            <entity-find entity-name="mantle.work.effort.WorkEffortCommEventDetail" list="wecedList">-->
-<!--                <econdition field-name="workEffortId"/>-->
-<!--                <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>-->
-<!--                <econdition field-name="toPartyId" from="project?.ownerPartyId"/>-->
-<!--            </entity-find>-->
-<!--        </else></if>-->
-
 <!--        <log level="warn" message="project ${project}"/>-->
+
+        <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="accountEdit"/>
+<!--        <log level="warn" message="accountEdit ${accountEdit}"/>-->
     </actions>
     <widgets>
         <container-row><row-col lg="12">
-            <form-single name="UpdateProjectForm" map="project">
-                <field name="workEffortName"><default-field><label text="${workEffortName}" type="h2"/></default-field></field>
-                <field name="estimatedStartDate"><default-field><label text="Start Date: ${ec.l10n.format(estimatedStartDate, 'MMM dd, yyyy hh:mm a')}" type="h6"/></default-field></field>
-                <field name="estimatedWorkDuration"><default-field><label text="Estimated Hours: ${estimatedWorkDuration}" type="h6"/></default-field></field>
-                <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
+            <form-single name="UpdateProjectForm" map="project" transition="updateProject" pass-through-parameters="true">
+                <!-- TODO: allow for partyId selection like FindProject when user can have multiple accounts -->
+                <field name="workEffortName"><conditional-field condition="accountEdit?.allowed" title="Project Name"><text-line/></conditional-field>
+                    <default-field><label text="${workEffortName}" type="h2"/></default-field></field>
+                <field name="visibilityEnumId"><conditional-field condition="accountEdit?.allowed" title="Visibility"><drop-down>
+                    <entity-options key="${enumId}" text="${description}">
+                        <entity-find entity-name="moqui.basic.Enumeration" cache="true">
+                            <econdition field-name="enumId" operator="in" from="['WevRestricted','WevAllUsers']"/>
+                            <econdition field-name="enumTypeId" value="WorkEffortVisibility"/>
+                        </entity-find></entity-options>
+                </drop-down></conditional-field></field>
+                <field name="estimatedStartDate"><conditional-field condition="accountEdit?.allowed" title="Start Date"><date-time/></conditional-field>
+                    <default-field><label text="Start Date: ${ec.l10n.format(estimatedStartDate, 'MMM dd, yyyy hh:mm a')}" type="h6"/></default-field></field>
+                <field name="estimatedWorkDuration"><conditional-field condition="accountEdit?.allowed" title="Estimated Hours"><text-line size="8"/></conditional-field>
+                    <default-field><label text="Estimated Hours: ${estimatedWorkDuration}" type="h6"/></default-field></field>
+                <field name="description"><conditional-field condition="accountEdit?.allowed" title="Description"><text-area rows="10" cols="60"/></conditional-field>
+                    <default-field><label text="${description ?: ''}"/></default-field></field>
+                <field name="submitButton"><conditional-field condition="accountEdit?.allowed" title="Update"><submit/></conditional-field></field>
                 <field-layout>
-                    <field-row><field-ref name="workEffortName"/></field-row>
+                    <field-row><field-ref name="workEffortName"/><field-ref name="visibilityEnumId"/></field-row>
                     <field-row><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/></field-row>
                     <fields-not-referenced/>
                 </field-layout>
             </form-single>
-
-<!--            <label text="Messages" type="h4"/>-->
-<!--            <form-list name="ListMessages" list="wecedList" skip-form="true">-->
-<!--                <field name="body"><default-field title=""><container style="text-right"><label text="${body}"/></container></default-field></field>-->
-<!--            </form-list>-->
-<!--            <form-list name="CreateMessage" transition="createMessage" skip-header="true" list="[project]">-->
-<!--                <field name="workEffortId"><default-field><hidden/></default-field></field>-->
-<!--                <field name="toPartyId" from="project?.ownerPartyId"><conditional-field condition="allowed">-->
-<!--                    <drop-down><list-options list="projectPartyList" key="${partyId}" text="${pseudoId}"/></drop-down>-->
-<!--                </conditional-field><default-field title="To"><display text="${project?.owner?.pseudoId}"/></default-field></field>-->
-<!--                <field name="body"><default-field title="Message"><text-area cols="80"/></default-field></field>-->
-<!--                <field name="submitButton"><default-field title="Send"><submit/></default-field></field>-->
-<!--            </form-list>-->
-
         </row-col></container-row>
     </widgets>
 </screen>

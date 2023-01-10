@@ -41,18 +41,38 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="partyId"/></member-entity>
         <member-entity entity-alias="PROL" entity-name="mantle.party.PartyRole" join-from-alias="WEP" join-optional="true">
             <key-map field-name="partyId"/></member-entity>
-        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="WEP" join-optional="true">
-            <key-map field-name="partyId"/></member-entity>
-        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="WEP" join-optional="true">
-            <key-map field-name="partyId"/></member-entity>
         <alias-all entity-alias="WEFF"><exclude field="workTypeEnumId"/></alias-all>
         <alias-all entity-alias="WEP"><exclude field="statusId"/></alias-all>
         <alias-all entity-alias="PTY"><exclude field="comments"/><exclude field="ownerPartyId"/></alias-all>
         <alias-all entity-alias="PROL"/>
-        <alias-all entity-alias="PER"/>
-        <alias-all entity-alias="ORG"/>
         <alias name="partyStatusId" entity-alias="WEP" field="statusId"/>
         <alias name="partyRoleTypeId" entity-alias="PROL" field="roleTypeId"/>
+    </view-entity>
+
+    <view-entity entity-name="WorkEffortDetailPartyWithRoleAndFromToRelationship" package="mantle.work.effort">
+        <member-entity entity-alias="WEFF" entity-name="mantle.work.effort.WorkEffort"/>
+        <member-entity entity-alias="WEP" entity-name="mantle.work.effort.WorkEffortParty" join-from-alias="WEFF">
+            <key-map field-name="workEffortId"/></member-entity>
+        <member-entity entity-alias="PROL" entity-name="mantle.party.PartyRole" join-from-alias="WEP" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship" join-from-alias="WEP">
+            <key-map field-name="partyId" related="toPartyId"/></member-entity>
+        <member-entity entity-alias="PTYT" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="toPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PTYF" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="WEFF"><exclude field="workTypeEnumId"/></alias-all>
+        <alias-all entity-alias="WEP"><exclude field="statusId"/></alias-all>
+        <alias-all entity-alias="PROL"/>
+        <alias-all entity-alias="PREL"><exclude field="fromDate,thruDate,statusId,comments"/></alias-all>
+        <alias-all entity-alias="PTYT" prefix="to"><exclude field="partyId"/><exclude field="comments"/><exclude field="ownerPartyId"/></alias-all>
+        <alias-all entity-alias="PTYF" prefix="from"><exclude field="partyId"/><exclude field="comments"/><exclude field="ownerPartyId"/></alias-all>
+        <alias name="effortStatusId" entity-alias="WEP" field="statusId"/>
+        <alias name="partyRoleTypeId" entity-alias="PROL" field="roleTypeId"/>
+        <alias name="relationshipFromDate" entity-alias="PREL" field="fromDate"/>
+        <alias name="relationshipThruDate" entity-alias="PREL" field="thruDate"/>
+        <alias name="relationshipStatusId" entity-alias="PREL" field="statusId"/>
+        <alias name="relationshipComments" entity-alias="PREL" field="comments"/>
     </view-entity>
 
     <!-- ========================================================= -->
@@ -109,7 +129,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias entity-alias="PSTYP" name="defaultValue"/>
         <alias entity-alias="PTRL" name="roleTypeId"/>
     </view-entity>
-
 
     <view-entity entity-name="PartyDetailAndRoleAndContentAndSettingAndRelationship" package="mantle.party">
         <member-entity entity-alias="PTY" entity-name="mantle.party.Party"/>
