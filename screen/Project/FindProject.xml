@@ -32,12 +32,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
             <date-filter/>
             <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
-            <select-field field-name="workEffortId,description,workEffortName,partyRelationshipId,fromRoleTypeId,toPartyId,toRoleTypeId,toPseudoId"/>
+            <select-field field-name="workEffortId,description,workEffortName,partyRelationshipId,fromRoleTypeId,toPartyId,toRoleTypeId,toPseudoId,fromPartyId"/>
             <order-by field-name="-lastUpdatedStamp"/>
         </entity-find>
         <filter-map-list list="projectList" to-list="editableProjectList"><field-map field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></filter-map-list>
 
-<!--        <log level="warn" message="projectList ${projectList}"/>-->
+        <log level="warn" message="projectList ${projectList}"/>
+        <log level="warn" message="editableProjectList ${editableProjectList}"/>
 
 <!--        <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">-->
 <!--            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>-->
@@ -68,7 +69,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="createProject"><conditional-field condition="editableProjectList != null &amp;&amp; editableProjectList?.size() &gt; 0">
                     <container-dialog id="NewProjectContainer" button-text="New Project">
                         <form-single name="NewProjectForm" transition="createProject" pass-through-parameters="true">
-                            <field name="partyId" from="editableProjectList?.getFirst()?.toPartyId"><conditional-field condition="editableProjectList?.size() &gt; 1" title="Account">
+                            <field name="partyId" from="editableProjectList?.first()?.toPartyId"><conditional-field condition="editableProjectList?.size() &gt; 1" title="Account">
                                     <drop-down required-manual-select="true"><list-options list="editableProjectList*.toPartyId"/></drop-down></conditional-field>
                                 <default-field title="Account"><hidden/></default-field></field>
                             <field name="workEffortName"><default-field title="Project Name"><text-line/></default-field></field>
