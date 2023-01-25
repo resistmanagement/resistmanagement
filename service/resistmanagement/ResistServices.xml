@@ -905,7 +905,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="accountCount"/>
         </out-parameters>
         <actions>
-            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" count-field="accountCount" distinct="true">
+            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" count-field="accountCount" distinct="true" cache="true">
                 <econdition field-name="roleTypeId" value="ClientManager"/>
                 <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
                 <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
@@ -1052,8 +1052,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="description"/>
         </in-parameters>
         <actions>
-            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="ProjectEdit"/>
-            <if condition="!ProjectEdit?.allowed"><return error="true" message="Cannot update Project"/></if>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+            <if condition="!projectEdit?.allowed"><return error="true" message="Cannot update Project"/></if>
 
             <service-call name="mantle.work.ProjectServices.update#Project" in-map="context"/>
         </actions>

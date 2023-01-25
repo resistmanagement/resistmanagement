@@ -13,10 +13,10 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Project" default-menu-index="5" default-menu-include="true" standalone="true">
+        default-menu-title="Project" default-menu-index="6" default-menu-include="true" standalone="true">
 
     <parameter name="workEffortId" required="true"/>
-    <parameter name="canViewAccount"/>
+    <parameter name="canViewProject"/>
 
     <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
         <if condition="!projectView?.allowed"><return message="Not allowed" error="true" type="danger"/></if></always-actions>
@@ -32,12 +32,14 @@ along with this software (see the LICENSE.md file). If not, see
         <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="accountEdit"/>
 <!--        <log level="warn" message="accountEdit ${accountEdit}"/>-->
     </actions>
+
     <widgets>
         <container-row><row-col lg="12">
             <form-single name="UpdateProjectForm" map="project" transition="updateProject" pass-through-parameters="true">
                 <!-- TODO: allow for partyId selection like FindProject when user can have multiple accounts -->
                 <field name="workEffortName"><conditional-field condition="accountEdit?.allowed" title="Project Name"><text-line/></conditional-field>
                     <default-field><label text="${workEffortName}" type="h2"/></default-field></field>
+
                 <field name="visibilityEnumId"><conditional-field condition="accountEdit?.allowed" title="Visibility"><drop-down>
                     <entity-options key="${enumId}" text="${description}">
                         <entity-find entity-name="moqui.basic.Enumeration" cache="true">

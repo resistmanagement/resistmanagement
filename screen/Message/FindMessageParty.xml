@@ -18,16 +18,16 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
 
     <actions>
-        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true">
+        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true" cache="true">
             <econdition field-name="roleTypeId" value="ClientManager"/>
+            <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
             <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
             <econdition field-name="contentLocation" operator="is-not-null"/>
             <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
             <econdition field-name="fromRoleTypeId" value="Administrator"/>
             <econdition field-name="toRoleTypeId" value="ClientManager"/>
             <econdition field-name="fromPartyId" operator="not-equals" from="ec.user.userAccount?.partyId"/>
-            <date-filter/>
-            <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+            <date-filter/><select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
             <order-by field-name="-contentDate"/>
         </entity-find>
 
