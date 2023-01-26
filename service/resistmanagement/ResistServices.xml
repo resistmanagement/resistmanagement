@@ -632,12 +632,12 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- If party can edit it, allow viewing of content -->
-            <entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent" auto-field-map="[partyContentId:partyContentId]" cache="true">
+            <entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent" auto-field-map="[partyContentId:partyContentId]">
                 <select-field field-name="partyId"/></entity-find-one>
             <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyContent.partyId]" out-map="checkAccountEdit"/>
             <if condition="checkAccountEdit?.allowed"><set field="allowed" from="true"/><return/></if>
 
-            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndContentAndSetting" count-field="pdrcsCount" distinct="true" cache="true">
+            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndContentAndSetting" count-field="pdrcsCount" distinct="true">
                 <econdition field-name="partyContentId"/>
                 <econdition field-name="roleTypeId" value="ClientManager"/>
                 <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
@@ -679,13 +679,13 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- If party can edit it, allow viewing of content -->
-            <entity-find-one entity-name="mantle.party.communication.CommunicationEventAndContent" value-field="communicationEventAndContent" auto-field-map="[communicationEventContentId:communicationEventContentId]" cache="true">
+            <entity-find-one entity-name="mantle.party.communication.CommunicationEventAndContent" value-field="communicationEventAndContent" auto-field-map="[communicationEventContentId:communicationEventContentId]">
                 <select-field field-name="fromPartyId"/></entity-find-one>
             <if condition="!communicationEventAndContent"></if>
             <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:communicationEventAndContent.fromPartyId]" out-map="checkAccountEdit"/>
             <if condition="checkAccountEdit?.allowed"><set field="allowed" from="true"/><return/></if>
 
-            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndSettingWithCommunicationEventAndContent" count-field="pdrscecCount" distinct="true" cache="true">
+            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndSettingWithCommunicationEventAndContent" count-field="pdrscecCount" distinct="true">
                 <econdition field-name="communicationEventContentId"/>
                 <econdition field-name="roleTypeId" value="ClientManager"/>
                 <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
@@ -731,7 +731,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="checkAccountEdit"/>
             <if condition="checkAccountEdit?.allowed"><set field="allowed" from="true"/><return/></if>
 
-            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndSetting" count-field="pdrsCount" distinct="true" cache="true">
+            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndSetting" count-field="pdrsCount" distinct="true">
                 <econdition field-name="partyId"/>
                 <econdition field-name="roleTypeId" value="ClientManager"/>
                 <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
@@ -772,9 +772,10 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <!-- Allow party to edit itself -->
             <if condition="partyId == ec.user.userAccount?.partyId"><set field="allowed" from="true"/><return/></if>
-            <entity-find-count entity-name="mantle.party.PartyFromAndToRelationship" count-field="pfatrCount" cache="true">
+            <entity-find-count entity-name="mantle.party.PartyFromAndToRelationship" count-field="pfatrCount">
                 <econdition field-name="toPartyId" from="partyId"/>
                 <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                <econdition field-name="toRoleTypeId" value="ClientManager"/>
                 <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
                 <date-filter/></entity-find-count>
 
@@ -790,7 +791,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="allowed" default="false"/>
         </out-parameters>
         <actions>
-            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount" cache="true">
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount">
                 <econdition field-name="workEffortId"/>
                 <econdition field-name="partyRoleTypeId" value="ClientManager"/>
                 <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
@@ -816,7 +817,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <set field="allowed" from="false"/>
-            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount" cache="true">
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount">
                 <econdition field-name="workEffortId"/>
                 <econdition field-name="partyRoleTypeId" value="ClientManager"/>
                 <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
@@ -1056,6 +1057,24 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!projectEdit?.allowed"><return error="true" message="Cannot update Project"/></if>
 
             <service-call name="mantle.work.ProjectServices.update#Project" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="store" noun="ProjectPosition">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="emplPositionClassId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emplPositionClassId"/>
+            <parameter name="workEffortId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+            <if condition="!projectEdit?.allowed"><return type="danger" error="true" message="Not allowed to edit this project"/></if>
+
+            <service-call name="store#mantle.humanres.position.EmplPosition" in-map="[emplPositionClassId:emplPositionClassId]" out-map="context"/>
+            <service-call name="store#mantle.work.effort.WorkEffortEmplPosition" in-map="[workEffortId:workEffortId, emplPositionId:emplPositionId]" out-map="context"/>
         </actions>
     </service>
 
