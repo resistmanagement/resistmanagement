@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Positions" default-menu-index="7" default-menu-include="true" standalone="true">
+
+    <parameter name="workEffortId" required="true"/>
+    <parameter name="canViewProject" required="true"/>
+
+    <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
+        <if condition="!projectView?.allowed"><return message="Not allowed" error="true" type="danger"/></if></always-actions>
+
+    <transition name="addProjectPosition"><service-call name="resistmanagement.ResistServices.create#ProjectPosition" in-map="[workEffortId:workEffortId, emplPositionClassId:emplPositionClassId]" out-map="context"/>
+        <default-response url="."/></transition>
+    <transition name="updateProjectPositionStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionStatus" in-map="[emplPositionId:emplPositionId,statusId:statusId]" out-map="context"/>
+        <default-response url="."/></transition>
+
+    <transition name="createProjectPositionApplication"><service-call name="resistmanagement.ResistServices.create#ProjectPositionApplication" in-map="[emplPositionId:emplPositionId,statusId:statusId,applyingPartyId:applyingPartyId]" out-map="context"/>
+        <default-response url="."/></transition>
+
+    <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
+    <transition name="getAccountList">
+        <actions>
+<!--            <log level="warn" message="exceptionPartyIdList ${exceptionPartyIdList}"/>-->
+            <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSetting" list="accountList" limit="20">
+                <econdition field-name="partyId" operator="not-in" from="exceptionPartyIdList"/>
+                <econdition field-name="roleTypeId" value="ClientManager"/>
+                <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
+                <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+                <econdition field-name="contentLocation" operator="is-not-null"/>
+                <econdition field-name="pseudoId" operator="like" value="%${term}%" ignore-case="true"/>
+                <select-field field-name="partyId,pseudoId"/>
+                <order-by field-name="^pseudoId"/>
+            </entity-find>
+<!--            <log level="warn" message="accountList ${accountList}"/>-->
+            <script>
+                def outList = []
+                for (def account in accountList)
+                    outList.add([value:account.partyId, label:"${account.pseudoId}".toString()])
+                ec.web.sendJsonResponse(outList)
+            </script>
+        </actions>
+        <default-response type="none" save-parameters="true"/>
+    </transition>
+
+    <actions>
+        <entity-find entity-name="mantle.work.effort.WorkEffortEmplPositionDetail" list="projectPositionList">
+            <econdition field-name="effortWorkEffortId" from="workEffortId"/>
+<!--            <econdition field-name="statusStatusId" value="EmpsActive"/>-->
+            <order-by field-name="-lastUpdatedStamp"/>
+        </entity-find>
+        <set field="viewableProjectPositionList" from="[]"/>
+        <entity-find entity-name="mantle.humanres.position.EmplPositionClass" list="emplPositionClassList">
+            <econdition field-name="emplPositionClassId" operator="not-in" from="projectPositionList*.positionEmplPositionClassId"/>
+        </entity-find>
+
+<!--        <log level="warn" message="projectPositionList ${projectPositionList}"/>-->
+
+        <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+
+        <set field="projectPositionTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
+    </actions>
+
+    <widgets>
+        <form-list name="AddPosition" list="projectPositionTitleList" skip-header="true" skip-form="true">
+            <field name="title"><default-field><label text="Positions" type="h2"/></default-field></field>
+            <field name="buttonText"><conditional-field condition="projectEdit?.allowed &amp;&amp; emplPositionClassList != null &amp;&amp; emplPositionClassList.size() &gt; 0">
+                <container-dialog id="AddProjectPositionDialog" button-text="Add Position">
+                    <form-single name="AddProjectPositionForm" transition="addProjectPosition" pass-through-parameters="true">
+                        <field name="workEffortId"><default-field><hidden/></default-field></field>
+                        <field name="emplPositionClassId"><default-field title="Type">
+                            <drop-down submit-on-select="true" required-manual-select="true" allow-empty="true">
+                                <list-options list="emplPositionClassList" key="${positionEmplPositionClassId}" text="${classTitle}"/>
+                            </drop-down>
+                        </default-field></field>
+                    </form-single>
+                </container-dialog>
+            </conditional-field></field>
+        </form-list>
+
+        <section-iterate name="PositionSectionIterate" list="projectPositionList" entry="projectPosition">
+            <actions>
+                <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplPosition" list="appliedAccountList">
+                    <econdition field-name="roleRoleTypeId" value="ClientManager"/>
+                    <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>
+                    <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>
+                    <econdition field-name="contentContentLocation" operator="is-not-null"/>
+                    <econdition field-name="applicationEmplPositionId" from="projectPosition.positionEmplPositionId"/>
+                    <select-field field-name="partyId,pseudoId"/>
+                    <order-by field-name="^pseudoId"/>
+                </entity-find>
+
+                <entity-find entity-name="mantle.party.PartyToAndRelationship" list="managedAccountRelationshipList">
+                    <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
+                    <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                    <econdition field-name="toRoleTypeId" value="ClientManager"/>
+                    <date-filter/>
+                    <select-field field-name="toPartyId"/>
+                </entity-find>
+
+<!--                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>-->
+            </actions>
+            <widgets>
+                <container-box><box-header title="${projectPosition.classTitle}"></box-header><box-toolbar>
+                    <form-single name="ProposeProjectPositionForm" transition="createProjectPositionApplication">
+                        <field name="emplPositionId" from="projectPosition.positionEmplPositionId"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
+                        <field name="statusId" from="'EaProposed'"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
+                        <field name="applyingPartyId"><conditional-field condition="projectEdit?.allowed" title="Propose an Account">
+                            <drop-down submit-on-select="true" required-manual-select="true" allow-empty="true">
+                                <dynamic-options transition="getAccountList" parameter-map="[exceptionPartyIdList:appliedAccountList*.partyPartyId]" server-search="true" min-length="2"/>
+                            </drop-down>
+                        </conditional-field></field>
+                    </form-single>
+                    <link url="createProjectPositionApplication" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,statusId:'EaRequested']" text="Request" condition="projectPosition.statusStatusId == 'EmpsActive' &amp;&amp; !appliedAccountList*.partyPartyId?.contains(managedAccountRelationshipList?.first()?.toPartyId)" tooltip="Request Project Application"/>
+                    <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsInactive']" text="Close" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsActive'" tooltip="Close ${projectPosition.classTitle} Position"/>
+                    <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsActive']" text="Open" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsInactive'" tooltip="Open ${projectPosition.classTitle} Position"/>
+<!--                        <link url="" text="Place" condition="projectEdit?.allowed"/>-->
+<!--                        <link url="" text="Cancel" condition=""/>-->
+<!--                        <link url="" text="Reject" condition=""/>-->
+                </box-toolbar><box-body-nopad>
+                    <form-list name="AppliedPositionApplicationForm" list="appliedAccountList" skip-form="true" skip-header="true">
+                        <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyPartyId]" out-map="accountView"/></row-actions>
+                        <field name="profilePicture"><default-field><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:contentPartyContentId]" width="50px"/></default-field></field>
+                        <field name="partyPseudoId"><default-field><link url="../../Account/ViewAccount" text="${partyPseudoId}" parameter-map="[partyId:partyPartyId, canViewAccount:accountView?.allowed]"/></default-field></field>
+                    </form-list>
+                </box-body-nopad></container-box>
+            </widgets>
+        </section-iterate>
+    </widgets>
+</screen>
