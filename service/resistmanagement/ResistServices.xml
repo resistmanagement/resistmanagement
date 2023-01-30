@@ -831,6 +831,27 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="wedprftrCount != null &amp;&amp; wedprftrCount == 1"><set field="allowed" from="true"/></if>
         </actions>
     </service>
+    
+    <service verb="check" noun="ProjectPositionEdit">
+        <in-parameters>
+            <parameter name="emplPositionId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="allowed"/>
+            <parameter name="emplPosition"/>
+        </out-parameters>
+        <actions>
+            <set field="allowed" from="false"/>
+
+            <entity-find-one entity-name="mantle.work.effort.WorkEffortEmplPositionDetail" value-field="emplPosition" auto-field-map="[positionEmplPositionId:emplPositionId]"/>
+
+            <!-- If the emplPosition workEffort join doesn't exist, then emplPosition will return nothing -->
+            <if condition="!emplPosition"><return type="danger" error="true" message="Project not found for Position"/></if>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:emplPosition.effortWorkEffortId]" out-map="projectEdit"/>
+
+            <if condition="projectEdit?.allowed"><set field="allowed" from="true"/></if>
+        </actions>
+    </service>
 
     <service verb="update" noun="Account">
         <in-parameters>
@@ -1061,7 +1082,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="store" noun="ProjectPosition">
+    <service verb="create" noun="ProjectPosition">
         <in-parameters>
             <parameter name="workEffortId" required="true"/>
             <parameter name="emplPositionClassId" required="true"/>
@@ -1073,9 +1094,83 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
             <if condition="!projectEdit?.allowed"><return type="danger" error="true" message="Not allowed to edit this project"/></if>
+            
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortEmplPositionDetail" count-field="workEffortEmplPositionCount">
+                <econdition field-name="effortWorkEffortId" from="workEffortId"/>
+                <econdition field-name="positionEmplPositionClassId" from="emplPositionClassId"/></entity-find-count>
+            <if condition="workEffortEmplPositionCount &gt; 0"><return type="info" message="Project position already added."/></if>
 
-            <service-call name="store#mantle.humanres.position.EmplPosition" in-map="[emplPositionClassId:emplPositionClassId]" out-map="context"/>
-            <service-call name="store#mantle.work.effort.WorkEffortEmplPosition" in-map="[workEffortId:workEffortId, emplPositionId:emplPositionId]" out-map="context"/>
+<!--            <log level="warn" message="workEffortEmplPositionCount ${workEffortEmplPositionCount}"/>-->
+
+            <service-call name="create#mantle.humanres.position.EmplPosition" in-map="[emplPositionClassId:emplPositionClassId, statusId:'EmpsActive']" out-map="context"/>
+            <service-call name="create#mantle.work.effort.WorkEffortEmplPosition" in-map="[workEffortId:workEffortId, emplPositionId:emplPositionId]" out-map="context"/>
+            <log level="warn" message="context.toString() ${context.toString()}"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="ProjectPositionStatus">
+        <in-parameters>
+            <parameter name="emplPositionId" required="true"/>
+            <parameter name="statusId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emplPositionClassId"/>
+            <parameter name="workEffortId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="resistmanagement.ResistServices.check#ProjectPositionEdit" in-map="[emplPositionId:emplPositionId]" out-map="projectPositionEdit"/>
+            <set field="emplPosition" from="projectPositionEdit.emplPosition"/>
+            <if condition="!projectPositionEdit?.allowed"><return type="danger" error="true" message="Not allowed to edit this project position"/></if>
+
+            <!-- Failure condition don't update entry -->
+            <if condition="statusId &amp;&amp; emplPosition.statusStatusId &amp;&amp; statusId == emplPosition.statusStatusId">
+                <return type="warning" message="Position is already ${emplPosition.statusDescription ?: emplPosition.statusStatusId}"/>
+            </if>
+
+            <service-call name="update#mantle.humanres.position.EmplPosition" in-map="[emplPositionId:emplPositionId, statusId:statusId]" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ProjectPositionApplication">
+        <in-parameters>
+            <parameter name="emplPositionId" required="true"/>
+            <parameter name="statusId" required="true"/>
+            <parameter name="applyingPartyId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="employmentApplicationId"/>
+        </out-parameters>
+        <actions>
+            <!-- Make sure that statusId is in the allowed values -->
+            <if condition="!['EaRequested','EaProposed'].contains(statusId)">
+                <entity-find-one entity-name="moqui.basic.StatusItem" value-field="status" auto-field-map="[statusId:statusId,statusTypeId:'EmploymentApplication']"/>
+                <return error="true" message="Cannot apply for project with status ${status?.description ?: statusId}"/></if>
+
+            <!-- If statusId is Proposed and cannot edit, throw error; otherwise set to requested -->
+            <service-call name="resistmanagement.ResistServices.check#ProjectPositionEdit" in-map="[emplPositionId:emplPositionId]" out-map="projectPositionEdit"/>
+            <if condition="statusId == 'EaProposed' &amp;&amp; !projectPositionEdit.allowed"><return error="true" message="Cannot Propose when unable to edit project position"/></if>
+
+            <!-- If applyingPartyId is not set, use the logged in user to find the account it owns; if there's more than one account allowed, ask for the account party information; if there's no accounts found, have use create an account. -->
+            <if condition="!applyingPartyId">
+                <entity-find entity-name="mantle.party.PartyToAndRelationship" list="managedAccountRelationshipList">
+                    <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
+                    <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                    <econdition field-name="toRoleTypeId" value="ClientManager"/>
+                    <date-filter/>
+                    <select-field field-name="toPartyId"/>
+                </entity-find>
+                <if condition="managedAccountRelationshipList.size() == 0"><return error="true" message="Please create an account to apply with."/></if>
+                <if condition="managedAccountRelationshipList.size() &gt; 1"><return error="true" message="Please select account to apply with."/></if>
+                <set field="applyingPartyId" from="managedAccountRelationshipList.getFirst().toPartyId"/>
+            </if>
+
+            <entity-find-count entity-name="mantle.humanres.employment.EmploymentApplication" count-field="employmentApplicationCount">
+                <econdition field-name="emplPositionId"/>
+                <econdition field-name="applyingPartyId"/>
+            </entity-find-count>
+            <if condition="employmentApplicationCount &gt; 0"><return error="true" type="danger" message="This account has applied, and can't apply again"/></if>
+
+            <service-call name="create#mantle.humanres.employment.EmploymentApplication" in-map="[emplPositionId:emplPositionId,statusId:statusId,referredByEnumId:'EarbPersonal',applicationDate:ec.user.nowTimestamp,applyingPartyId:applyingPartyId]" out-map="context"/>
         </actions>
     </service>
 
