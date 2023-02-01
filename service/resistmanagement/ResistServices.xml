@@ -808,6 +808,33 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="check" noun="ProjectPositionView" authz-action="view">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="allowed" default="false"/>
+        </out-parameters>
+        <actions>
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplication" count-field="wedprftrepaCount">
+                <econdition field-name="effortWorkEffortId" from="workEffortId"/>
+                <econdition field-name="toRoleRoleTypeId" value="ClientManager"/>
+                <econdition field-name="effortWorkEffortTypeEnumId" value="WetProject"/>
+                <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
+                <econditions combine="or">
+                    <econdition field-name="effortVisibilityEnumId" value="WevAllUsers"/>
+                    <econdition field-name="relationshipFromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
+                <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
+                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+                <select-field field-name="effortWorkEffortId,positionEmplPositionId"/>
+            </entity-find-count>
+<!--            <log level="warn" message="wedprftrepaCount ${wedprftrepaCount}"/>-->
+
+            <if condition="wedprftrepaCount != null &amp;&amp; wedprftrepaCount &gt; 0"><set field="allowed" from="true"/></if>
+        </actions>
+    </service>
+
     <service verb="check" noun="ProjectEdit" authz-action="view">
         <in-parameters>
             <parameter name="workEffortId" required="true"/>
@@ -829,27 +856,6 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-count>
 
             <if condition="wedprftrCount != null &amp;&amp; wedprftrCount == 1"><set field="allowed" from="true"/></if>
-        </actions>
-    </service>
-    
-    <service verb="check" noun="ProjectPositionEdit">
-        <in-parameters>
-            <parameter name="emplPositionId" required="true"/>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="allowed"/>
-            <parameter name="emplPosition"/>
-        </out-parameters>
-        <actions>
-            <set field="allowed" from="false"/>
-
-            <entity-find-one entity-name="mantle.work.effort.WorkEffortEmplPositionDetail" value-field="emplPosition" auto-field-map="[positionEmplPositionId:emplPositionId]"/>
-
-            <!-- If the emplPosition workEffort join doesn't exist, then emplPosition will return nothing -->
-            <if condition="!emplPosition"><return type="danger" error="true" message="Project not found for Position"/></if>
-            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:emplPosition.effortWorkEffortId]" out-map="projectEdit"/>
-
-            <if condition="projectEdit?.allowed"><set field="allowed" from="true"/></if>
         </actions>
     </service>
 
@@ -1104,12 +1110,13 @@ along with this software (see the LICENSE.md file). If not, see
 
             <service-call name="create#mantle.humanres.position.EmplPosition" in-map="[emplPositionClassId:emplPositionClassId, statusId:'EmpsActive']" out-map="context"/>
             <service-call name="create#mantle.work.effort.WorkEffortEmplPosition" in-map="[workEffortId:workEffortId, emplPositionId:emplPositionId]" out-map="context"/>
-            <log level="warn" message="context.toString() ${context.toString()}"/>
+<!--            <log level="warn" message="context.toString() ${context.toString()}"/>-->
         </actions>
     </service>
 
     <service verb="update" noun="ProjectPositionStatus">
         <in-parameters>
+            <parameter name="workEffortId" required="true"/>
             <parameter name="emplPositionId" required="true"/>
             <parameter name="statusId"/>
         </in-parameters>
@@ -1118,13 +1125,18 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="workEffortId"/>
         </out-parameters>
         <actions>
-            <service-call name="resistmanagement.ResistServices.check#ProjectPositionEdit" in-map="[emplPositionId:emplPositionId]" out-map="projectPositionEdit"/>
-            <set field="emplPosition" from="projectPositionEdit.emplPosition"/>
-            <if condition="!projectPositionEdit?.allowed"><return type="danger" error="true" message="Not allowed to edit this project position"/></if>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+            <if condition="!projectEdit?.allowed"><return type="danger" error="true" message="Not allowed to edit this project position"/></if>
+
+            <entity-find-one entity-name="WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplication" value-field="emplPosition">
+                <field-map field-name="effortWorkEffortId" from="workEffortId"/>
+                <field-map field-name="positionEmplPositionId" from="emplPositionId"/>
+                <select-field field-name="positionStatusStatusId"/>
+            </entity-find-one>
 
             <!-- Failure condition don't update entry -->
-            <if condition="statusId &amp;&amp; emplPosition.statusStatusId &amp;&amp; statusId == emplPosition.statusStatusId">
-                <return type="warning" message="Position is already ${emplPosition.statusDescription ?: emplPosition.statusStatusId}"/>
+            <if condition="statusId &amp;&amp; emplPosition.positionStatusStatusId &amp;&amp; statusId == emplPosition.positionStatusStatusId">
+                <return type="warning" message="Position is already ${emplPosition.positionStatusDescription ?: emplPosition.positionStatusStatusId}"/>
             </if>
 
             <service-call name="update#mantle.humanres.position.EmplPosition" in-map="[emplPositionId:emplPositionId, statusId:statusId]" out-map="context"/>
@@ -1133,6 +1145,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="create" noun="ProjectPositionApplication">
         <in-parameters>
+            <parameter name="workEffortId" required="true"/>
             <parameter name="emplPositionId" required="true"/>
             <parameter name="statusId" required="true"/>
             <parameter name="applyingPartyId"/>
@@ -1142,13 +1155,13 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- Make sure that statusId is in the allowed values -->
-            <if condition="!['EaRequested','EaProposed'].contains(statusId)">
+            <if condition="!['EaApplied','EaInvited'].contains(statusId)">
                 <entity-find-one entity-name="moqui.basic.StatusItem" value-field="status" auto-field-map="[statusId:statusId,statusTypeId:'EmploymentApplication']"/>
                 <return error="true" message="Cannot apply for project with status ${status?.description ?: statusId}"/></if>
 
             <!-- If statusId is Proposed and cannot edit, throw error; otherwise set to requested -->
-            <service-call name="resistmanagement.ResistServices.check#ProjectPositionEdit" in-map="[emplPositionId:emplPositionId]" out-map="projectPositionEdit"/>
-            <if condition="statusId == 'EaProposed' &amp;&amp; !projectPositionEdit.allowed"><return error="true" message="Cannot Propose when unable to edit project position"/></if>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+            <if condition="statusId == 'EaInvited' &amp;&amp; !projectEdit.allowed"><return error="true" message="Cannot invite to project position"/></if>
 
             <!-- If applyingPartyId is not set, use the logged in user to find the account it owns; if there's more than one account allowed, ask for the account party information; if there's no accounts found, have use create an account. -->
             <if condition="!applyingPartyId">
@@ -1174,35 +1187,79 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <!-- Messages -->
-    <service verb="create" noun="ProjectMessage">
+    <service verb="update" noun="ProjectPositionApplicationStatus">
         <in-parameters>
             <parameter name="workEffortId" required="true"/>
-            <parameter name="toPartyId" required="true"/>
-            <parameter name="body" required="true"/>
-            <parameter name="communicationEventTypeId" default-value="Message"/>
-            <parameter name="statusId" default-value="CeReceived"/>
-            <parameter name="entryDate" default="ec.user.nowTimestamp"/>
+            <parameter name="emplPositionId" required="true"/>
+            <parameter name="employmentApplicationId" required="true"/>
+            <parameter name="statusId"/>
         </in-parameters>
         <out-parameters>
-            <parameter name="communicationEventId"/>
-            <parameter name="workEffortId"/>
+            <parameter name="statusId"/>
         </out-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>
-            <if condition="!project"><return type="warning" message="Project not found with Id ${workEffortId}"/></if>
+            <!-- Make sure that statusId is in the allowed values -->
+            <if condition="!['EaInvited','EaApplied','EaApproved','EaRejected','EaCanceled'].contains(statusId)">
+                <entity-find-one entity-name="moqui.basic.StatusItem" value-field="status" auto-field-map="[statusId:statusId,statusTypeId:'EmploymentApplication']"/>
+                <return error="true" message="Cannot put project position in status ${status?.description ?: statusId}"/></if>
 
-            <set field="fromPartyId" from="ec.user.userAccount.partyId"/>
-            <service-call name="create#mantle.party.communication.CommunicationEvent" in-map="context" out-map="context"/>
-            <service-call name="create#mantle.work.effort.WorkEffortCommEvent" in-map="context" out-map="context"/>
+            <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplication" list="emplPositionList" distinct="true">
+                <econdition field-name="effortWorkEffortId" from="workEffortId"/>
+                <econdition field-name="positionEmplPositionId" from="emplPositionId"/>
+                <econdition field-name="applicationEmploymentApplicationId" from="employmentApplicationId"/>
+                <econdition field-name="toRoleRoleTypeId" value="ClientManager"/>
+                <select-field field-name="effortWorkEffortId,toRoleRoleTypeId,applicationEmploymentApplicationId,applicationStatusStatusId,applicationApplyingPartyId"/>
+            </entity-find>
+            <if condition="emplPositionList.size() &gt; 1"><log level="warn" message="Service update#ProjectPositionApplicationStatus's entity find shouldn't return more than one entry from it's query."/></if>
+            <set field="emplPosition" from="emplPositionList.getFirst()"/>
 
-<!--            <log level="warn" message="toPartyId ${toPartyId}"/>-->
-<!--            <log level="warn" message="project.parties*.partyId?.contains(toPartyId) ${project.parties*.partyId}"/>-->
-            <if condition="!project.parties*.partyId?.contains(toPartyId)">
-<!--                <service-call name="mantle.work.WorkEffortServices.add#WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:toPartyId, roleTypeId:]"-->
-            </if>
+<!--            <log level="warn" message="emplPosition ${emplPosition}"/>-->
+            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:emplPosition.applicationApplyingPartyId]" out-map="accountEdit"/>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+            <set field="allowed" from="false"/>
+            <if condition="statusId == 'EaInvited' &amp;&amp; projectEdit?.allowed &amp;&amp; ['EaRejected'].contains(emplPosition.applicationStatusStatusId)"><set field="allowed" from="true"/></if>
+            <if condition="statusId == 'EaApplied' &amp;&amp; accountEdit?.allowed &amp;&amp; ['EaCanceled'].contains(emplPosition.applicationStatusStatusId)"><set field="allowed" from="true"/></if>
+            <if condition="statusId == 'EaApproved' &amp;&amp; projectEdit?.allowed &amp;&amp; ['EaApplied'].contains(emplPosition.applicationStatusStatusId) || accountEdit?.allowed &amp;&amp; ['EaInvited'].contains(emplPosition.applicationStatusStatusId)"><set field="allowed" from="true"/></if>
+            <if condition="statusId == 'EaRejected' &amp;&amp; projectEdit?.allowed &amp;&amp; ['EaApplied','EaApproved'].contains(emplPosition.applicationStatusStatusId)"><set field="allowed" from="true"/></if>
+            <if condition="statusId == 'EaCanceled' &amp;&amp; accountEdit?.allowed &amp;&amp; ['EaInvited','EaApproved'].contains(emplPosition.applicationStatusStatusId)"><set field="allowed" from="true"/></if>
 
+            <if condition="allowed == false"><return type="danger" error="true" message="Not allowed to edit this project position"/></if>
+
+            <if condition="allowed == true">
+                <log level="warn" message="allowed submit EmploymentApplication context.toString() ${context.toString()}"/>
+                <service-call name="update#mantle.humanres.employment.EmploymentApplication" in-map="[employmentApplicationId:employmentApplicationId,statusId:statusId]" out-map="context"/></if>
         </actions>
     </service>
+
+    <!-- Messages -->
+<!--    <service verb="create" noun="ProjectMessage">-->
+<!--        <in-parameters>-->
+<!--            <parameter name="workEffortId" required="true"/>-->
+<!--            <parameter name="toPartyId" required="true"/>-->
+<!--            <parameter name="body" required="true"/>-->
+<!--            <parameter name="communicationEventTypeId" default-value="Message"/>-->
+<!--            <parameter name="statusId" default-value="CeReceived"/>-->
+<!--            <parameter name="entryDate" default="ec.user.nowTimestamp"/>-->
+<!--        </in-parameters>-->
+<!--        <out-parameters>-->
+<!--            <parameter name="communicationEventId"/>-->
+<!--            <parameter name="workEffortId"/>-->
+<!--        </out-parameters>-->
+<!--        <actions>-->
+<!--            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>-->
+<!--            <if condition="!project"><return type="warning" message="Project not found with Id ${workEffortId}"/></if>-->
+
+<!--            <set field="fromPartyId" from="ec.user.userAccount.partyId"/>-->
+<!--            <service-call name="create#mantle.party.communication.CommunicationEvent" in-map="context" out-map="context"/>-->
+<!--            <service-call name="create#mantle.work.effort.WorkEffortCommEvent" in-map="context" out-map="context"/>-->
+
+<!--&lt;!&ndash;            <log level="warn" message="toPartyId ${toPartyId}"/>&ndash;&gt;-->
+<!--&lt;!&ndash;            <log level="warn" message="project.parties*.partyId?.contains(toPartyId) ${project.parties*.partyId}"/>&ndash;&gt;-->
+<!--            <if condition="!project.parties*.partyId?.contains(toPartyId)">-->
+<!--&lt;!&ndash;                <service-call name="mantle.work.WorkEffortServices.add#WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:toPartyId, roleTypeId:]"&ndash;&gt;-->
+<!--            </if>-->
+
+<!--        </actions>-->
+<!--    </service>-->
 
 </services>

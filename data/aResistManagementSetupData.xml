@@ -275,11 +275,21 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ==================================================== -->
     <!-- ========== Resist Management Project Data ========== -->
     <!-- ==================================================== -->
-    <statuses statusId="EaRequested" sequenceNum="1" statusTypeId="EmploymentApplication" description="Requested"/>
-    <statuses statusId="EaProposed" sequenceNum="2" statusTypeId="EmploymentApplication" description="Proposed"/>
-    <statuses statusId="EaPlaced" sequenceNum="3" statusTypeId="EmploymentApplication" description="Placed"/>
-    <statuses statusId="EaRejected" sequenceNum="98" statusTypeId="EmploymentApplication" description="Rejected"/>
-    <statuses statusId="EaCanceled" sequenceNum="99" statusTypeId="EmploymentApplication" description="Canceled"/>
+    <statuses statusId="EaInvited" sequenceNum="1" statusTypeId="EmploymentApplication" description="Invited"/>
+    <statuses statusId="EaApplied" sequenceNum="11" statusTypeId="EmploymentApplication" description="Applied"/>
+    <statuses statusId="EaApproved" sequenceNum="12" statusTypeId="EmploymentApplication" description="Approved"/>
+    <statuses statusId="EaRejected" sequenceNum="98" statusTypeId="EmploymentApplication" description="Rejected by Project Owner"/>
+    <statuses statusId="EaCanceled" sequenceNum="99" statusTypeId="EmploymentApplication" description="Canceled by Applicant"/>
+
+    <!-- TODO: Is there a way to check whether the person requesting the state change is allowed to (like in the StatusFlowTransition screens)? -->
+    <moqui.basic.StatusFlowTransition statusId="EaRejected" statusFlowId="Default" toStatusId="EaInvited" transitionName="Invite"/>
+    <moqui.basic.StatusFlowTransition statusId="EaCanceled" statusFlowId="Default" toStatusId="EaApplied" transitionName="Apply"/>
+    <moqui.basic.StatusFlowTransition statusId="EaApplied" statusFlowId="Default" toStatusId="EaApproved" transitionName="Approve"/>
+    <moqui.basic.StatusFlowTransition statusId="EaInvited" statusFlowId="Default" toStatusId="EaApproved" transitionName="Approve"/>
+    <moqui.basic.StatusFlowTransition statusId="EaApplied" statusFlowId="Default" toStatusId="EaRejected" transitionName="Reject"/>
+    <moqui.basic.StatusFlowTransition statusId="EaApproved" statusFlowId="Default" toStatusId="EaRejected" transitionName="Reject"/>
+    <moqui.basic.StatusFlowTransition statusId="EaInvited" statusFlowId="Default" toStatusId="EaCanceled" transitionName="Cancel"/>
+    <moqui.basic.StatusFlowTransition statusId="EaApproved" statusFlowId="Default" toStatusId="EaCanceled" transitionName="Cancel"/>
 
     <moqui.basic.StatusFlowTransition statusId="EmpsActive" statusFlowId="Default" toStatusId="EmpsInactive" transitionName="Close"/>
     <moqui.basic.StatusFlowTransition statusId="EmpsInactive" statusFlowId="Default" toStatusId="EmpsActive" transitionName="Open"/>

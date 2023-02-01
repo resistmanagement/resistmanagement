@@ -28,7 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="createProjectPositionApplication"><service-call name="resistmanagement.ResistServices.create#ProjectPositionApplication" in-map="[workEffortId:workEffortId,emplPositionId:emplPositionId,statusId:statusId,applyingPartyId:applyingPartyId]" out-map="context"/>
         <default-response url="."/></transition>
-    <transition name="updateProjectPositionApplicationStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionApplicationStatus" in-map="[workEffortId:workEffortId,employmentApplicationId:employmentApplicationId,statusId:statusId]" out-map="context"/>
+    <transition name="updateProjectPositionApplicationStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionApplicationStatus" in-map="[workEffortId:workEffortId,emplPositionId:emplPositionId,employmentApplicationId:employmentApplicationId,statusId:statusId]" out-map="context"/>
         <default-response url="."/></transition>
 
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
@@ -100,9 +100,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="contentContentLocation" operator="is-not-null"/>
                     <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
                     <econdition field-name="applicationEmplPositionId" from="projectPosition.positionEmplPositionId"/>
-                    <select-field field-name="partyId,pseudoId"/>
+                    <select-field field-name="applicationEmplPositionId,applicationEmploymentApplicationId,contentPartyContentId,partyPartyId,partyPseudoId,statusDescription,statusStatusId"/>
                     <order-by field-name="^pseudoId"/>
-                    <select-field field-name="applicationEmploymentApplicationId,contentPartyContentId,partyPartyId,statusDescription,statusStatusId"/>
                 </entity-find>
 
                 <entity-find entity-name="mantle.party.PartyToAndRelationship" list="managedAccountRelationshipList">
@@ -113,14 +112,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="toPartyId"/>
                 </entity-find>
 
-<!--                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>-->
+                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>
             </actions>
             <widgets>
                 <container-box><box-header title="${projectPosition.classTitle}"></box-header><box-toolbar>
                     <form-single name="ProposeProjectPositionForm" transition="createProjectPositionApplication" pass-through-parameters="true">
                         <field name="emplPositionId" from="projectPosition.positionEmplPositionId"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
                         <field name="statusId" from="'EaInvited'"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
-                        <field name="applyingPartyId"><conditional-field condition="projectEdit?.allowed" title="Invite an Account">
+                        <field name="applyingPartyId"><conditional-field condition="projectEdit?.allowed" title="Invite Account">
                             <drop-down submit-on-select="true" required-manual-select="true" allow-empty="true">
                                 <dynamic-options transition="getAccountList" parameter-map="[exceptionPartyIdList:appliedAccountList*.partyPartyId]" server-search="true" min-length="2"/>
                             </drop-down>
@@ -133,17 +132,24 @@ along with this software (see the LICENSE.md file). If not, see
 <!--                        <link url="" text="Cancel" condition=""/>-->
 <!--                        <link url="" text="Reject" condition=""/>-->
                 </box-toolbar><box-body-nopad>
-                    <form-list name="AppliedPositionApplicationForm" list="appliedAccountList" skip-form="true">
-                        <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyPartyId]" out-map="accountView"/></row-actions>
-                        <field name="profilePicture"><default-field title=""><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:contentPartyContentId]" width="50px"/></default-field></field>
-                        <field name="partyPseudoId"><default-field title=""><link url="../../Account/ViewAccount" text="${partyPseudoId}" parameter-map="[partyId:partyPartyId, canViewAccount:accountView?.allowed]"/></default-field></field>
-                        <field name="state"><default-field><label text="${statusDescription}"/></default-field></field>
-                        <field name="approve"><conditional-field condition="projectEdit?.allowed &amp;&amp; ['EaApplied','EaRejected'].contains(statusStatusId)" title="">
-                            <link url="updateProjectPositionApplicationStatus" text="Approve" parameter-map="[workEffortId:workEffortId,employmentApplicationId:applicationEmploymentApplicationId,statusId:'EaApproved']"/></conditional-field></field>
-<!--                    <field name="cancel"><conditional-field condition=""><link url="" text="Cancel"/></conditional-field></field>-->
-                        <field name="reject"><conditional-field condition="projectEdit?.allowed &amp;&amp; ['EaInvited','EaApplied','EaApproved'].contains(statusStatusId)" title="">
-                            <link url="updateProjectPositionApplicationStatus" text="Reject" parameter-map="[workEffortId:workEffortId,employmentApplicationId:applicationEmploymentApplicationId,statusId:'EaRejected']"/></conditional-field></field>
-                    </form-list>
+                    <section-iterate name="AppliedAccountSection" list="appliedAccountList" entry="appliedAccount">
+                        <actions>
+                            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:appliedAccount.partyPartyId]" out-map="accountEdit"/>
+                            <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:appliedAccount.partyPartyId]" out-map="accountView"/></actions>
+                        <widgets>
+                            <container-box><box-header>
+                                <image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:appliedAccount.contentPartyContentId]" width="50px"/>
+                                <label type="h5" text="${appliedAccount.partyPseudoId} -"/>
+                                <label text="> ${appliedAccount.statusDescription}"/>
+                            </box-header><box-toolbar>
+                                <link url="updateProjectPositionApplicationStatus" text="Invite" condition="projectEdit?.allowed &amp;&amp; ['EaRejected'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaInvited']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Apply" condition="accountEdit?.allowed &amp;&amp; ['EaCanceled'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaApplied']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Approve" condition="projectEdit?.allowed &amp;&amp; ['EaApplied'].contains(appliedAccount.statusStatusId) || accountEdit?.allowed &amp;&amp; ['EaInvited'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaApproved']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Reject" condition="projectEdit?.allowed &amp;&amp; ['EaApplied','EaApproved'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaRejected']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Cancel" condition="accountEdit?.allowed &amp;&amp; ['EaInvited','EaApproved'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaCanceled']"/>
+                            </box-toolbar></container-box>
+                        </widgets>
+                    </section-iterate>
                 </box-body-nopad></container-box>
             </widgets>
         </section-iterate>

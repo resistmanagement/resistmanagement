@@ -16,10 +16,10 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Project" default-menu-index="6" default-menu-include="true" standalone="true">
 
     <parameter name="workEffortId" required="true"/>
-    <parameter name="canViewProject"/>
+    <parameter name="canViewProjectPositions"/>
 
     <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
-        <if condition="!projectView?.allowed"><return message="Not allowed" error="true" type="danger"/></if></always-actions>
+        <if condition="!projectView?.allowed"><return message="Not allowed to view project" error="true" type="danger"/></if></always-actions>
 
     <transition name="updateProject"><service-call name="resistmanagement.ResistServices.update#Project"
             in-map="[workEffortId:workEffortId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]"/>
