@@ -16,17 +16,19 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Positions" default-menu-index="7" default-menu-include="true" standalone="true">
 
     <parameter name="workEffortId" required="true"/>
-    <parameter name="canViewProject" required="true"/>
+    <parameter name="canViewProjectPositions"/>
 
     <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
-        <if condition="!projectView?.allowed"><return message="Not allowed" error="true" type="danger"/></if></always-actions>
+        <if condition="!projectView?.allowed"><return message="Not allowed to view project" error="true" type="danger"/></if></always-actions>
 
     <transition name="addProjectPosition"><service-call name="resistmanagement.ResistServices.create#ProjectPosition" in-map="[workEffortId:workEffortId, emplPositionClassId:emplPositionClassId]" out-map="context"/>
         <default-response url="."/></transition>
-    <transition name="updateProjectPositionStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionStatus" in-map="[emplPositionId:emplPositionId,statusId:statusId]" out-map="context"/>
+    <transition name="updateProjectPositionStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionStatus" in-map="[workEffortId:workEffortId,emplPositionId:emplPositionId,statusId:statusId]" out-map="context"/>
         <default-response url="."/></transition>
 
-    <transition name="createProjectPositionApplication"><service-call name="resistmanagement.ResistServices.create#ProjectPositionApplication" in-map="[emplPositionId:emplPositionId,statusId:statusId,applyingPartyId:applyingPartyId]" out-map="context"/>
+    <transition name="createProjectPositionApplication"><service-call name="resistmanagement.ResistServices.create#ProjectPositionApplication" in-map="[workEffortId:workEffortId,emplPositionId:emplPositionId,statusId:statusId,applyingPartyId:applyingPartyId]" out-map="context"/>
+        <default-response url="."/></transition>
+    <transition name="updateProjectPositionApplicationStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionApplicationStatus" in-map="[workEffortId:workEffortId,employmentApplicationId:employmentApplicationId,statusId:statusId]" out-map="context"/>
         <default-response url="."/></transition>
 
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
@@ -91,14 +93,16 @@ along with this software (see the LICENSE.md file). If not, see
 
         <section-iterate name="PositionSectionIterate" list="projectPositionList" entry="projectPosition">
             <actions>
-                <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplPosition" list="appliedAccountList">
+                <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="appliedAccountList" distinct="true">
                     <econdition field-name="roleRoleTypeId" value="ClientManager"/>
                     <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>
                     <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>
                     <econdition field-name="contentContentLocation" operator="is-not-null"/>
+                    <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
                     <econdition field-name="applicationEmplPositionId" from="projectPosition.positionEmplPositionId"/>
                     <select-field field-name="partyId,pseudoId"/>
                     <order-by field-name="^pseudoId"/>
+                    <select-field field-name="applicationEmploymentApplicationId,contentPartyContentId,partyPartyId,statusDescription,statusStatusId"/>
                 </entity-find>
 
                 <entity-find entity-name="mantle.party.PartyToAndRelationship" list="managedAccountRelationshipList">
@@ -113,26 +117,32 @@ along with this software (see the LICENSE.md file). If not, see
             </actions>
             <widgets>
                 <container-box><box-header title="${projectPosition.classTitle}"></box-header><box-toolbar>
-                    <form-single name="ProposeProjectPositionForm" transition="createProjectPositionApplication">
+                    <form-single name="ProposeProjectPositionForm" transition="createProjectPositionApplication" pass-through-parameters="true">
                         <field name="emplPositionId" from="projectPosition.positionEmplPositionId"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
-                        <field name="statusId" from="'EaProposed'"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
-                        <field name="applyingPartyId"><conditional-field condition="projectEdit?.allowed" title="Propose an Account">
+                        <field name="statusId" from="'EaInvited'"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
+                        <field name="applyingPartyId"><conditional-field condition="projectEdit?.allowed" title="Invite an Account">
                             <drop-down submit-on-select="true" required-manual-select="true" allow-empty="true">
                                 <dynamic-options transition="getAccountList" parameter-map="[exceptionPartyIdList:appliedAccountList*.partyPartyId]" server-search="true" min-length="2"/>
                             </drop-down>
                         </conditional-field></field>
                     </form-single>
-                    <link url="createProjectPositionApplication" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,statusId:'EaRequested']" text="Request" condition="projectPosition.statusStatusId == 'EmpsActive' &amp;&amp; !appliedAccountList*.partyPartyId?.contains(managedAccountRelationshipList?.first()?.toPartyId)" tooltip="Request Project Application"/>
+                    <link url="createProjectPositionApplication" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,statusId:'EaApplied']" text="Apply" condition="projectPosition.statusStatusId == 'EmpsActive' &amp;&amp; !appliedAccountList*.partyPartyId?.contains(managedAccountRelationshipList?.getFirst()?.toPartyId)" tooltip="Apply to Position"/>
                     <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsInactive']" text="Close" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsActive'" tooltip="Close ${projectPosition.classTitle} Position"/>
                     <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsActive']" text="Open" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsInactive'" tooltip="Open ${projectPosition.classTitle} Position"/>
 <!--                        <link url="" text="Place" condition="projectEdit?.allowed"/>-->
 <!--                        <link url="" text="Cancel" condition=""/>-->
 <!--                        <link url="" text="Reject" condition=""/>-->
                 </box-toolbar><box-body-nopad>
-                    <form-list name="AppliedPositionApplicationForm" list="appliedAccountList" skip-form="true" skip-header="true">
+                    <form-list name="AppliedPositionApplicationForm" list="appliedAccountList" skip-form="true">
                         <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyPartyId]" out-map="accountView"/></row-actions>
-                        <field name="profilePicture"><default-field><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:contentPartyContentId]" width="50px"/></default-field></field>
-                        <field name="partyPseudoId"><default-field><link url="../../Account/ViewAccount" text="${partyPseudoId}" parameter-map="[partyId:partyPartyId, canViewAccount:accountView?.allowed]"/></default-field></field>
+                        <field name="profilePicture"><default-field title=""><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:contentPartyContentId]" width="50px"/></default-field></field>
+                        <field name="partyPseudoId"><default-field title=""><link url="../../Account/ViewAccount" text="${partyPseudoId}" parameter-map="[partyId:partyPartyId, canViewAccount:accountView?.allowed]"/></default-field></field>
+                        <field name="state"><default-field><label text="${statusDescription}"/></default-field></field>
+                        <field name="approve"><conditional-field condition="projectEdit?.allowed &amp;&amp; ['EaApplied','EaRejected'].contains(statusStatusId)" title="">
+                            <link url="updateProjectPositionApplicationStatus" text="Approve" parameter-map="[workEffortId:workEffortId,employmentApplicationId:applicationEmploymentApplicationId,statusId:'EaApproved']"/></conditional-field></field>
+<!--                    <field name="cancel"><conditional-field condition=""><link url="" text="Cancel"/></conditional-field></field>-->
+                        <field name="reject"><conditional-field condition="projectEdit?.allowed &amp;&amp; ['EaInvited','EaApplied','EaApproved'].contains(statusStatusId)" title="">
+                            <link url="updateProjectPositionApplicationStatus" text="Reject" parameter-map="[workEffortId:workEffortId,employmentApplicationId:applicationEmploymentApplicationId,statusId:'EaRejected']"/></conditional-field></field>
                     </form-list>
                 </box-body-nopad></container-box>
             </widgets>
