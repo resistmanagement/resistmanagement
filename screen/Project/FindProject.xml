@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <!-- Find the Resist Projects that are visible to the logged in user -->
-        <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" list="projectList" cache="true">
+        <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" list="projectList" distinct="true" cache="true">
             <econdition field-name="partyRoleTypeId" value="ClientManager"/>
             <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
             <econdition field-name="toRoleTypeId" value="ClientManager"/>
@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
             <date-filter/>
             <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
-            <select-field field-name="workEffortId,description,workEffortName,partyRelationshipId,fromRoleTypeId,toPartyId,toRoleTypeId,toPseudoId,fromPartyId"/>
+            <select-field field-name="workEffortId,description,workEffortName,toPseudoId"/>
             <order-by field-name="-lastUpdatedStamp"/>
         </entity-find>
 
