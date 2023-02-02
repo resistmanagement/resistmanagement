@@ -1225,9 +1225,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <if condition="allowed == false"><return type="danger" error="true" message="Not allowed to edit this project position"/></if>
 
-            <if condition="allowed == true">
-                <log level="warn" message="allowed submit EmploymentApplication context.toString() ${context.toString()}"/>
-                <service-call name="update#mantle.humanres.employment.EmploymentApplication" in-map="[employmentApplicationId:employmentApplicationId,statusId:statusId]" out-map="context"/></if>
+            <if condition="allowed == true"><service-call name="update#mantle.humanres.employment.EmploymentApplication" in-map="[employmentApplicationId:employmentApplicationId,statusId:statusId]" out-map="context"/></if>
         </actions>
     </service>
 

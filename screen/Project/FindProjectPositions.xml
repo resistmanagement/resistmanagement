@@ -112,7 +112,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="toPartyId"/>
                 </entity-find>
 
-                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>
+<!--                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>-->
             </actions>
             <widgets>
                 <container-box><box-header title="${projectPosition.classTitle}"></box-header><box-toolbar>
@@ -128,9 +128,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <link url="createProjectPositionApplication" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,statusId:'EaApplied']" text="Apply" condition="projectPosition.statusStatusId == 'EmpsActive' &amp;&amp; !appliedAccountList*.partyPartyId?.contains(managedAccountRelationshipList?.getFirst()?.toPartyId)" tooltip="Apply to Position"/>
                     <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsInactive']" text="Close" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsActive'" tooltip="Close ${projectPosition.classTitle} Position"/>
                     <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsActive']" text="Open" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsInactive'" tooltip="Open ${projectPosition.classTitle} Position"/>
-<!--                        <link url="" text="Place" condition="projectEdit?.allowed"/>-->
-<!--                        <link url="" text="Cancel" condition=""/>-->
-<!--                        <link url="" text="Reject" condition=""/>-->
                 </box-toolbar><box-body-nopad>
                     <section-iterate name="AppliedAccountSection" list="appliedAccountList" entry="appliedAccount">
                         <actions>
