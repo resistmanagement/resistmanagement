@@ -65,7 +65,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econditions combine="or">
                     <econditions combine="and">
                         <econdition field-name="contentLocation" operator="is-not-null"/>
-                        <econdition field-name="partyContentTypeEnumId" operator="in" from="['PcntPostImageSmall','PcntPrimaryImage']"/>
+                        <econdition field-name="partyContentTypeEnumId" operator="in" from="['PcntPrimaryImage']"/>
                     </econditions>
                     <econditions combine="and">
                         <econdition field-name="contentLocation" operator="is-null"/>
@@ -106,9 +106,8 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="partyProfilePictureList" from="[[partyContentId:profileContentList?.first()?.partyContentId, partyText:party?.pseudoId ?: (party?.person?.firstName + ' ' + party?.person?.lastName) ?: party?.organization?.organizationName]]"/>
         <set field="bio" value=""/><if condition="partyContentBioList?.size() &gt; 0"><set field="bio" from="partyContentBioList?.first()?.description"/></if>
 
+<!--        <log level="warn" message="postContentList?.size() ${postContentList?.size()} postContentList ${postContentList}"/>-->
         <set field="postTitleList" from="[]"/><set field="postList" from="[]"/><set field="intermediatePostList" from="[]"/>
-
-        <!--        <log level="warn" message="postContentList?.size() ${postContentList?.size()} postContentList ${postContentList}"/>-->
         <if condition="postContentList?.size() &gt; 0">
             <set field="postTitleList" from="[[communicationEventContentId:postContentList?.first()?.communicationEventContentId]]"/>
 

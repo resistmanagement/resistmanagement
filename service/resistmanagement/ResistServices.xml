@@ -507,7 +507,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="fileMimeTypeList" type="List" default="ec.service.sync().name('org.moqui.impl.ImageServices.get#ImageReaderMIMETypes').call()?.imageReaderMIMETypes" required="true"/>
         </in-parameters>
         <out-parameters>
-            <parameter name="partyContentId"/>
+            <parameter name="communicationEventId"/>
             <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
         </out-parameters>
         <actions>
@@ -607,6 +607,115 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <set field="contentFile" from="ec.resource.getLocationReference(contentFileLocation)" type="moqui.org.resource.ResourceReference"/>
             <service-call name="resistmanagement.ResistServices.upload#PostAttachment" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="ProjectPostAttachment">
+        <in-parameters>
+<!--            <parameter name="partyId" required="true"/>-->
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="outputImageFormat" required="true" default-value="jpg"></parameter>
+            <parameter name="saveOriginal" type="Boolean" default-value="true" required="true"><description>If true, will save the original image.</description></parameter>
+            <parameter name="saveLarge" type="Boolean" default-value="false" required="true"><description>If true, will save a large image.</description></parameter>
+            <parameter name="saveMedium" type="Boolean" default-value="true" required="true"><description>If true, will save a medium image.</description></parameter>
+            <parameter name="saveSmall" type="Boolean" default-value="true" required="true"><description>If true, will save a small image.</description></parameter>
+            <parameter name="saveThumbnail" type="Boolean" default-value="false" required="true"><description>If true, will save the thumbnail image.</description></parameter>
+            <parameter name="contentTypeOriginal" default-value="CmctImageOriginal" required="true"><description>Party Content Type Enum Id for the Original image.</description></parameter>
+            <parameter name="contentTypeLarge" default-value="CmctImageLarge" required="true"><description>Party Content Type Enum Id for the Large image.</description></parameter>
+            <parameter name="contentTypeMedium" default-value="CmctImageMedium" required="true"><description>Party Content Type Enum Id for the Medium image.</description></parameter>
+            <parameter name="contentTypeSmall" default-value="CmctImageSmall" required="true"><description>Party Content Type Enum Id for the Small image.</description></parameter>
+            <parameter name="contentTypeThumbnail" default-value="CmctImageThumbnail" required="true"><description>Party Content Type Enum Id for the Thumbnail image.</description></parameter>
+            <parameter name="fileMimeTypeList" type="List" default="ec.service.sync().name('org.moqui.impl.ImageServices.get#ImageReaderMIMETypes').call()?.imageReaderMIMETypes" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="communicationEventId"/>
+            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
+        </out-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; !fileMimeTypeList.contains(contentFile.getContentType())">
+                <!-- see: https://www.javacodeexamples.com/solution-java-util-regex-patternsyntaxexception-dangling-meta-character-near-index-0/3446 for why not split('+') and is split('\\+') -->
+                <!-- see: https://freemarker.apache.org/docs/dgui_misc_autoescaping.html for why not split('\\+') and is split('\\\\+') -->
+                <return error="true" message="The file type you used: ${contentFile.getContentType().split('/')[1].split('\\\\+')[0] } is not supported. Please upload a ${fileMimeTypeList.collect{ fileMimeTypeList.indexOf(it) &lt; fileMimeTypeList.size() -1 ? it.split('/')[1].split('\\\\+')[0] : 'or ' + it.split('/')[1].split('\\\\+')[0] }.join(', ')} file format."/>
+            </if>
+            <if condition="!defaultFileName &amp;&amp; !defaultFileRenderLocation &amp;&amp; contentFile == null"><return message="File not uploaded"/></if>
+
+            <set field="fileName"/>
+            <set field="uploaded" from="true"/>
+            <script><![CDATA[
+                try { fileName = contentFile?.getFileName() }
+                catch (Exception exception) { fileName = contentFile?.getName(); uploaded = false }
+                ]]></script>
+
+            <!-- TODO: Handle contentFile uploads with mime types that aren't supported -->
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(fileName)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" count-field="ceCount">
+                <econdition field-name="effortWorkEffortId" from="workEffortId"/>
+<!--                <econdition field-name="eventFromPartyId" from="partyId"/>-->
+                <econdition field-name="eventCommunicationEventTypeId" value="Post"/>
+            </entity-find-count>
+            <if condition="ceCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>
+
+            <service-call name="create#mantle.party.communication.CommunicationEvent" in-map="[communicationEventTypeId:'Post',entryDate:ec.user.nowTimestamp]" out-map="context"/>
+            <service-call name="create#mantle.work.effort.WorkEffortCommEvent" in-map="[workEffortId:workEffortId,communicationEventId:communicationEventId]"/>
+
+            <if condition="!communicationEventId"><return error="true" message="Something went wrong creating your post. Please try again." type="warning"/></if>
+
+            <set field="fileNameNoExtension" from="fileName?.take(fileName?.lastIndexOf('.'))"/>
+
+            <!-- TODO: Use checksum from original to check for duplicates. -->
+            <!--            <entity-find entity-name="mantle.party.PartyContent" list="pcDuplicateList">-->
+            <!--                <econdition field-name="partyId"/>-->
+            <!--                <econdition field-name="partyContentTypeEnumId"/>-->
+            <!--                <econdition field-name="contentLocation" operator="like" value="${contentRoot}/party/${partyId}/content_%/${fileNameNoExtension}_Original.${outputImageFormat}" ignore-if-empty="true"/>-->
+            <!--                <order-by field-name="-contentDate"/></entity-find>-->
+            <!--            <set field="partyContentId" from="pcDuplicateList?.getFirst()?.partyContentId"/>-->
+            <!--            <if condition="!partyContentId &amp;&amp; pcDuplicateList?.size() == 0">-->
+
+            <set field="Original" type="NewMap"/><set field="contentLocationOriginal"/>
+            <set field="Large" type="NewMap"/><set field="contentLocationLarge"/>
+            <set field="Medium" type="NewMap"/><set field="contentLocationMedium"/>
+            <set field="Small" type="NewMap"/><set field="contentLocationSmall"/>
+            <set field="Thumbnail" type="NewMap"/><set field="contentLocationThumbnail"/>
+
+            <if condition="saveOriginal"><service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventId:communicationEventId,contentTypeEnumId:contentTypeOriginal,sequenceNum:01]" out-map="Original"/><set field="contentLocationOriginal" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${Original.communicationEventContentId}/${fileNameNoExtension}_Original.${outputImageFormat}"/></if>
+            <if condition="saveLarge"><service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventId:communicationEventId,contentTypeEnumId:contentTypeLarge,sequenceNum:01]" out-map="Large"/><set field="contentLocationLarge" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${Large.communicationEventContentId}/${fileNameNoExtension}_Large.${outputImageFormat}"/></if>
+            <if condition="saveMedium"><service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventId:communicationEventId,contentTypeEnumId:contentTypeMedium,sequenceNum:01]" out-map="Medium"/><set field="contentLocationMedium" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${Medium.communicationEventContentId}/${fileNameNoExtension}_Medium.${outputImageFormat}"/></if>
+            <if condition="saveSmall"><service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventId:communicationEventId,contentTypeEnumId:contentTypeSmall,sequenceNum:01]" out-map="Small"/><set field="contentLocationSmall" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${Small.communicationEventContentId}/${fileNameNoExtension}_Small.${outputImageFormat}"/></if>
+            <if condition="saveThumbnail"><service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventId:communicationEventId,contentTypeEnumId:contentTypeThumbnail,sequenceNum:01]" out-map="Thumbnail"/><set field="contentLocationThumbnail" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${Thumbnail.communicationEventContentId}/${fileNameNoExtension}_Thumbnail.${outputImageFormat}"/></if>
+
+            <if condition="uploaded">
+                <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
+                    inputImageStream:contentFile?.openStream(),
+                    outputImageFormat:outputImageFormat,
+                    outputResourceReferenceOriginal:ec.resource.getLocationReference(contentLocationOriginal),
+                    outputResourceReferenceLarge:ec.resource.getLocationReference(contentLocationLarge),
+                    outputResourceReferenceMedium:ec.resource.getLocationReference(contentLocationMedium),
+                    outputResourceReferenceSmall:ec.resource.getLocationReference(contentLocationSmall),
+                    outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
+                ]" out-map="context"/>
+                <else>
+                    <service-call name="org.moqui.impl.ImageServices.convert#Image" in-map="[
+                    inputImageStream:contentFile?.getInputStream(),
+                    outputImageFormat:outputImageFormat,
+                    outputResourceReferenceOriginal:ec.resource.getLocationReference(contentLocationOriginal),
+                    outputResourceReferenceLarge:ec.resource.getLocationReference(contentLocationLarge),
+                    outputResourceReferenceMedium:ec.resource.getLocationReference(contentLocationMedium),
+                    outputResourceReferenceSmall:ec.resource.getLocationReference(contentLocationSmall),
+                    outputResourceReferenceThumbnail:ec.resource.getLocationReference(contentLocationThumbnail),
+                ]" out-map="context"/>
+                </else></if>
+
+            <if condition="saveOriginal"><service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventContentId:Original.communicationEventContentId, contentLocation:contentLocationOriginal]"/></if>
+            <if condition="saveLarge"><service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventContentId:Large.communicationEventContentId, contentLocation:contentLocationLarge]"/></if>
+            <if condition="saveMedium"><service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventContentId:Medium.communicationEventContentId, contentLocation:contentLocationMedium]"/></if>
+            <if condition="saveSmall"><service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventContentId:Small.communicationEventContentId, contentLocation:contentLocationSmall]"/></if>
+            <if condition="saveThumbnail"><service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="[communicationEventContentId:Thumbnail.communicationEventContentId, contentLocation:contentLocationThumbnail]"/></if>
         </actions>
     </service>
 
@@ -1074,11 +1183,12 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="update" noun="Project">
         <in-parameters>
             <parameter name="workEffortId" required="true"/>
-            <parameter name="workEffortName" required="true"/>
+            <parameter name="visibilityEnumId"/>
+            <parameter name="statusId"/>
+            <parameter name="workEffortName"/>
+            <parameter name="description"/>
             <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
             <parameter name="estimatedWorkDuration"/>
-            <parameter name="visibilityEnumId"/>
-            <parameter name="description"/>
         </in-parameters>
         <actions>
             <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
