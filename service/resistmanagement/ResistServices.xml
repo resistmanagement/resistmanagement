@@ -943,6 +943,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="allowed" default="false"/>
         </out-parameters>
         <actions>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+            <if condition="projectEdit?.allowed == true"><set field="allowed" from="true"/><return/></if>
+
             <service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
             <if condition="!projectView?.allowed"><return/></if>
             <entity-find-count entity-name="mantle.work.effort.WorkEffortEmplPositionDetail" count-field="projectPositionCount">
