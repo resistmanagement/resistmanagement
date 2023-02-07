@@ -289,4 +289,19 @@ along with this software (see the LICENSE.md file). If not, see
         <alias-all entity-alias="CEV"/>
         <alias-all entity-alias="CEVC"/>
     </view-entity>
+
+    <view-entity entity-name="CommunicationEventAndContentWithWorkEffort" package="mantle.party.communication">
+        <member-entity entity-alias="CEV" entity-name="mantle.party.communication.CommunicationEvent"/>
+        <member-entity entity-alias="CEVC" entity-name="mantle.party.communication.CommunicationEventContent" join-from-alias="CEV">
+            <key-map field-name="communicationEventId"/></member-entity>
+        <member-entity entity-alias="WECE" entity-name="mantle.work.effort.WorkEffortCommEvent" join-from-alias="CEV" join-optional="true">
+            <key-map field-name="communicationEventId"/></member-entity>
+        <member-entity entity-alias="WEFF" entity-name="mantle.work.effort.WorkEffort" join-from-alias="WECE">
+            <key-map field-name="workEffortId"/></member-entity>
+
+        <alias-all entity-alias="CEV" prefix="event"/>
+        <alias-all entity-alias="CEVC" prefix="eventContent"/>
+        <alias-all entity-alias="WEFF" prefix="effort"/>
+        <alias-all entity-alias="WECE" prefix="effortEvent"/>
+    </view-entity>
 </entities>
