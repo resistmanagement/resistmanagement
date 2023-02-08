@@ -15,9 +15,11 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Projects" default-menu-index="5" default-menu-include="false" standalone="true" menu-image="/ssstatic/images/project-business120.png">
 
-    <transition name="createProject"><service-call name="resistmanagement.ResistServices.create#Project"
-        in-map="[partyId:partyId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]"/>
-        <default-response url="."/></transition>
+    <transition name="createProject"><actions>
+        <service-call name="resistmanagement.ResistServices.create#Project" in-map="[partyId:partyId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]" out-map="context"/>
+        <service-call name="resistmanagement.ResistServices.check#ProjectPositionView" in-map="[workEffortId:workEffortId]" out-map="projectPositionView"/>
+    </actions>
+        <default-response url="../ViewProject" parameter-map="[workEffortId:workEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></transition>
     <transition-include name="createPersonAccount" location="component://resistmanagement/screen/Account/FindAccount.xml"/>
 
     <actions>
@@ -116,7 +118,7 @@ along with this software (see the LICENSE.md file). If not, see
             <form-list name="ListProjects" list="projectList" skip-form="true">
                 <row-actions><service-call name="resistmanagement.ResistServices.check#ProjectPositionView" in-map="[workEffortId:workEffortId]" out-map="projectPositionView"/></row-actions>
                 <field name="toPseudoId"><default-field title="Profile"><display/></default-field></field>
-                <field name="workEffortName"><default-field title="Name"><link url="../ViewProject" text="${workEffortName}" parameter-map="[workEffortId:workEffortId, canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
+                <field name="workEffortName"><default-field title="Name"><link url="../ViewProject" text="${workEffortName}" parameter-map="[workEffortId:workEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
                 <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
             </form-list>
         </row-col></container-row>
