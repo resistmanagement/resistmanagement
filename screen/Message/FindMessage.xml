@@ -41,9 +41,22 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="createMessage"><service-call name="mantle.party.CommunicationServices.create#Message"/>
         <default-response url="."/></transition>
+    <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
 
     <actions>
-        <entity-find-one entity-name="mantle.party.PartyDetail" value-field="toParty" auto-field-map="[partyId:toPartyId]"/>
+        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSetting" list="accountList" distinct="true">
+            <econdition field-name="partyId" from="toPartyId"/>
+            <econdition field-name="roleTypeId" value="ClientManager"/>
+            <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
+            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="contentLocation" operator="is-not-null"/>
+            <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+            <order-by field-name="-contentDate"/>
+        </entity-find>
+        <set field="toParty" from="accountList?.getFirst()"/>
+
+        <log level="warn" message="toParty ${toParty}"/>
+
         <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList">
             <econditions combine="or">
                 <econditions>
@@ -66,6 +79,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <form-list name="ListMessage" list="messageTitleList" skip-header="true" skip-form="true">
+            <field name="profilePicture"><default-field><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:toParty.partyContentId]" width="100px"/></default-field></field>
             <field name="title"><default-field><label text="${toParty.pseudoId}" type="h2"/></default-field></field>
         </form-list>
 
