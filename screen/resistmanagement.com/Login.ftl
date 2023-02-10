@@ -40,32 +40,32 @@
             <input type="hidden" name="initialTab" value="login">
             <#-- people know what to do <p class="text-muted text-center">${ec.l10n.localize("Enter your username and password to sign in")}</p> -->
             <#-- not needed for this request: <input type="hidden" name="moquiSessionToken" value="${ec.web.sessionToken}"> -->
-            <input type="text" name="username" value="${(username!"")?html}"
+            <input id="login_form_username" name="username" type="text" inputmode="email" value="${(username!"")?html}"
                    <#if username?has_content && secondFactorRequired>disabled="disabled"<#else>autofocus</#if>
-                   required="required" class="form-control top" id="login_form_username"
+                   required="required" class="form-control top"
                    placeholder="${ec.l10n.localize("Username")}" aria-label="${ec.l10n.localize("Username")}">
             <#-- secondFactorRequired will only be set if a user is pre-authenticated, and in that case password not required again -->
             <#if secondFactorRequired>
-                <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required="required"
-                       placeholder="${ec.l10n.localize("Authentication Code")}" class="form-control bottom" autofocus
-                       aria-label="${ec.l10n.localize("Authentication Code")}">
+                <input id="login_form_code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+                       required="required" class="form-control bottom"
+                       placeholder="${ec.l10n.localize("Authentication Code")}" autofocus aria-label="${ec.l10n.localize("Authentication Code")}">
             <#else>
-                <input type="password" name="password" required="required" class="form-control <#if secondFactorRequired>middle<#else>bottom</#if>"
+                <input type="password" name="password" required="required" autocomplete="current-password" id="current-password" class="form-control <#if secondFactorRequired>middle<#else>bottom</#if>"
                        placeholder="${ec.l10n.localize("Password")}" aria-label="${ec.l10n.localize("Password")}">
             </#if>
             <button class="btn btn-lg btn-primary btn-block" type="submit">${ec.l10n.localize("Sign in")}</button>
             <#if expiredCredentials><p class="text-warning text-center">WARNING: Your password has expired</p></#if>
             <#if passwordChangeRequired><p class="text-warning text-center">WARNING: Password change required</p></#if>
         </form>
-        <script>$("#login_form_username").focus();</script>
     </div>
     <div id="reset" class="tab-pane">
         <form method="post" action="${sri.buildUrl("resetPassword").url}" class="form-signin" id="reset_form">
             <p class="text-muted text-center">${ec.l10n.localize("Enter your username to email a reset password")}</p>
             <input type="hidden" name="moquiSessionToken" value="${ec.web.sessionToken}">
             <input type="hidden" name="initialTab" value="reset">
-            <input type="text" name="username" value="${(username!"")?html}" required="required" class="form-control"
+            <input id="reset_form_username" type="text" name="username" inputmode="email" value="${(username!"")?html}"
                    <#if username?has_content && secondFactorRequired>disabled="disabled"</#if>
+                   required="required" class="form-control"
                    placeholder="${ec.l10n.localize("Username")}" aria-label="${ec.l10n.localize("Username")}">
             <button class="btn btn-lg btn-danger btn-block" type="submit">${ec.l10n.localize("Email Reset Password")}</button>
         </form>
@@ -75,23 +75,25 @@
             <p class="text-muted text-center">${ec.l10n.localize("Enter details to change your password")}</p>
             <input type="hidden" name="moquiSessionToken" value="${ec.web.sessionToken}">
             <input type="hidden" name="initialTab" value="change">
-            <input type="text" name="username" value="${(username!"")?html}" required="required" class="form-control top"
+            <input id="change_form_username" name="username" type="text" inputmode="email"
+                   <#if !username?has_content && !secondFactorRequired>autocomplete="username"</#if> value="${(username!"")?html}"
                    <#if username?has_content && secondFactorRequired>disabled="disabled"</#if>
+                   required="required" class="form-control top"
                    placeholder="${ec.l10n.localize("Username")}" aria-label="${ec.l10n.localize("Username")}">
             <#-- secondFactorRequired will only be set if a user is pre-authenticated, and in that case password not required again -->
             <#if secondFactorRequired>
                 <input type="hidden" name="oldPassword" value="ignored">
-                <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required="required"
-                       placeholder="${ec.l10n.localize("Authentication Code")}" class="form-control middle"
-                       aria-label="${ec.l10n.localize("Authentication Code")}">
+                <input id="change_form_code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+                       required="required" class="form-control middle"
+                       placeholder="${ec.l10n.localize("Authentication Code")}" aria-label="${ec.l10n.localize("Authentication Code")}">
             <#else>
-                <input type="password" name="oldPassword" required="required" class="form-control middle"
+                <input type="password" name="oldPassword" autocomplete="current-password" id="current-password" required="required" class="form-control middle"
                        placeholder="${ec.l10n.localize("Old Password")}" aria-label="${ec.l10n.localize("Old Password")}">
             </#if>
             <#-- FUTURE: fancy JS to validate PW as it is entered or on blur -->
-            <input type="password" name="newPassword" required="required" class="form-control middle"
+            <input type="password" name="newPassword" autocomplete="new-password" id="new-password" required="required" class="form-control middle"
                    placeholder="${ec.l10n.localize("New Password")}" aria-label="${ec.l10n.localize("New Password")}">
-            <input type="password" name="newPasswordVerify" required="required" class="form-control bottom"
+            <input type="password" name="newPasswordVerify" autocomplete="new-password" id="new-password" required="required" class="form-control bottom"
                    placeholder="${ec.l10n.localize("New Password Verify")}" aria-label="${ec.l10n.localize("New Password Verify")}">
             <button class="btn btn-lg btn-danger btn-block" type="submit">${ec.l10n.localize("Change Password")}</button>
 
@@ -106,10 +108,10 @@
             <input type="hidden" name="moquiFormName" value="createAccount">
             <input type="text" name="firstName" value="${(ec.getWeb().getErrorParameters().get("firstName"))!""}" placeholder="First Name" class="form-control top required" required="required">
             <input type="text" name="lastName" value="${(ec.getWeb().getErrorParameters().get("lastName"))!""}" placeholder="Last Name" class="form-control middle required" required="required">
-            <input type="email" name="emailAddress" value="${(ec.getWeb().getErrorParameters().get("emailAddress"))!""}" placeholder="Email" class="form-control middle email required" required="required">
-            <input type="text" name="username" value="${(ec.getWeb().getErrorParameters().get("username"))!""}" placeholder="Username" class="form-control middle">
-            <input type="password" class="form-control middle required" name="newPassword" placeholder="Password" required="required">
-            <input type="password" class="form-control bottom required" name="newPasswordVerify" placeholder="Verify Password" required="required">
+            <input type="email" inputmode="email" name="emailAddress" value="${(ec.getWeb().getErrorParameters().get("emailAddress"))!""}" placeholder="Email" class="form-control middle email required" required="required">
+            <input type="text" inputmode="email" name="username" value="${(ec.getWeb().getErrorParameters().get("username"))!""}" placeholder="Username" class="form-control middle">
+            <input type="password" class="form-control middle required" name="newPassword" autocomplete="new-password" id="new-password" placeholder="Password" required="required">
+            <input type="password" class="form-control bottom required" name="newPasswordVerify" autocomplete="new-password" id="new-password" placeholder="Verify Password" required="required">
 
             <p class="text-muted text-left">By signing up, you agree to our <#list agreementList as agreement><a href="${agreement.contentLocation}">${agreement.typeDescription}</a><#sep>, </#list>.</p>
 
@@ -149,9 +151,19 @@
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             var $target = $(e.target);
             window.location.hash = $target.attr('href');
-            $('.initial-tab').val(window.location.hash.slice(1));
+            var tabName = window.location.hash.slice(1);
+            $('.initial-tab').val(tabName);
             $target.addClass("text-strong").removeClass("text-primary");
             if (e.relatedTarget) $(e.relatedTarget).removeClass("text-strong").addClass("text-primary");
+            <#if username?has_content && secondFactorRequired>
+            if (tabName === "login") { $("#login_form_code").focus(); }
+            else if (tabName === "change") { $("#change_form_code").focus(); }
+            else if (tabName === "reset") { $("#reset_form_username").focus(); }
+            <#else>
+            if (tabName === "login") { $("#login_form_username").focus(); }
+            else if (tabName === "change") { $("#change_form_username").focus(); }
+            else if (tabName === "reset") { $("#reset_form_username").focus(); }
+            </#if>
         });
         $('a[href="' + (location.hash || '${initialTab!"#login"}') + '"]').tab('show');
     })

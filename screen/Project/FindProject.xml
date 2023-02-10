@@ -13,7 +13,7 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Projects" default-menu-index="5" default-menu-include="false" standalone="true" menu-image="/ssstatic/images/project-business120.png">
+        default-menu-title="Projects" default-menu-index="5" default-menu-include="false" menu-image="/ssstatic/images/project-business120.png">
 
     <transition name="createProject"><actions>
         <service-call name="resistmanagement.ResistServices.create#Project" in-map="[partyId:partyId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]" out-map="context"/>
