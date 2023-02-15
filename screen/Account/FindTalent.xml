@@ -47,7 +47,6 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="emplPositionClassId" operator="not-in" from="epcpcList?.emplPositionClassId"/>
             <order-by field-name="title"/></entity-find>
 
-
         <set field="talentTaskList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
     <widgets>
