@@ -13,7 +13,38 @@
 <!--<http://creativecommons.org/publicdomain/zero/1.0/>.-->
 <!--&ndash;&gt;-->
 <screen-extend xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd">
+    <transition name="manifest.webmanifest" read-only="true">
+        <actions><script><![CDATA[
+            def manifestOut = [
+                    name: "Resist Management",
+                    short_name: "Resist Management",
+                    icons: [
+                            [
+                                    src: '/r/images/ResistSquareBlack200.png',
+                                    type: "image/png",
+                                    sizes: "200x200"
+                            ],
+                            [
+                                    src: '/r/images/ResistSquareBlack500.png',
+                                    type: "image/png",
+                                    sizes: "500x500"
+                            ]
+                    ],
+                    start_url: "/",
+                    display: "fullscreen",
+                    prefer_related_applications: true
+            ];
+            ec.web.sendJsonResponse(manifestOut)
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
 
-<!--    <transition-include name="manifest.json" location="component://webroot/screen/webroot.xml"/>-->
-
+<!--    <transition name="serviceWorker.js" read-only="true">-->
+<!--        <actions><script><![CDATA[-->
+<!--            ec.web.sendResourceResponse("component://webroot/screen/webroot/serviceWorker.js")-->
+<!--            ]]></script>-->
+<!--        </actions>-->
+<!--        <default-response type="none"/>-->
+<!--    </transition>-->
 </screen-extend>

@@ -14,6 +14,6 @@
 <!--&ndash;&gt;-->
 <screen-extend xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd">
 
-<!--    <transition-include name="manifest.json" location="component://webroot/screen/webroot.xml"/>-->
+<!--    <transition-include name="manifest.webmanifest" location="component://webroot/screen/webroot/apps.xml"/>-->
 
 </screen-extend>
