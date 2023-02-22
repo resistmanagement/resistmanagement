@@ -49,13 +49,11 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
             <econdition field-name="contentLocation" operator="is-not-null"/>
             <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
-            <order-by field-name="-contentDate"/>
-        </entity-find>
+            <order-by field-name="-contentDate"/></entity-find>
         <if condition="accountContentList"><set field="newMessage.contentUrl" from="'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
         <set field="newMessage.fromPseudoId" from="accountContentList.getFirst()?.party?.pseudoId"/>
         <set field="newMessage.sent" from="true"/>
         <script>ec.web.sendJsonResponse([newMessage:newMessage])</script>
-
     </actions><default-response type="none"/></transition>
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
     <transition name="getMessages" read-only="true">
@@ -104,6 +102,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!--                <log level="warn" message="partyContent ${partyContent}"/>-->
                 <!--                <log level="warn" message="commEvent.fromPartyId ${commEvent.fromPartyId}"/>-->
                 <set field="message" from="[communicationEventId:communicationEventId, partyId:partyContent.partyId, fromPseudoId:partyContent.party.pseudoId, body: commEvent.body, contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>
+                <set field="message.sent" from="commEvent.fromPartyId == fromPartyId"/>
                 <script>messageList.add(message)</script>
             </iterate>
 
