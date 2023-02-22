@@ -1369,7 +1369,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
 
                 <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
-                    <econdition field-name="partyId" operator="in" from="partyRelationshipList*.fromPartyId"/></entity-find>
+                    <econdition field-name="partyId" operator="in" from="partyRelationshipList*.fromPartyId"/>
+                    <select-field field-name="userId"/></entity-find>
 
                 <entity-find-one entity-name="mantle.party.Party" value-field="fromParty" auto-field-map="[partyId:document.fromPartyId]"/>
                 <set field="document.fromPseudoId" from="fromParty.pseudoId"/>
@@ -1382,10 +1383,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
 <!--                <log level="warn" message="accountContentList ${accountContentList}"/>-->
                 <if condition="accountContentList"><set field="document.contentUrl" from="'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
-                <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:document.fromPartyId]" out-map="AccountEdit"/>
-                <set field="document.sent" from="AccountEdit?.allowed" type="Boolean"/>
+                <set field="document.sent" from="false" type="Boolean"/>
 
-                <log level="warn" message="document ${document}"/>
+<!--                <log level="warn" message="document ${document}"/>-->
+<!--                <log level="warn" message="context.toString() ${context.toString()}"/>-->
 
                 <script><![CDATA[
                     def nm = ec.makeNotificationMessage()
