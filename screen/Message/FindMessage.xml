@@ -41,14 +41,27 @@ along with this software (see the LICENSE.md file). If not, see
     </always-actions>
 
     <transition name="createMessage"><actions>
-        <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="accountEdit"/>
-        <if condition="!accountEdit?.allowed"><return message="Not allowed" error="true"/></if>
-        <service-call name="mantle.party.CommunicationServices.create#Message" in-map="[toPartyId:toPartyId,fromPartyId:fromPartyId,body:body,communicationEventTypeId:'ResistChatMessage']"/></actions>
-        <default-response url="."/></transition>
+        <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="AccountEdit"/>
+        <if condition="!AccountEdit?.allowed"><return message="Not allowed" error="true"/></if>
+        <service-call name="mantle.party.CommunicationServices.create#Message" in-map="[toPartyId:toPartyId,fromPartyId:fromPartyId,body:body,communicationEventTypeId:'ResistChatMessage']" out-map="NewMessage"/>
+        <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
+            <econdition field-name="partyId" from="fromPartyId"/>
+            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="contentLocation" operator="is-not-null"/>
+            <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+            <order-by field-name="-contentDate"/>
+        </entity-find>
+        <if condition="accountContentList"><set field="NewMessage.contentUrl" from="'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
+        <set field="NewMessage.fromPseudoId" from="accountContentList.getFirst()?.party?.pseudoId"/>
+        <set field="NewMessage.sent" from="true"/>
+    </actions><default-response url="." parameter-map="NewMessage"/></transition>
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
-    <transition name="getMessages" read-only="true">
+    <transition name="getMessages">
         <actions>
-            <!--        <log level="warn" message="context ${context.toString()}"/>-->
+            <log level="warn" message="context ${context.toString()}"/>
+
+            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="AccountEdit"/>
+            <if condition="!AccountEdit?.allowed"><return message="Not allowed" error="true"/></if>
 
             <set field="accountList" from="[fromPartyId, toPartyId]"/>
             <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
@@ -58,7 +71,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
                 <order-by field-name="-contentDate"/>
             </entity-find>
-            <!--        <log level="warn" message="accountContentList ${accountContentList.partyId}"/>-->
+            <log level="warn" message="accountContentList ${accountContentList.partyId}"/>
 
             <set field="toParty" from="accountContentList?.find{it.partyId == toPartyId}"/>
             <set field="fromParty" from="accountContentList?.find{it.partyId == fromPartyId}"/>
@@ -90,15 +103,18 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="commEventList" entry="commEvent">
                 <set field="partyContent" from="accountContentList?.find{it.partyId == commEvent.fromPartyId}"/>
 <!--                <log level="warn" message="partyContent ${partyContent}"/>-->
-<!--                <log level="warn" message="commEvent.fromPartyId ${commEvent.fromPartyId}"/>-->
-                <set field="message" from="[communicationEventId:communicationEventId, partyId:partyContent.partyId, fromPseudoId:partyContent.party.pseudoId, body: commEvent.body, contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>
+<!--                <log level="warn" message="commEvent ${commEvent}"/>-->
+
+<!--                <set field="message" from="[communicationEventId:commEvent.communicationEventId, partyId:partyContent.partyId, fromPseudoId:partyContent.party.pseudoId, sent:, body:commEvent.body, contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>-->
+                <set field="message" from="[communicationEventId:commEvent.communicationEventId, partyId:partyContent.partyId, fromPseudoId:partyContent.party.pseudoId, body:commEvent.body, contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>
+                <set field="message.sent" from="fromPartyId==commEvent.fromPartyId" type="Boolean"/>
                 <script>messageList.add(message)</script>
             </iterate>
 
-<!--            <log level="warn" message="messageList ${messageList}"/>-->
+            <log level="warn" message="messageList ${messageList}"/>
             <script>ec.web.sendJsonResponse([messageList:messageList])</script>
         </actions>
-        <default-response url="."/></transition>
+        <default-response url="." parameter-map=""/></transition>
 
     <widgets>
         <render-mode><text type="qvue"><![CDATA[
@@ -110,7 +126,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     :key="chatData.communicationEventId"
                                     :name="chatData.fromPseudoId"
                                     :avatar="chatData.contentUrl"
-                                    :text="[chatData.body]"/>
+                                    :text="[chatData.body]"
+                                    />
                         </template>
                         <q-form @submit.prevent="createMessage" autocapitalize="off" autocomplete="off" class="q-pa-md">
                             <m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line>
@@ -127,12 +144,12 @@ along with this software (see the LICENSE.md file). If not, see
                     } },
                     methods: {
                         updateChatDataList: function() {
-                            console.log(this)
+                            // console.log(this)
                             var vm = this;
                             $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
-                                dataType:"json", headers:{ Accept:'application/json' },
+                                dataType:"json", headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
                                 error: moqui.handleAjaxError,
-                                data: vm.$root.currentParameters,
+                                data: JSON.stringify(vm.$root.currentParameters),
                                 success: function(responseObj, status, jqXHR) {
                                     // update display objects
                                     vm.chatDataList = responseObj.messageList;
@@ -146,15 +163,18 @@ along with this software (see the LICENSE.md file). If not, see
                                 headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
                                 error:moqui.handleAjaxError,
                                 success: function(responseObj, status, jqXHR) {
+                                    vm.chatDataList.push({body:vm.newServiceInfo.body, communicationEventId:responseObj.screenParameters.communicationEventId, contentUrl:responseObj.screenParameters.contentUrl, fromPseudoId:responseObj.screenParameters.fromPseudoId, sent:responseObj.screenParameters.sent, partyId:vm.newServiceInfo.fromPartyId})
                                     vm.newServiceInfo.body = ""
-                                    // vm.updateChatDataList();
                                 }
                             });
                         },
                         notificationCallback: function (jsonObj, webSocket) {
-                            console.log('notificationCallback')
-                            console.log(jsonObj)
-                            this.chatDataList.push(jsonObj.message)
+                            // console.log('notificationCallback')
+                            // console.log(jsonObj)
+                            // console.log(this.chatDataList)
+                            // console.log(this.chatDataList[this.chatDataList.length-1])
+                            if (this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId)
+                                this.chatDataList.push(jsonObj.message)
                         }
                     },
                     mounted: function() {
