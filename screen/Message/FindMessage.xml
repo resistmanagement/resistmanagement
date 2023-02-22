@@ -56,7 +56,7 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="NewMessage.sent" from="true"/>
     </actions><default-response url="." parameter-map="NewMessage"/></transition>
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
-    <transition name="getMessages">
+    <transition name="getMessages" read-only="true">
         <actions>
             <log level="warn" message="context ${context.toString()}"/>
 
@@ -111,10 +111,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>messageList.add(message)</script>
             </iterate>
 
-            <log level="warn" message="messageList ${messageList}"/>
+<!--            <log level="warn" message="messageList ${messageList}"/>-->
             <script>ec.web.sendJsonResponse([messageList:messageList])</script>
         </actions>
-        <default-response url="." parameter-map=""/></transition>
+        <default-response url="."/></transition>
 
     <widgets>
         <render-mode><text type="qvue"><![CDATA[
@@ -147,11 +147,12 @@ along with this software (see the LICENSE.md file). If not, see
                             // console.log(this)
                             var vm = this;
                             $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
-                                dataType:"json", headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
+                                dataType:"json", headers:{ Accept:'application/json' },
                                 error: moqui.handleAjaxError,
-                                data: JSON.stringify(vm.$root.currentParameters),
+                                data: vm.$root.currentParameters,
                                 success: function(responseObj, status, jqXHR) {
                                     // update display objects
+                                    // if (responseObj.messageList != null)
                                     vm.chatDataList = responseObj.messageList;
                                 }
                             });
@@ -163,7 +164,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
                                 error:moqui.handleAjaxError,
                                 success: function(responseObj, status, jqXHR) {
-                                    vm.chatDataList.push({body:vm.newServiceInfo.body, communicationEventId:responseObj.screenParameters.communicationEventId, contentUrl:responseObj.screenParameters.contentUrl, fromPseudoId:responseObj.screenParameters.fromPseudoId, sent:responseObj.screenParameters.sent, partyId:vm.newServiceInfo.fromPartyId})
+                                    vm.chatDataList.push({body:vm.newServiceInfo.body, communicationEventId:responseObj.screenParameters.communicationEventId, contentUrl:responseObj.screenParameters.contentUrl, fromPseudoId:responseObj.screenParameters.fromPseudoId, partyId:vm.newServiceInfo.fromPartyId})
                                     vm.newServiceInfo.body = ""
                                 }
                             });
