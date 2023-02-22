@@ -13,14 +13,15 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
-        default-menu-title="Messages" default-menu-index="5" menu-image="fa fa-comment" menu-image-type="icon" default-menu-include="true">
+        default-menu-title="Messages" default-menu-index="3" default-menu-include="false" render-modes="vue,qvue" server-static="vue,qvue" standalone="true">
 
-    <parameter name="toPartyId" required="true"/>
+    <!-- TODO: Change these to makes sense in the context of a screen not a message. -->
+    <parameter name="toPartyId"/>
     <parameter name="fromPartyId"/>
 
     <always-actions>
         <!-- TODO: Fix how this is handled for john.doe -->
-<!--        <log level="warn" message="toPartyId ${toPartyId}"/>-->
+        <!--        <log level="warn" message="toPartyId ${toPartyId}"/>-->
         <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true" cache="true">
             <econdition field-name="roleTypeId" value="ClientManager"/>
             <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
@@ -32,95 +33,140 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
             <date-filter/><select-field field-name="partyId"/>
         </entity-find>
-<!--        <log level="warn" message="accountList ${accountList}"/>-->
+        <!--        <log level="warn" message="accountList ${accountList}"/>-->
         <set field="fromPartyId" from="accountList?.getFirst()?.partyId"/>
         <if condition="!fromPartyId"><return message="Not allowed" error="true" type="danger"/></if>
         <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="checkAccountEdit"/>
         <if condition="!checkAccountEdit.allowed"><return message="Not allowed" error="true" type="danger"/></if>
     </always-actions>
 
-    <transition name="createMessage"><service-call name="mantle.party.CommunicationServices.create#Message"/>
+    <transition name="createMessage"><actions>
+        <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="accountEdit"/>
+        <if condition="!accountEdit?.allowed"><return message="Not allowed" error="true"/></if>
+        <service-call name="mantle.party.CommunicationServices.create#Message" in-map="[toPartyId:toPartyId,fromPartyId:fromPartyId,body:body,communicationEventTypeId:'ResistChatMessage']"/></actions>
         <default-response url="."/></transition>
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
+    <transition name="getMessages" read-only="true">
+        <actions>
+            <!--        <log level="warn" message="context ${context.toString()}"/>-->
 
-    <actions>
-        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSetting" list="accountList" distinct="true">
-            <econdition field-name="partyId" from="toPartyId"/>
-            <econdition field-name="roleTypeId" value="ClientManager"/>
-            <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
-            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
-            <econdition field-name="contentLocation" operator="is-not-null"/>
-            <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
-            <order-by field-name="-contentDate"/>
-        </entity-find>
-        <set field="toParty" from="accountList?.getFirst()"/>
+            <set field="accountList" from="[fromPartyId, toPartyId]"/>
+            <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
+                <econdition field-name="partyId" operator="in" from="accountList"/>
+                <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+                <econdition field-name="contentLocation" operator="is-not-null"/>
+                <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+                <order-by field-name="-contentDate"/>
+            </entity-find>
+            <!--        <log level="warn" message="accountContentList ${accountContentList.partyId}"/>-->
 
-        <log level="warn" message="toParty ${toParty}"/>
+            <set field="toParty" from="accountContentList?.find{it.partyId == toPartyId}"/>
+            <set field="fromParty" from="accountContentList?.find{it.partyId == fromPartyId}"/>
 
-        <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList">
-            <econditions combine="or">
-                <econditions>
-                    <econdition field-name="fromPartyId" ignore-if-empty="true"/>
-                    <econdition field-name="toPartyId" ignore-if-empty="true"/>
+<!--            <log level="warn" message="toParty ${toParty}"/>-->
+<!--            <log level="warn" message="fromParty ${fromParty}"/>-->
+
+            <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList">
+                <econditions combine="or">
+                    <econditions>
+                        <econdition field-name="fromPartyId" ignore-if-empty="true"/>
+                        <econdition field-name="toPartyId" ignore-if-empty="true"/>
+                    </econditions>
+                    <econditions>
+                        <econdition field-name="fromPartyId" from="toPartyId" ignore-if-empty="true"/>
+                        <econdition field-name="toPartyId" from="fromPartyId" ignore-if-empty="true"/>
+                    </econditions>
                 </econditions>
-                <econditions>
-                    <econdition field-name="fromPartyId" from="toPartyId" ignore-if-empty="true"/>
-                    <econdition field-name="toPartyId" from="fromPartyId" ignore-if-empty="true"/>
-                </econditions>
-            </econditions>
-            <econdition field-name="communicationEventTypeId" operator="in" value="Message"/>
-            <select-field field-name="communicationEventId"/><select-field field-name="entryDate"/>
-            <select-field field-name="statusId"/><select-field field-name="fromPartyId"/><select-field field-name="toPartyId"/>
-            <select-field field-name="body"/>
-            <order-by field-name="entryDate"/>
-        </entity-find>
+                <econdition field-name="communicationEventTypeId" value="ResistChatMessage"/>
+                <select-field field-name="communicationEventId"/><select-field field-name="entryDate"/>
+                <select-field field-name="statusId"/><select-field field-name="fromPartyId"/><select-field field-name="toPartyId"/>
+                <select-field field-name="body"/>
+                <order-by field-name="entryDate"/>
+            </entity-find>
 
-        <set field="messageTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
-    </actions>
+<!--            <log level="warn" message="commEventList ${commEventList}"/>-->
+
+            <set field="messageList" from="[]"/>
+            <iterate list="commEventList" entry="commEvent">
+                <set field="partyContent" from="accountContentList?.find{it.partyId == commEvent.fromPartyId}"/>
+<!--                <log level="warn" message="partyContent ${partyContent}"/>-->
+<!--                <log level="warn" message="commEvent.fromPartyId ${commEvent.fromPartyId}"/>-->
+                <set field="message" from="[communicationEventId:communicationEventId, partyId:partyContent.partyId, fromPseudoId:partyContent.party.pseudoId, body: commEvent.body, contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>
+                <script>messageList.add(message)</script>
+            </iterate>
+
+<!--            <log level="warn" message="messageList ${messageList}"/>-->
+            <script>ec.web.sendJsonResponse([messageList:messageList])</script>
+        </actions>
+        <default-response url="."/></transition>
+
     <widgets>
-        <form-list name="ListMessage" list="messageTitleList" skip-header="true" skip-form="true">
-            <field name="profilePicture"><default-field><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:toParty.partyContentId]" width="100px"/></default-field></field>
-            <field name="title"><default-field><label text="${toParty.pseudoId}" type="h2"/></default-field></field>
-        </form-list>
+        <render-mode><text type="qvue"><![CDATA[
+            <template>
+                <div class="q-pa-md row justify-center">
+                    <div style="width: 100%; max-width: 400px">
+                        <template v-for="chatData in chatDataList">
+                            <q-chat-message
+                                    :key="chatData.communicationEventId"
+                                    :name="chatData.fromPseudoId"
+                                    :avatar="chatData.contentUrl"
+                                    :text="[chatData.body]"/>
+                        </template>
+                        <q-form @submit.prevent="createMessage" autocapitalize="off" autocomplete="off" class="q-pa-md">
+                            <m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line>
 
-        <form-list name="MessageList" list="commEventList" skip-form="true" header-dialog="true" saved-finds="true" paginate="false" skip-header="true">
-            <row-actions>
-                <entity-find entity-name="mantle.party.communication.CommunicationEventPurpose" list="cepList">
-                    <econdition field-name="communicationEventId"/><order-by field-name="purposeEnumId"/></entity-find>
-            </row-actions>
-            <hidden-parameters><parameter name="partyId"/></hidden-parameters>
-
-            <field name="entryDate"><header-field show-order-by="true"/>
-                <default-field title="Date"><display format="MMMMM dd HH:mm"/></default-field>
-            </field>
-            <field name="fromPartyId">
-                <default-field><display-entity entity-name="mantle.party.PartyDetail" also-hidden="false"
-                                               key-field-name="partyId" text="PartyNameTemplate"/></default-field>
-            </field>
-
-            <field name="body"><default-field title="Message"><label text="${body}"/></default-field></field>
-
-<!--            <form-list-column><field-ref name="fromPartyId"/><field-ref name="toPartyId"/></form-list-column>-->
-            <form-list-column><field-ref name="fromPartyId"/></form-list-column>
-            <form-list-column><field-ref name="entryDate"/></form-list-column>
-            <form-list-column><field-ref name="body"/></form-list-column>
-        </form-list>
-
-
-        <form-single name="CreateMessage" transition="createMessage">
-            <field name="partyId"><default-field><hidden/></default-field></field>
-            <field name="fromPartyId"><default-field title="From"><hidden/></default-field></field>
-            <field name="toPartyId"><default-field title="To"><hidden/></default-field></field>
-
-            <field name="body"><default-field title="Message"><text-area cols="80" rows="2"/></default-field></field>
-
-            <field name="submitButton"><default-field title="Send"><submit/></default-field></field>
-
-            <field-layout>
-                <field-row-big>
-                    <field-ref name="body"/><field-ref name="submitButton"/>
-                </field-row-big>
-            </field-layout>
-        </form-single>
+                            <q-btn dense outline no-caps color="primary" type="submit" name="submitBtn" label="Send"></q-btn>
+                        </q-form>
+                    </div>
+                </div>
+            </template>
+            <script>
+                module.exports = {
+                    data: function() { return {
+                        chatDataList: [], newServiceInfo:{ body:"", fromPartyId:this.$root.currentParameters.fromPartyId, toPartyId:this.$root.currentParameters.toPartyId },
+                    } },
+                    methods: {
+                        updateChatDataList: function() {
+                            console.log(this)
+                            var vm = this;
+                            $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
+                                dataType:"json", headers:{ Accept:'application/json' },
+                                error: moqui.handleAjaxError,
+                                data: vm.$root.currentParameters,
+                                success: function(responseObj, status, jqXHR) {
+                                    // update display objects
+                                    vm.chatDataList = responseObj.messageList;
+                                }
+                            });
+                        },
+                        createMessage: function() {
+                            var vm = this;
+                            $.ajax({ type:"POST", url:"/apps/Message/FindMessage/createMessage",
+                                data:this.newServiceInfo, dataType:"json",
+                                headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
+                                error:moqui.handleAjaxError,
+                                success: function(responseObj, status, jqXHR) {
+                                    vm.newServiceInfo.body = ""
+                                    // vm.updateChatDataList();
+                                }
+                            });
+                        },
+                        notificationCallback: function (jsonObj, webSocket) {
+                            console.log('notificationCallback')
+                            console.log(jsonObj)
+                            this.chatDataList.push(jsonObj.message)
+                        }
+                    },
+                    mounted: function() {
+                        // console.log('FindMessage mounted')
+                        // get chat right away
+                        this.updateChatDataList();
+                        this.$root.notificationClient.registerListener("ResistChatEvent", this.notificationCallback);
+                    },
+                }
+            </script>
+            ]]></text><text type="html,vuet"><![CDATA[
+            <p><strong>Only supported in the 'qvt' render mode, go to the same URL under /qapps (instead of /apps or /vapps)</strong></p>
+            ]]></text></render-mode>
     </widgets>
 </screen>

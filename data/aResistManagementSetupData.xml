@@ -339,4 +339,34 @@ along with this software (see the LICENSE.md file). If not, see
 <!--    <moqui.screen.ScreenThemeResource screenThemeId="RESIST_MANAGEMENT_DEFAULT" sequenceNum="50" resourceTypeEnumId="STRT_STYLESHEET"-->
 <!--                                      resourceValue="/apps/resistmanagement/css/resistmanagement.css"/>-->
 
+    <!-- ========================================================= -->
+    <!-- ========== Resist Management Notification Data ========== -->
+    <!-- ========================================================= -->
+    <moqui.security.user.NotificationTopic topic="ResistChatEvent" description="Resist Chat Update Event"
+        typeString="info" showAlert="Y" persistOnSend="N" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
+        titleTemplate="${fromPseudoId} said ${body}"
+        linkTemplate="/qapps/Message/FindMessage?fromPartyId=${fromPartyId}&amp;toPartyId=${toPartyId}"/>
+
+    <CommunicationEventType communicationEventTypeId="ResistChatMessage" description="Message"/>
+
+    <dataDocuments dataDocumentId="ResistChatEvent" indexName="mantle" documentName="Resist Chat Event"
+                   primaryEntityName="mantle.party.communication.CommunicationEvent" documentTitle="${body.take(80)}">
+        <fields fieldSeqId="01" fieldPath="communicationEventId"/>
+        <fields fieldSeqId="02" fieldPath="communicationEventTypeId"/>
+        <conditions conditionSeqId="02" fieldNameAlias="communicationEventTypeId" fieldValue="ResistChatMessage"/>
+        <fields fieldSeqId="04" fieldPath="statusId"/>
+        <fields fieldSeqId="10" fieldPath="fromPartyId"/>
+        <fields fieldSeqId="12" fieldPath="toPartyId"/>
+
+        <fields fieldSeqId="20" fieldPath="entryDate"/>
+        <fields fieldSeqId="24" fieldPath="contentType"/>
+        <fields fieldSeqId="25" fieldPath="body"/>
+    </dataDocuments>
+
+    <moqui.entity.feed.DataFeed dataFeedId="ResistChatNotifications" dataFeedTypeEnumId="DTFDTP_RT_PUSH"
+        feedName="Resist Chat Notifications" feedReceiveServiceName="resistmanagement.ResistServices.send#DataDocumentChatNotifications"
+        feedDeleteServiceName="org.moqui.impl.BasicServices.noop">
+        <documents dataDocumentId="ResistChatEvent"/>
+    </moqui.entity.feed.DataFeed>
+
 </entity-facade-xml>

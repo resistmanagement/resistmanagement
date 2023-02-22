@@ -1353,34 +1353,46 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <!-- Messages -->
-<!--    <service verb="create" noun="ProjectMessage">-->
-<!--        <in-parameters>-->
-<!--            <parameter name="workEffortId" required="true"/>-->
-<!--            <parameter name="toPartyId" required="true"/>-->
-<!--            <parameter name="body" required="true"/>-->
-<!--            <parameter name="communicationEventTypeId" default-value="Message"/>-->
-<!--            <parameter name="statusId" default-value="CeReceived"/>-->
-<!--            <parameter name="entryDate" default="ec.user.nowTimestamp"/>-->
-<!--        </in-parameters>-->
-<!--        <out-parameters>-->
-<!--            <parameter name="communicationEventId"/>-->
-<!--            <parameter name="workEffortId"/>-->
-<!--        </out-parameters>-->
-<!--        <actions>-->
-<!--            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>-->
-<!--            <if condition="!project"><return type="warning" message="Project not found with Id ${workEffortId}"/></if>-->
+    <service verb="send" noun="DataDocumentChatNotifications" authenticate="false">
+        <description>
+            Like the 'org.moqui.impl.EntityServices.send#DataDocumentNotifications' but also looks for partyId/fromPartyId/toPartyId
+            fields in the DataDocument and looks up their UserAccount.userId values if there are any to notify those users.
+        </description>
+        <implements service="org.moqui.EntityServices.receive#DataFeed"/>
+        <actions>
+            <iterate list="documentList" entry="document">
+                <entity-find entity-name="mantle.party.PartyRelationship" list="partyRelationshipList">
+                    <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                    <econdition field-name="toRoleTypeId" value="ClientManager"/>
+                    <econdition field-name="toPartyId" from="document.toPartyId"/>
+                    <date-filter/>
+                </entity-find>
 
-<!--            <set field="fromPartyId" from="ec.user.userAccount.partyId"/>-->
-<!--            <service-call name="create#mantle.party.communication.CommunicationEvent" in-map="context" out-map="context"/>-->
-<!--            <service-call name="create#mantle.work.effort.WorkEffortCommEvent" in-map="context" out-map="context"/>-->
+                <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
+                    <econdition field-name="partyId" operator="in" from="partyRelationshipList*.fromPartyId"/></entity-find>
 
-<!--&lt;!&ndash;            <log level="warn" message="toPartyId ${toPartyId}"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <log level="warn" message="project.parties*.partyId?.contains(toPartyId) ${project.parties*.partyId}"/>&ndash;&gt;-->
-<!--            <if condition="!project.parties*.partyId?.contains(toPartyId)">-->
-<!--&lt;!&ndash;                <service-call name="mantle.work.WorkEffortServices.add#WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:toPartyId, roleTypeId:]"&ndash;&gt;-->
-<!--            </if>-->
+                <entity-find-one entity-name="mantle.party.Party" value-field="fromParty" auto-field-map="[partyId:document.fromPartyId]"/>
+                <set field="document.fromPseudoId" from="fromParty.pseudoId"/>
+                <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
+                    <econdition field-name="partyId" from="document.fromPartyId"/>
+                    <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+                    <econdition field-name="contentLocation" operator="is-not-null"/>
+                    <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+                    <order-by field-name="-contentDate"/>
+                </entity-find>
+<!--                <log level="warn" message="accountContentList ${accountContentList}"/>-->
+                <if condition="accountContentList"><set field="document.contentUrl" from="'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
 
-<!--        </actions>-->
-<!--    </service>-->
+                <log level="warn" message="document ${document}"/>
+
+                <script><![CDATA[
+                    def nm = ec.makeNotificationMessage()
+                    nm.topic((String) document._type).message((Map<String, Object>) document)
+                    if (userAccountList) nm.userIds(new HashSet(userAccountList*.userId))
+                    nm.send()
+                    ]]></script>
+            </iterate>
+        </actions>
+    </service>
 
 </services>
