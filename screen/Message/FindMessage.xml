@@ -76,7 +76,10 @@ along with this software (see the LICENSE.md file). If not, see
             <!--            <log level="warn" message="toParty ${toParty}"/>-->
             <!--            <log level="warn" message="fromParty ${fromParty}"/>-->
 
-            <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList">
+<!--            <log level="warn" message="offset ${offset}"/>-->
+            <set field="offset" from="offset?:0" type="Integer"/>
+            <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList" limit="20" offset="offset*20">
+
                 <econditions combine="or">
                     <econditions>
                         <econdition field-name="fromPartyId" ignore-if-empty="true"/>
@@ -91,7 +94,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="communicationEventId"/><select-field field-name="entryDate"/>
                 <select-field field-name="statusId"/><select-field field-name="fromPartyId"/><select-field field-name="toPartyId"/>
                 <select-field field-name="body"/>
-                <order-by field-name="entryDate"/>
+                <order-by field-name="-entryDate"/>
             </entity-find>
 
             <!--            <log level="warn" message="commEventList ${commEventList}"/>-->
@@ -101,7 +104,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="partyContent" from="accountContentList?.find{it.partyId == commEvent.fromPartyId}"/>
                 <!--                <log level="warn" message="partyContent ${partyContent}"/>-->
                 <!--                <log level="warn" message="commEvent.fromPartyId ${commEvent.fromPartyId}"/>-->
-                <set field="message" from="[communicationEventId:communicationEventId, partyId:partyContent.partyId, fromPseudoId:partyContent.party.pseudoId, body: commEvent.body, contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>
+                <set field="message" from="[
+                    communicationEventId:commEvent.communicationEventId,
+                    partyId:partyContent.partyId,
+                    fromPseudoId:partyContent.party.pseudoId,
+                    body:commEvent.body,
+                    contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>
                 <set field="message.sent" from="commEvent.fromPartyId == fromPartyId"/>
                 <script>messageList.add(message)</script>
             </iterate>
@@ -116,15 +124,23 @@ along with this software (see the LICENSE.md file). If not, see
             <template>
                 <div class="q-pa-md row justify-center">
                     <div style="width: 100%; max-width: 400px">
-                        <template v-for="chatData in chatDataList">
-                            <q-chat-message
-                                    :key="chatData.communicationEventId"
-                                    :name="chatData.fromPseudoId"
-                                    :avatar="chatData.contentUrl"
-                                    :text="[chatData.body]"
-                                    :sent="chatData.sent"
-                                    />
-                        </template>
+                        <q-infinite-scroll @load="onLoad" :initial-index="0" :offset="250" reverse>
+                            <template slot="loading">
+                                <div class="row justify-center q-my-md">
+                                    <q-spinner color="primary" name="dots" size="40px" />
+                                </div>
+                            </template>
+                            <template v-for="chatData in chatDataList.slice().reverse()">
+                                <q-chat-message
+                                        :key="chatData.communicationEventId"
+                                        :name="chatData.fromPseudoId"
+                                        :avatar="chatData.contentUrl"
+                                        :text="[chatData.body]"
+                                        :sent="chatData.sent"
+                                />
+                            </template>
+                        </q-infinite-scroll>
+
                         <q-form @submit.prevent="createMessage" autocapitalize="off" autocomplete="off" class="q-pa-md">
                             <m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line>
 
@@ -136,7 +152,7 @@ along with this software (see the LICENSE.md file). If not, see
             <script>
                 module.exports = {
                     data: function() { return {
-                        chatDataList: [], newServiceInfo:{ body:"", fromPartyId:this.$root.currentParameters.fromPartyId, toPartyId:this.$root.currentParameters.toPartyId },
+                        chatDataList: [], newServiceInfo:{ body:"", fromPartyId:this.$root.currentParameters.fromPartyId, toPartyId:this.$root.currentParameters.toPartyId }, items: [ {}, {}, {}, {}, {}, {}, {} ]
                     } },
                     methods: {
                         updateChatDataList: function() {
@@ -179,6 +195,27 @@ along with this software (see the LICENSE.md file). If not, see
                             // console.log(this.chatDataList[this.chatDataList.length-1])
                             if (this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId)
                                 this.chatDataList.push(jsonObj.message)
+                        },
+                        onLoad (index, done) {
+                            console.log('onload')
+                            console.log(index)
+                            console.log(done)
+                            setTimeout(() => {
+                                if (this.chatDataList) {
+                                    var vm = this;
+                                    $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
+                                        dataType:"json", headers:{ Accept:'application/json' },
+                                        error: moqui.handleAjaxError,
+                                        data: {fromPartyId:vm.$root.currentParameters.fromPartyId, toPartyId:vm.$root.currentParameters.toPartyId, offset:index},
+                                        success: function(responseObj, status, jqXHR) {
+                                            // update display objects
+                                            if (responseObj.messageList != null)
+                                                vm.chatDataList.push.apply(vm.chatDataList, responseObj.messageList);
+                                        }
+                                    });
+                                }
+                                done()
+                            }, 1000)
                         }
                     },
                     mounted: function() {
