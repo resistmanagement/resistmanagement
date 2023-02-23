@@ -43,7 +43,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createMessage" require-session-token="true"><actions>
         <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="AccountEdit"/>
         <if condition="!AccountEdit?.allowed"><return message="Not allowed" error="true"/></if>
-        <service-call name="mantle.party.CommunicationServices.create#Message" in-map="[toPartyId:toPartyId,fromPartyId:fromPartyId,body:body,communicationEventTypeId:'ResistChatMessage']" out-map="newMessage"/>
+        <set field="entryDate" from="ec.user.getNowTimestamp()"/>
+        <service-call name="mantle.party.CommunicationServices.create#Message" in-map="[toPartyId:toPartyId,fromPartyId:fromPartyId,body:body,communicationEventTypeId:'ResistChatMessage',entryDate:entryDate]" out-map="newMessage"/>
         <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
             <econdition field-name="partyId" from="fromPartyId"/>
             <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
@@ -53,6 +54,7 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="accountContentList"><set field="newMessage.contentUrl" from="'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
         <set field="newMessage.fromPseudoId" from="accountContentList.getFirst()?.party?.pseudoId"/>
         <set field="newMessage.sent" from="true"/>
+        <set field="newMessage.entryDate" from="entryDate"/>
         <script>ec.web.sendJsonResponse([newMessage:newMessage])</script>
     </actions><default-response type="none"/></transition>
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
@@ -76,10 +78,9 @@ along with this software (see the LICENSE.md file). If not, see
             <!--            <log level="warn" message="toParty ${toParty}"/>-->
             <!--            <log level="warn" message="fromParty ${fromParty}"/>-->
 
-<!--            <log level="warn" message="offset ${offset}"/>-->
-            <set field="offset" from="offset?:0" type="Integer"/>
-            <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList" limit="20" offset="offset*20">
-
+            <!--            <log level="warn" message="offset ${offset}"/>-->
+<!--            <log level="warn" message="earliestEntryDate ${earliestEntryDate}"/>-->
+            <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList" limit="20">
                 <econditions combine="or">
                     <econditions>
                         <econdition field-name="fromPartyId" ignore-if-empty="true"/>
@@ -91,6 +92,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </econditions>
                 </econditions>
                 <econdition field-name="communicationEventTypeId" value="ResistChatMessage"/>
+                <econdition field-name="entryDate" operator="less" from="earliestEntryDate ? earliestEntryDate as Long : ec.user.getNowTimestamp()"/>
                 <select-field field-name="communicationEventId"/><select-field field-name="entryDate"/>
                 <select-field field-name="statusId"/><select-field field-name="fromPartyId"/><select-field field-name="toPartyId"/>
                 <select-field field-name="body"/>
@@ -109,7 +111,9 @@ along with this software (see the LICENSE.md file). If not, see
                     partyId:partyContent.partyId,
                     fromPseudoId:partyContent.party.pseudoId,
                     body:commEvent.body,
-                    contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId]"/>
+                    contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId,
+                    entryDate:commEvent.entryDate
+                ]"/>
                 <set field="message.sent" from="commEvent.fromPartyId == fromPartyId"/>
                 <script>messageList.add(message)</script>
             </iterate>
@@ -124,25 +128,22 @@ along with this software (see the LICENSE.md file). If not, see
             <template>
                 <div class="q-pa-md row justify-center">
                     <div style="width: 100%; max-width: 400px">
-                        <q-infinite-scroll @load="onLoad" :initial-index="0" :offset="250" reverse>
+                        <q-infinite-scroll @load="onScrollLoad" :initial-index="0" :offset="250" reverse>
                             <template slot="loading">
                                 <div class="row justify-center q-my-md">
                                     <q-spinner color="primary" name="dots" size="40px" />
                                 </div>
                             </template>
-                            <template v-for="chatData in chatDataList.slice().reverse()">
-                                <q-chat-message
-                                        :key="chatData.communicationEventId"
-                                        :name="chatData.fromPseudoId"
-                                        :avatar="chatData.contentUrl"
-                                        :text="[chatData.body]"
-                                        :sent="chatData.sent"
-                                />
-                            </template>
+                            <q-chat-message v-for="chatData in chatDataListReversed" :key="chatData.communicationEventId"
+                                    :name="chatData.fromPseudoId"
+                                    :avatar="chatData.contentUrl"
+                                    :text="[chatData.body]"
+                                    :sent="chatData.sent"
+                            />
                         </q-infinite-scroll>
 
                         <q-form @submit.prevent="createMessage" autocapitalize="off" autocomplete="off" class="q-pa-md">
-                            <m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line>
+                            <div ref="bodyInput"><m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line></div>
 
                             <q-btn dense outline no-caps color="primary" type="submit" name="submitBtn" label="Send"></q-btn>
                         </q-form>
@@ -154,21 +155,12 @@ along with this software (see the LICENSE.md file). If not, see
                     data: function() { return {
                         chatDataList: [], newServiceInfo:{ body:"", fromPartyId:this.$root.currentParameters.fromPartyId, toPartyId:this.$root.currentParameters.toPartyId }, items: [ {}, {}, {}, {}, {}, {}, {} ]
                     } },
+                    computed: {
+                        chatDataListReversed: function() {
+                            return this.chatDataList.slice().reverse()
+                        }
+                    },
                     methods: {
-                        updateChatDataList: function() {
-                            // console.log(this)
-                            var vm = this;
-                            $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
-                                dataType:"json", headers:{ Accept:'application/json' },
-                                error: moqui.handleAjaxError,
-                                data: vm.$root.currentParameters,
-                                success: function(responseObj, status, jqXHR) {
-                                    // update display objects
-                                    if (responseObj.messageList != null)
-                                        vm.chatDataList = responseObj.messageList;
-                                }
-                            });
-                        },
                         createMessage: function() {
                             var vm = this;
                             $.ajax({ type:"POST", url:"/apps/Message/FindMessage/createMessage",
@@ -176,8 +168,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
                                 error:moqui.handleAjaxError,
                                 success: function(responseObj, status, jqXHR) {
-                                    console.log('createMessage success')
-                                    vm.chatDataList.push({
+                                    // console.log('createMessage success')
+                                    vm.chatDataList.unshift({
                                         body:vm.newServiceInfo.body,
                                         communicationEventId:responseObj.newMessage.communicationEventId,
                                         contentUrl:responseObj.newMessage.contentUrl,
@@ -186,32 +178,38 @@ along with this software (see the LICENSE.md file). If not, see
                                         partyId:vm.newServiceInfo.fromPartyId
                                     })
                                     vm.newServiceInfo.body = ""
-                                    console.log(vm.chatDataList)
+                                    vm.focusBodyElement();
+                                    // console.log(vm.chatDataList)
                                 }
                             });
                         },
                         notificationCallback: function (jsonObj, webSocket) {
-                            console.log('notificationCallback')
+                            // console.log('notificationCallback')
                             // console.log(jsonObj)
                             // console.log(this.chatDataList)
                             // console.log(this.chatDataList[this.chatDataList.length-1])
                             if (this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId)
-                                this.chatDataList.push(jsonObj.message)
+                                this.chatDataList.unshift(jsonObj.message)
                         },
-                        onLoad (index, done) {
-                            // console.log('onload')
+                        onScrollLoad (index, done) {
+                            // console.log('onScrollLoad')
                             // console.log(index)
                             // console.log(done)
                             setTimeout(() => {
                                 var stop = false
+
+                                // console.log(this.chatDataList)
+
+                                var earliestEntryDate = this.chatDataList.length ? this.chatDataList[this.chatDataList.length-1].entryDate : null;
+                                // console.log(earliestEntryDate)
                                 if (this.chatDataList) {
                                     var vm = this;
                                     $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
                                         dataType:"json", headers:{ Accept:'application/json' },
-                                        data: {fromPartyId:vm.$root.currentParameters.fromPartyId, toPartyId:vm.$root.currentParameters.toPartyId, offset:index},
+                                        data: {fromPartyId:vm.$root.currentParameters.fromPartyId, toPartyId:vm.$root.currentParameters.toPartyId, earliestEntryDate:earliestEntryDate},
                                         error: function() {
                                             // retry again on error
-                                            done(false);
+                                            done(false)
                                             moqui.handleAjaxError()
                                         },
                                         success: function(responseObj, status, jqXHR) {
@@ -220,6 +218,9 @@ along with this software (see the LICENSE.md file). If not, see
                                             if (responseObj.messageList !== null) {
                                                 vm.chatDataList.push.apply(vm.chatDataList, responseObj.messageList);
                                             }
+                                            // for (key in vm.chatDataList) {
+                                            //     console.log(vm.chatDataList[key].communicationEventId)
+                                            // }
                                             if (responseObj.messageList === null || responseObj.messageList.length < 20) {
                                                 // console.log('stop = true')
                                                 stop = true
@@ -230,14 +231,19 @@ along with this software (see the LICENSE.md file). If not, see
                                     });
                                 }
                             }, 100)
+                        },
+                        focusBodyElement: function () {
+                            // Focus the input body element
+                            var jqEl = $(this.$refs.bodyInput);
+                            if (jqEl) jqEl.find("input:visible:not([type='submit']):first").focus();
                         }
                     },
                     mounted: function() {
-                        // console.log('FindMessage mounted')
-                        // get chat right away
-                        this.updateChatDataList();
+                        console.log('FindMessage mounted')
                         this.$root.notificationClient.registerListener("ResistChatEvent", this.notificationCallback);
+                        this.focusBodyElement();
                     },
+
                 }
             </script>
             ]]></text><text type="html,vuet"><![CDATA[
