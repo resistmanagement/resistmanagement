@@ -176,20 +176,22 @@ along with this software (see the LICENSE.md file). If not, see
                                 headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
                                 error:moqui.handleAjaxError,
                                 success: function(responseObj, status, jqXHR) {
+                                    console.log('createMessage success')
                                     vm.chatDataList.push({
                                         body:vm.newServiceInfo.body,
                                         communicationEventId:responseObj.newMessage.communicationEventId,
                                         contentUrl:responseObj.newMessage.contentUrl,
                                         sent:responseObj.newMessage.sent,
                                         fromPseudoId:responseObj.newMessage.fromPseudoId,
-                                        partyId:vm.newServiceInfo.fromPartyId}
-                                    )
+                                        partyId:vm.newServiceInfo.fromPartyId
+                                    })
                                     vm.newServiceInfo.body = ""
+                                    console.log(vm.chatDataList)
                                 }
                             });
                         },
                         notificationCallback: function (jsonObj, webSocket) {
-                            // console.log('notificationCallback')
+                            console.log('notificationCallback')
                             // console.log(jsonObj)
                             // console.log(this.chatDataList)
                             // console.log(this.chatDataList[this.chatDataList.length-1])
@@ -197,25 +199,37 @@ along with this software (see the LICENSE.md file). If not, see
                                 this.chatDataList.push(jsonObj.message)
                         },
                         onLoad (index, done) {
-                            console.log('onload')
-                            console.log(index)
-                            console.log(done)
+                            // console.log('onload')
+                            // console.log(index)
+                            // console.log(done)
                             setTimeout(() => {
+                                var stop = false
                                 if (this.chatDataList) {
                                     var vm = this;
                                     $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
                                         dataType:"json", headers:{ Accept:'application/json' },
-                                        error: moqui.handleAjaxError,
                                         data: {fromPartyId:vm.$root.currentParameters.fromPartyId, toPartyId:vm.$root.currentParameters.toPartyId, offset:index},
+                                        error: function() {
+                                            // retry again on error
+                                            done(false);
+                                            moqui.handleAjaxError()
+                                        },
                                         success: function(responseObj, status, jqXHR) {
                                             // update display objects
-                                            if (responseObj.messageList != null)
+                                            // console.log(responseObj.messageList)
+                                            if (responseObj.messageList !== null) {
                                                 vm.chatDataList.push.apply(vm.chatDataList, responseObj.messageList);
+                                            }
+                                            if (responseObj.messageList === null || responseObj.messageList.length < 20) {
+                                                // console.log('stop = true')
+                                                stop = true
+                                            }
+                                            // console.log(stop)
+                                            done(stop)
                                         }
                                     });
                                 }
-                                done()
-                            }, 1000)
+                            }, 100)
                         }
                     },
                     mounted: function() {
