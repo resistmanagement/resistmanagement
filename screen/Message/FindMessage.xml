@@ -128,26 +128,37 @@ along with this software (see the LICENSE.md file). If not, see
             <template>
                 <div class="q-pa-md row justify-center">
                     <div style="width: 100%; max-width: 400px">
-                        <q-infinite-scroll @load="onScrollLoad" :initial-index="0" :offset="250" reverse>
+                        <q-infinite-scroll @load="onScrollLoad" :initial-index="0" reverse ref="chatScroll">
                             <template slot="loading">
                                 <div class="row justify-center q-my-md">
-                                    <q-spinner color="primary" name="dots" size="40px" />
+                                    <q-spinner color="primary" name="dots" size="40px"/>
                                 </div>
                             </template>
                             <q-chat-message v-for="chatData in chatDataListReversed" :key="chatData.communicationEventId"
-                                    :name="chatData.fromPseudoId"
-                                    :avatar="chatData.contentUrl"
-                                    :text="[chatData.body]"
-                                    :sent="chatData.sent"
+                                            class="scroll"
+                                            :name="chatData.fromPseudoId"
+                                            :avatar="chatData.contentUrl"
+                                            :text="[chatData.body]"
+                                            :sent="chatData.sent"
                             />
                         </q-infinite-scroll>
-
-                        <q-form @submit.prevent="createMessage" autocapitalize="off" autocomplete="off" class="q-pa-md">
-                            <div ref="bodyInput"><m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line></div>
-
-                            <q-btn dense outline no-caps color="primary" type="submit" name="submitBtn" label="Send"></q-btn>
-                        </q-form>
+                        <q-page-scroller reverse position="bottom">
+                            <q-btn fab icon="keyboard_arrow_down" color="primary" label="Scroll to Bottom"/>
+                        </q-page-scroller>
                     </div>
+                    <q-footer reveal bordered class="bg-grey-1">
+                        <div class="q-pa-md row justify-center">
+                            <div style="width: 100%; max-width: 400px">
+                                <q-form @submit.prevent="createMessage" class="q-pa-md">
+                                    <div class="row">
+                                        <div ref="bodyInput" class="col-10"><m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line></div>
+
+                                        <q-btn dense outline no-caps color="primary" class="col" type="submit" name="submitBtn" label="Send"></q-btn>
+                                    </div>
+                                </q-form>
+                            </div>
+                        </div>
+                    </q-footer>
                 </div>
             </template>
             <script>
@@ -169,6 +180,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 error:moqui.handleAjaxError,
                                 success: function(responseObj, status, jqXHR) {
                                     // console.log('createMessage success')
+
                                     vm.chatDataList.unshift({
                                         body:vm.newServiceInfo.body,
                                         communicationEventId:responseObj.newMessage.communicationEventId,
@@ -179,6 +191,14 @@ along with this software (see the LICENSE.md file). If not, see
                                     })
                                     vm.newServiceInfo.body = ""
                                     vm.focusBodyElement();
+
+                                    // scroll down to comment
+                                    setTimeout(() => {
+                                        document.documentElement.scrollTop = document.documentElement.scrollHeight;
+                                        document.body.scrollTop = document.body.scrollHeight;
+                                    }, 10);
+
+
                                     // console.log(vm.chatDataList)
                                 }
                             });
@@ -188,7 +208,7 @@ along with this software (see the LICENSE.md file). If not, see
                             // console.log(jsonObj)
                             // console.log(this.chatDataList)
                             // console.log(this.chatDataList[this.chatDataList.length-1])
-                            if (this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId)
+                            if (this.chatDataList.length ? this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId : false)
                                 this.chatDataList.unshift(jsonObj.message)
                         },
                         onScrollLoad (index, done) {

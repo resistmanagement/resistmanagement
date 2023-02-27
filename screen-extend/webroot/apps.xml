@@ -31,7 +31,7 @@
                             ]
                     ],
                     start_url: "/",
-                    display: "fullscreen",
+                    display: "minimal-ui",
                     prefer_related_applications: true
             ];
             ec.web.sendJsonResponse(manifestOut)
