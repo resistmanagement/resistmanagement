@@ -2,28 +2,22 @@
 <!-- No copyright or license for configuration file, details here are not considered a creative work. -->
 <moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd">
     <screen-facade>
-        <screen location="component://webroot/screen/webroot/apps.xml">
+        <screen location="component://resistmanagement/screen/custom.xml">
             <subscreens-item name="resistmanagementadmin" menu-title="Resist Admin" menu-index="3"
                              location="component://resistmanagement/screen/resistadmin.xml"/>
-        </screen>
-        <screen location="component://webroot/screen/webroot/apps.xml">
             <subscreens-item name="Project" menu-title="Projects" menu-index="5"
                              location="component://resistmanagement/screen/Project.xml"/>
-        </screen>
-        <screen location="component://webroot/screen/webroot/apps.xml">
             <subscreens-item name="Account" menu-title="Accounts" menu-index="6"
                              location="component://resistmanagement/screen/Account.xml"/>
-        </screen>
-        <screen location="component://webroot/screen/webroot/apps.xml">
             <subscreens-item name="Message" menu-title="Messages" menu-index="7"
                              location="component://resistmanagement/screen/Message.xml"/>
-        </screen>
-        <screen location="component://webroot/screen/webroot/apps.xml">
             <subscreens-item name="Settings" menu-title="Settings" menu-index="8"
                              location="component://resistmanagement/screen/s.xml"/>
         </screen>
         <screen location="component://webroot/screen/webroot.xml" default-subscreen="r">
             <subscreens-item name="r" menu-include="false" no-sub-path="true" location="component://resistmanagement/screen/resistmanagement.com.xml"/>
+            <subscreens-item name="rapps" menu-include="false" location="component://resistmanagement/screen/rapps.xml"/>
+            <subscreens-item name="custom" menu-include="false" location="component://resistmanagement/screen/custom.xml"/>
         </screen>
     </screen-facade>
 </moqui-conf>

@@ -122,7 +122,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <pre-actions><script>
         // if user already logged in redirect to root
-        if (ec.user.userId) sri.sendRedirectAndStopRender('/qapps')
+        if (ec.user.userId) sri.sendRedirectAndStopRender('/rapps')
 
         // jQuery/UI
         html_scripts.add('/libs/jquery/jquery.min.js')

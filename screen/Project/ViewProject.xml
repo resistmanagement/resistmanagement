@@ -24,6 +24,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="updateProject"><service-call name="resistmanagement.ResistServices.update#Project"
             in-map="[workEffortId:workEffortId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, statusId:statusId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]"/>
         <default-response url="."/></transition>
+    <transition name="updateStatus"><service-call name="resistmanagement.ResistServices.update#Project"
+                                                  in-map="[workEffortId:workEffortId, statusId:statusId]"/><default-response url="."/></transition>
     <transition name="addProjectPost"><service-call name="resistmanagement.ResistServices.upload#ProjectPostAttachment" in-map="[workEffortId:workEffortId,contentFile:contentFile]"/>
         <default-response url="."/></transition>
     <transition name="downloadProjectCommEventContent" read-only="true">
@@ -74,6 +76,13 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
         </if>
 <!--        <log level="warn" message="postContentList?.size() ${postContentList?.size()} postContentList ${postContentList} \n\n postAllContentList ${postAllContentList}"/>-->
+
+        <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" auto-field-map="project"/>
+        <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">
+            <econdition field-name="statusId" from="project.statusId"/>
+            <econdition field-name="statusFlowId" from="project.statusFlowId ?: 'Default'"/>
+            <order-by field-name="transitionSequence,transitionName"/>
+        </entity-find>
     </actions>
 
     <widgets>
@@ -81,14 +90,25 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- TODO: allow for partyId selection like FindProject when user can have multiple accounts -->
             <field name="workEffortName"><conditional-field condition="projectEdit?.allowed" title="Project Name"><text-line/></conditional-field>
                 <default-field><label text="${workEffortName}" type="h2"/></default-field></field>
-            <field name="statusId"><default-field title="Status"><label text="Status: ${project.status.description}" type="h6"/></default-field></field>
-            <field name="approve"><conditional-field condition="projectEdit?.allowed &amp;&amp; project.statusId == 'WeInPlanning'"><link url="updateProject" text="Approve" parameter-map="[workEffortId:workEffortId,visibilityEnumId:visibilityEnumId,statusId:'WeApproved',workEffortName:workEffortName,description:description,estimatedStartDate:estimatedStartDate,estimatedWorkDuration:estimatedWorkDuration]"/></conditional-field></field>
-            <field name="start"><conditional-field condition="projectEdit?.allowed &amp;&amp; project.statusId == 'WeApproved'"><link url="updateProject" text="Start" parameter-map="[workEffortId:workEffortId,visibilityEnumId:visibilityEnumId,statusId:'WeInProgress',workEffortName:workEffortName,description:description,estimatedStartDate:estimatedStartDate,estimatedWorkDuration:estimatedWorkDuration]"/></conditional-field></field>
-            <field name="complete"><conditional-field condition="projectEdit?.allowed &amp;&amp; project.statusId == 'WeInProgress'"><link url="updateProject" text="Complete" parameter-map="[workEffortId:workEffortId,visibilityEnumId:visibilityEnumId,statusId:'WeComplete',workEffortName:workEffortName,description:description,estimatedStartDate:estimatedStartDate,estimatedWorkDuration:estimatedWorkDuration]"/></conditional-field></field>
-            <field name="replan"><conditional-field condition="projectEdit?.allowed &amp;&amp; ['WeCancelled','WeApproved'].contains(project.statusId)"><link url="updateProject" text="Replan" parameter-map="[workEffortId:workEffortId,visibilityEnumId:visibilityEnumId,statusId:'WeInPlanning',workEffortName:workEffortName,description:description,estimatedStartDate:estimatedStartDate,estimatedWorkDuration:estimatedWorkDuration]"/></conditional-field></field>
-            <field name="restart"><conditional-field condition="projectEdit?.allowed &amp;&amp; project.statusId == 'WeInProgress'"><link url="updateProject" text="Restart" parameter-map="[workEffortId:workEffortId,visibilityEnumId:visibilityEnumId,statusId:'WeApproved',workEffortName:workEffortName,description:description,estimatedStartDate:estimatedStartDate,estimatedWorkDuration:estimatedWorkDuration]"/></conditional-field></field>
-            <field name="resume"><conditional-field condition="projectEdit?.allowed &amp;&amp; project.statusId == 'WeComplete'"><link url="updateProject" text="Resume" parameter-map="[workEffortId:workEffortId,visibilityEnumId:visibilityEnumId,statusId:'WeInProgress',workEffortName:workEffortName,description:description,estimatedStartDate:estimatedStartDate,estimatedWorkDuration:estimatedWorkDuration]"/></conditional-field></field>
-            <field name="cancel"><conditional-field condition="projectEdit?.allowed &amp;&amp; ['WeInPlanning','WeApproved','WeInProgress'].contains(project.statusId)"><link url="updateProject" text="Cancel" parameter-map="[workEffortId:workEffortId,visibilityEnumId:visibilityEnumId,statusId:'WeCancelled',workEffortName:workEffortName,description:description,estimatedStartDate:estimatedStartDate,estimatedWorkDuration:estimatedWorkDuration]"/></conditional-field></field>
+<!--            <field name="statusId"><default-field title="Status"><label text="Status: ${project.status.description}" type="h6"/></default-field></field>-->
+            <field name="status"><conditional-field condition="projectEdit?.allowed">
+                <container style="shaded-area condensed" type="span">
+                    <container style="float-plain condensed" type="ul">
+                        <container type="li">
+                            <container><label text="Status" type="strong"/></container>
+                            <container><label text="${statusItem?.description ?: ''}" type="strong" style="text-info"/></container>
+                        </container>
+                        <section-iterate name="StatusChangeLinkSection" list="statusTransitionList" entry="statusTransition"><condition>
+                            <expression>statusTransition.userPermissionId == null || statusTransition.userPermissionId.isEmpty() || ec.user.hasPermission(statusTransition.userPermissionId)</expression>
+                        </condition><widgets>
+                            <container type="li">
+                                <link url="${statusChangeTransition ?: 'updateStatus'}" text="${transitionName}"
+                                      text-map="statusTransition" parameter-map="[statusId:statusTransition.toStatusId]"/>
+                            </container>
+                        </widgets></section-iterate>
+                    </container>
+                </container>
+            </conditional-field></field>
             <field name="visibilityEnumId"><conditional-field condition="projectEdit?.allowed" title="Visibility"><drop-down>
                 <entity-options key="${enumId}" text="${description}">
                     <entity-find entity-name="moqui.basic.Enumeration" cache="true">
@@ -104,7 +124,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field><label text="${description ?: ''}"/></default-field></field>
             <field name="submitButton"><conditional-field condition="projectEdit?.allowed" title="Update"><submit/></conditional-field></field>
             <field-layout>
-                <field-row-big><field-ref name="workEffortName"/><field-ref name="statusId"/><field-ref name="approve"/><field-ref name="start"/><field-ref name="complete"/><field-ref name="replan"/><field-ref name="restart"/><field-ref name="resume"/><field-ref name="cancel"/></field-row-big>
+<!--                <field-row-big><field-ref name="workEffortName"/></field-row-big>-->
+                <field-row><field-ref name="workEffortName"/><field-ref name="status"/></field-row>
                 <field-row-big><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/><field-ref name="visibilityEnumId"/></field-row-big>
                 <fields-not-referenced/>
             </field-layout>
