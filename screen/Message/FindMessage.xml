@@ -51,7 +51,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="contentLocation" operator="is-not-null"/>
             <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
             <order-by field-name="-contentDate"/></entity-find>
-        <if condition="accountContentList"><set field="newMessage.contentUrl" from="'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
+        <if condition="accountContentList"><set field="newMessage.contentUrl" from="'/custom/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
         <set field="newMessage.fromPseudoId" from="accountContentList.getFirst()?.party?.pseudoId"/>
         <set field="newMessage.sent" from="true"/>
         <set field="newMessage.entryDate" from="entryDate"/>
@@ -111,7 +111,7 @@ along with this software (see the LICENSE.md file). If not, see
                     partyId:partyContent.partyId,
                     fromPseudoId:partyContent.party.pseudoId,
                     body:commEvent.body,
-                    contentUrl:'/apps/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId,
+                    contentUrl:'/custom/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId,
                     entryDate:commEvent.entryDate
                 ]"/>
                 <set field="message.sent" from="commEvent.fromPartyId == fromPartyId"/>
@@ -174,7 +174,7 @@ along with this software (see the LICENSE.md file). If not, see
                     methods: {
                         createMessage: function() {
                             var vm = this;
-                            $.ajax({ type:"POST", url:"/apps/Message/FindMessage/createMessage",
+                            $.ajax({ type:"POST", url:"/custom/Message/FindMessage/createMessage",
                                 data:this.newServiceInfo, dataType:"json",
                                 headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
                                 error:moqui.handleAjaxError,
@@ -224,7 +224,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 // console.log(earliestEntryDate)
                                 if (this.chatDataList) {
                                     var vm = this;
-                                    $.ajax({ type:"GET", url:"/apps/Message/FindMessage/getMessages",
+                                    $.ajax({ type:"GET", url:"/custom/Message/FindMessage/getMessages",
                                         dataType:"json", headers:{ Accept:'application/json' },
                                         data: {fromPartyId:vm.$root.currentParameters.fromPartyId, toPartyId:vm.$root.currentParameters.toPartyId, earliestEntryDate:earliestEntryDate},
                                         error: function() {
@@ -266,8 +266,6 @@ along with this software (see the LICENSE.md file). If not, see
 
                 }
             </script>
-            ]]></text><text type="html,vuet"><![CDATA[
-            <p><strong>Only supported in the 'qvt' render mode, go to the same URL under /qapps (instead of /apps or /vapps)</strong></p>
             ]]></text></render-mode>
     </widgets>
 </screen>

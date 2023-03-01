@@ -654,11 +654,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
             </else></if>
 
-            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" count-field="ceCount">
+            <entity-find-count entity-name="mantle.party.communication.CommunicationEventAndContentWithWorkEffort" count-field="ceCount">
                 <econdition field-name="effortWorkEffortId" from="workEffortId"/>
-<!--                <econdition field-name="eventFromPartyId" from="partyId"/>-->
                 <econdition field-name="eventCommunicationEventTypeId" value="Post"/>
+                <econdition field-name="eventContentContentTypeEnumId" value="CmctImageSmall"/>
             </entity-find-count>
+<!--            <log level="warn" message="ceCount ${ceCount}"/>-->
             <if condition="ceCount &gt;= 12"><return error="true" message="Cannot upload more than 12 Posts"/></if>
 
             <service-call name="create#mantle.party.communication.CommunicationEvent" in-map="[communicationEventTypeId:'Post',entryDate:ec.user.nowTimestamp]" out-map="context"/>
@@ -1189,7 +1190,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="AccountEdit"/>
             <if condition="!AccountEdit?.allowed"><return error="true" message="Cannot create Project"/></if>
 
-            <service-call name="mantle.work.ProjectServices.create#Project" in-map="context" out-map="context"/>
+            <service-call name="mantle.work.ProjectServices.create#Project" in-map="context + [statusFlowId:'ResistProject']" out-map="context"/>
         </actions>
     </service>
 
@@ -1207,7 +1208,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
             <if condition="!projectEdit?.allowed"><return error="true" message="Cannot update Project"/></if>
 
-            <service-call name="mantle.work.ProjectServices.update#Project" in-map="context"/>
+            <service-call name="mantle.work.ProjectServices.update#Project" in-map="context + [statusFlowId:'ResistProject']"/>
         </actions>
     </service>
 
