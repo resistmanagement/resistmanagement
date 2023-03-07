@@ -72,6 +72,7 @@ along with this software (see the LICENSE.md file). If not, see
     <parties lastUpdatedStamp="1670441119726" pseudoId="100001" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100001">
         <userAccounts emailAddress="ElonMusk1@moqui.org" disabled="N" passwordSalt="gXr7s8xj" passwordSetDate="1670441119928" lastUpdatedStamp="1670441119726" passwordBase64="N" userFullName="Elon Musk" userId="100001" passwordHashType="SHA-256" currentPassword="67f1aecebe0434b04b773ce74b15d88b1409af8f7da839662809739d70df1e68" requirePasswordChange="N" username="ElonMusk1@moqui.org">
             <moqui.security.UserPasswordHistory fromDate="1670441119927" lastUpdatedStamp="1670441119726"/>
+            <notificationTopics emailNotifications="Y" lastUpdatedStamp="1677865153560" topic="ResistProjectReminder"/>
             <groups userGroupId="RESIST_APP_USERS" fromDate="1670441119960" lastUpdatedStamp="1670441119726"/>
         </userAccounts>
         <contactMechs lastUpdatedStamp="1670441119726" contactMechId="100052" fromDate="1670441119840" contactMechPurposeId="EmailPrimary"/>
@@ -92,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
     </parties>
     <mantle.party.PartyRelationship lastUpdatedStamp="1670441131340" fromPartyId="100001" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1670441131366" partyRelationshipId="100051" relationshipTypeEnumId="PrtManager" toPartyId="100002"/>
     <mantle.party.PartyRelationship lastUpdatedStamp="1670441142468" fromPartyId="100001" toRoleTypeId="Talent" fromRoleTypeId="Administrator" fromDate="1670441142588" partyRelationshipId="100052" relationshipTypeEnumId="PrtManager" toPartyId="100002"/>
-    <workEfforts workEffortId="100006" workEffortTypeEnumId="WetProject" estimatedStartDate="1670442060000" statusId="WeInPlanning" workEffortName="Go to the Store" estimatedWorkDuration="1" lastUpdatedStamp="1670442803509" ownerPartyId="100002" visibilityEnumId="WevAllUsers">
+    <workEfforts workEffortId="100006" workEffortTypeEnumId="WetProject" purposeEnumId="WepPrResistProject" estimatedStartDate="1670442060000" statusId="WeInPlanning" workEffortName="Go to the Store" estimatedWorkDuration="1" lastUpdatedStamp="1670442803509" ownerPartyId="100002" visibilityEnumId="WevAllUsers">
         <description><![CDATA[Get:
 - Zebra Patterned Fabric
 - 15ft by 20ft of Grasslands Fabric
@@ -108,6 +109,7 @@ along with this software (see the LICENSE.md file). If not, see
     <parties lastUpdatedStamp="1670442895895" pseudoId="100003" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100003">
         <userAccounts emailAddress="HarrisonFord1@moqui.org" disabled="N" passwordSalt="nwh-lDVg" passwordSetDate="1670442896068" lastUpdatedStamp="1670442895895" passwordBase64="N" userFullName="Harrison Ford" userId="100002" passwordHashType="SHA-256" currentPassword="f219640deb9713e4e856d657d896511826e44dfdc21e1ef95241b5c6e6531b19" requirePasswordChange="N" username="HarrisonFord1@moqui.org">
             <moqui.security.UserPasswordHistory fromDate="1670442896068" lastUpdatedStamp="1670442895895"/>
+            <notificationTopics emailNotifications="Y" lastUpdatedStamp="1677865153560" topic="ResistProjectReminder"/>
             <groups userGroupId="RESIST_APP_USERS" fromDate="1670442896092" lastUpdatedStamp="1670442895895"/>
         </userAccounts>
         <contactMechs lastUpdatedStamp="1670442895895" contactMechId="100053" fromDate="1670442896032" contactMechPurposeId="EmailPrimary"/>
@@ -126,7 +128,7 @@ along with this software (see the LICENSE.md file). If not, see
         <mantle.party.PartyDimension lastUpdatedStamp="1670966549232" uomId="LEN_in" value="72" dimensionDate="1670966544657" uomDimensionTypeId="Height"/>
     </parties>
     <mantle.party.PartyRelationship lastUpdatedStamp="1670442925705" fromPartyId="100003" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1670442925712" partyRelationshipId="100053" relationshipTypeEnumId="PrtManager" toPartyId="100004"/>
-    <workEfforts workEffortId="100007" workEffortTypeEnumId="WetProject" estimatedStartDate="1670442900000" statusId="WeInPlanning" workEffortName="Safari Fantasy Shoot" estimatedWorkDuration="1" lastUpdatedStamp="1670443145680" ownerPartyId="100004" visibilityEnumId="WevAllUsers">
+    <workEfforts workEffortId="100007" workEffortTypeEnumId="WetProject" purposeEnumId="WepPrResistProject" estimatedStartDate="1670442900000" statusId="WeInPlanning" workEffortName="Safari Fantasy Shoot" estimatedWorkDuration="1" lastUpdatedStamp="1670443145680" ownerPartyId="100004" visibilityEnumId="WevAllUsers">
         <description><![CDATA[Need to Get:
 - Animal Costume
 - Safari Background
@@ -145,5 +147,39 @@ Need to Bring:
     </workEfforts>
     <resistmanagement.ResistServices.upload-ProfilePictureAttachmentInternal partyId="100004"/>
     <resistmanagement.ResistServices.upload-PostAttachmentResourceInternal partyId="100004" contentFileLocation="component://moqui-image/data/images/autumn.tif"/>
+
+    <mantle.humanres.position.EmplPosition lastUpdatedStamp="1677865406982" emplPositionId="100000" emplPositionClassId="Photographer" pseudoId="100000" statusId="EmpsActive">
+        <mantle.work.effort.WorkEffortEmplPosition workEffortId="100007" lastUpdatedStamp="1677865406982"/>
+    </mantle.humanres.position.EmplPosition>
+    <contactMechs lastUpdatedStamp="1670442895895" trustLevelEnumId="CmtlNew" infoString="AnselAdams1@moqui.org" contactMechTypeEnumId="CmtEmailAddress" contactMechId="100054"/>
+    <parties lastUpdatedStamp="1677865153560" pseudoId="100000" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100005">
+        <userAccounts emailAddress="AnselAdams1@moqui.org" disabled="N" passwordSalt="5_v6kztK" passwordSetDate="1677865153813" lastUpdatedStamp="1677865153560" passwordBase64="N" userFullName="Ansel Adams" userId="100003" passwordHashType="SHA-256" currentPassword="e9c5e8be6c8a84767c5eda78fcdc0979e1a7bc50ca88a93dd45c794e485d63cd" requirePasswordChange="N" username="AnselAdams1@moqui.org">
+            <moqui.security.UserPasswordHistory fromDate="1677865153812" lastUpdatedStamp="1677865153560"/>
+            <notificationTopics emailNotifications="Y" lastUpdatedStamp="1677865153560" topic="ResistProjectReminder"/>
+            <groups userGroupId="RESIST_APP_USERS" fromDate="1677865153848" lastUpdatedStamp="1677865153560"/>
+        </userAccounts>
+        <contactMechs lastUpdatedStamp="1677865153560" contactMechId="100054" fromDate="1677865153694" contactMechPurposeId="EmailPrimary"/>
+        <person lastName="Adams" lastUpdatedStamp="1677865153560" firstName="Ansel"/>
+    </parties>
+    <parties lastUpdatedStamp="1677865211384" pseudoId="anseladams" ownerPartyId="_NA_" partyTypeEnumId="PtyPerson" disabled="N" partyId="100006">
+        <toRelationships lastUpdatedStamp="1677865211384" frompartyId="100005" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1677865211394" partyRelationshipId="100055" relationshipTypeEnumId="PrtManager" toPartyId="100006"/>
+        <toRelationships lastUpdatedStamp="1677865281305" frompartyId="100005" toRoleTypeId="Talent" fromRoleTypeId="Administrator" fromDate="1677865281421" partyRelationshipId="100056" relationshipTypeEnumId="PrtManager" toPartyId="100006"/>
+        <settings lastUpdatedStamp="1677865211384" settingValue="PtyAllUsers" partySettingTypeId="PartyVisibility"/>
+        <mantle.humanres.ability.PartySkill lastUpdatedStamp="1677865306789" skillTypeEnumId="StFashion"/>
+        <roles lastUpdatedStamp="1677865211384" roleTypeId="Customer"/>
+        <roles lastUpdatedStamp="1677865211384" roleTypeId="ClientManager"/>
+        <roles lastUpdatedStamp="1677865281305" roleTypeId="Supplier"/>
+        <roles lastUpdatedStamp="1677865281305" roleTypeId="Talent"/>
+        <mantle.humanres.position.EmplPositionClassParty fromDate="1677865281421" lastUpdatedStamp="1677865281305" emplPositionClassId="Photographer"/>
+        <classifications fromDate="1677865281421" lastUpdatedStamp="1677864810710" partyClassificationId="PcgMale"/>
+        <classifications fromDate="1677865281421" lastUpdatedStamp="1677865301074" partyClassificationId="PccDslr"/>
+        <contents partyContentId="100053" contentDate="1677865274629" lastUpdatedStamp="1677865274413" partyContentTypeEnumId="PcntBio" userId="100003"><description><![CDATA[Ansel Easton Adams (February 20, 1902 – April 22, 1984) was an American landscape photographer and environmentalist known for his black-and-white images of the American West. He helped found Group f/64, an association of photographers advocating "pure" photography which favored sharp focus and the use of the full tonal range of a photograph. He and Fred Archer developed an exacting system of image-making called the Zone System, a method of achieving a desired final print through a deeply technical understanding of how tonal range is recorded and developed during exposure, negative development, and printing. The resulting clarity and depth of such images characterized his photography.]]></description></contents>
+        <Applying-mantle.humanres.employment.EmploymentApplication lastUpdatedStamp="1677865417426" applyingPartyId="100006" statusId="EaInvited" referredByEnumId="EarbPersonal" emplPositionId="100000" employmentApplicationId="100000" applicationDate="1677865417510"/>
+    </parties>
+    <mantle.party.PartyRelationship lastUpdatedStamp="1677865211384" fromPartyId="100005" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1677865211394" partyRelationshipId="100055" relationshipTypeEnumId="PrtManager" toPartyId="100006"/>
+    <mantle.party.PartyRelationship lastUpdatedStamp="1677865281305" fromPartyId="100005" toRoleTypeId="Talent" fromRoleTypeId="Administrator" fromDate="1677865281421" partyRelationshipId="100056" relationshipTypeEnumId="PrtManager" toPartyId="100006"/>
+    <resistmanagement.ResistServices.upload-ProfilePictureAttachmentInternal partyId="100006"/>
+    <resistmanagement.ResistServices.upload-PostAttachmentResourceInternal partyId="100006" contentFileLocation="component://moqui-image/data/images/autumn.tif"/>
+
 </entity-facade-xml>
 

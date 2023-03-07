@@ -116,6 +116,7 @@ along with this software (see the LICENSE.md file). If not, see
                           in-map="context + [userGroupId:'RESIST_APP_USERS']"/>
             <service-call name="create#moqui.security.UserGroupMember"
                           in-map="[userGroupId:'RESIST_APP_USERS', userId:userId, fromDate:ec.user.nowTimestamp]"/>
+            <service-call name="create#moqui.security.user.NotificationTopicUser" in-map="[userId:userId,topic:'ResistProjectReminder',emailNotifications:'Y']"/>
         </actions>
         <default-response type="screen-last"/><error-response url="."/>
     </transition>
