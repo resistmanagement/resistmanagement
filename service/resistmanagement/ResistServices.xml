@@ -1116,7 +1116,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="accountCount &gt; 0"><return type="warning" message="Can only create one Account per User."/></if>
 
             <!-- no special characters, no spaces, all lowercase, max 30 characters -->
-            <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-z0-9]+', '')"/>
+            <set field="pseudoId" from="pseudoId.toLowerCase().replaceAll('[^a-zA-Z0-9_.]+', '')"/>
             <if condition="pseudoId.length() &gt; 30"><return type="info" error="true" message="Profile name cannot be above 30 characters. It is currently ${pseudoId.length()} characters; lease shorten it."/></if>
 
             <!-- pseudoId is intended to be unique. Check for existing pseudoId with same characters. -->
