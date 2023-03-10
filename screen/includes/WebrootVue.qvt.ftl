@@ -38,7 +38,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <#assign headerLogoList = sri.getThemeValues("STRT_HEADER_LOGO")>
             <#if headerLogoList?has_content>
-                <m-link href="/apps"><div class="q-mx-md q-mt-sm">
+                <m-link href="/rapps"><div class="q-mx-md q-mt-sm">
                     <img src="${sri.buildUrl(headerLogoList?first).getUrl()}" alt="Home" height="32">
                 </div></m-link>
             </#if>

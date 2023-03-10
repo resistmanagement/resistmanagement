@@ -111,8 +111,17 @@ along with this software (see the LICENSE.md file). If not, see
                     <date-filter/>
                     <select-field field-name="toPartyId"/>
                 </entity-find>
+                <!--                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>-->
 
-<!--                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>-->
+<!--                <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" auto-field-map="[statusId:projectPosition.positionStatusId]"/>-->
+<!--                <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">-->
+<!--                    <econdition field-name="statusId" from="statusItem.statusId"/>-->
+<!--                    <econdition field-name="statusFlowId" value="EmploymentApplication"/>-->
+<!--                    <order-by field-name="transitionSequence,transitionName"/>-->
+<!--                </entity-find>-->
+
+<!--                <log level="warn" message="statusItem ${statusItem}"/>-->
+<!--                <log level="warn" message="statusTransitionList ${statusTransitionList}"/>-->
             </actions>
             <widgets>
                 <container-box><box-header title="${projectPosition.classTitle}"></box-header><box-toolbar>
@@ -139,6 +148,22 @@ along with this software (see the LICENSE.md file). If not, see
                                 <label type="h5" text="${appliedAccount.partyPseudoId} -"/>
                                 <label text="> ${appliedAccount.statusDescription}"/>
                             </box-header><box-toolbar>
+<!--                                <container style="shaded-area condensed" type="span">-->
+<!--                                    <container style="float-plain condensed" type="ul">-->
+<!--                                        <container type="li">-->
+<!--                                            <container><label text="Status" type="strong"/></container>-->
+<!--                                            <container><label text="${statusItem?.description ?: ''}" type="strong" style="text-info"/></container>-->
+<!--                                        </container>-->
+<!--                                        <section-iterate name="StatusChangeLinkSection" list="statusTransitionList" entry="statusTransition"><condition>-->
+<!--                                            <expression>statusTransition.userPermissionId == null || statusTransition.userPermissionId.isEmpty() || ec.user.hasPermission(statusTransition.userPermissionId)</expression>-->
+<!--                                        </condition><widgets>-->
+<!--                                            <container type="li">-->
+<!--                                                <link url="${statusChangeTransition ?: 'updateStatus'}" text="${transitionName}"-->
+<!--                                                      text-map="statusTransition" parameter-map="[statusId:statusTransition.toStatusId]"/>-->
+<!--                                            </container>-->
+<!--                                        </widgets></section-iterate>-->
+<!--                                    </container>-->
+<!--                                </container>-->
                                 <link url="updateProjectPositionApplicationStatus" text="Invite" condition="projectEdit?.allowed &amp;&amp; ['EaRejected'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaInvited']"/>
                                 <link url="updateProjectPositionApplicationStatus" text="Apply" condition="accountEdit?.allowed &amp;&amp; ['EaCanceled'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaApplied']"/>
                                 <link url="updateProjectPositionApplicationStatus" text="Approve" condition="projectEdit?.allowed &amp;&amp; ['EaApplied'].contains(appliedAccount.statusStatusId) || accountEdit?.allowed &amp;&amp; ['EaInvited'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaApproved']"/>

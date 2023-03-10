@@ -31,7 +31,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="createOrganization"><service-call name="mantle.party.PartyServices.create#Organization"/>
         <default-response url="."/></transition>
 
-    <transition name="partyProfileDetail"><default-response url="//apps/YourAccount/User/PartyProfileDetail"/></transition>
+    <transition name="partyProfileDetail"><default-response url="/apps/YourAccount/User/PartyProfileDetail"/></transition>
 
     <actions>
         <if condition="partyId != ec.user.userAccount.partyId"><return error="true" message="Party not found with ID ${partyId}"/></if>
