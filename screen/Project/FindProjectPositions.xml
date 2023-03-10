@@ -30,6 +30,8 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="updateProjectPositionApplicationStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionApplicationStatus" in-map="[workEffortId:workEffortId,emplPositionId:emplPositionId,employmentApplicationId:employmentApplicationId,statusId:statusId]" out-map="context"/>
         <default-response url="."/></transition>
+    <transition name="updateProjectPartyStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPartyStatus" in-map="[workEffortId:workEffortId,partyId:partyId,fromDate:fromDate,statusId:statusId]" out-map="context"/>
+        <default-response url="."/></transition>
 
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
     <transition name="getAccountList">
@@ -59,7 +61,6 @@ along with this software (see the LICENSE.md file). If not, see
     <actions>
         <entity-find entity-name="mantle.work.effort.WorkEffortEmplPositionDetail" list="projectPositionList">
             <econdition field-name="effortWorkEffortId" from="workEffortId"/>
-<!--            <econdition field-name="statusStatusId" value="EmpsActive"/>-->
             <order-by field-name="-lastUpdatedStamp"/>
         </entity-find>
         <set field="viewableProjectPositionList" from="[]"/>
@@ -93,16 +94,28 @@ along with this software (see the LICENSE.md file). If not, see
 
         <section-iterate name="PositionSectionIterate" list="projectPositionList" entry="projectPosition">
             <actions>
-                <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="appliedAccountList" distinct="true">
-                    <econdition field-name="roleRoleTypeId" value="ClientManager"/>
-                    <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>
-                    <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>
-                    <econdition field-name="contentContentLocation" operator="is-not-null"/>
-                    <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
-                    <econdition field-name="applicationEmplPositionId" from="projectPosition.positionEmplPositionId"/>
-                    <select-field field-name="applicationEmplPositionId,applicationEmploymentApplicationId,contentPartyContentId,partyPartyId,partyPseudoId,statusDescription,statusStatusId"/>
-                    <order-by field-name="^pseudoId"/>
+<!--                <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="appliedAccountList" distinct="true">-->
+<!--                    <econdition field-name="roleRoleTypeId" value="ClientManager"/>-->
+<!--                    <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>-->
+<!--                    <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>-->
+<!--                    <econdition field-name="contentContentLocation" operator="is-not-null"/>-->
+<!--                    <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>-->
+<!--                    <econdition field-name="applicationEmplPositionId" from="projectPosition.positionEmplPositionId"/>-->
+<!--&lt;!&ndash;                    <econdition field-name="effortPartyWorkEffortId" from="workEffortId" or-null="true"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <econdition field-name="effortPartyRoleTypeId" value="Talent" or-null="true"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>&ndash;&gt;-->
+<!--                    <select-field field-name="applicationEmplPositionId,applicationEmploymentApplicationId,contentPartyContentId,partyPartyId,partyPseudoId,applicationStatusDescription,applicationStatusStatusId,applicationStatusId,applicationEmplPositionId,effortPartyRoleTypeId,effortPartyPartyId,effortPartyFromDate,effortPartyStatusId,effortPartyStatusDescription"/>-->
+<!--&lt;!&ndash;                    <select-field field-name="partyPartyId"/>&ndash;&gt;-->
+<!--                    <order-by field-name="^pseudoId"/>-->
+<!--                </entity-find>-->
+
+                <entity-find entity-name="mantle.humanres.employment.EmploymentApplication" list="applicationList">
+                    <econdition field-name="emplPositionId" from="projectPosition.positionEmplPositionId"/>
                 </entity-find>
+
+<!--                <log level="warn" message="projectPosition ${projectPosition.toString()}"/>-->
+<!--                <log level="warn" message="appliedAccountList ${appliedAccountList.toString()}"/>-->
+<!--                <log level="warn" message="applicationList ${applicationList.toString()}"/>-->
 
                 <entity-find entity-name="mantle.party.PartyToAndRelationship" list="managedAccountRelationshipList">
                     <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
@@ -111,7 +124,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <date-filter/>
                     <select-field field-name="toPartyId"/>
                 </entity-find>
-                <!--                <log level="warn" message="appliedAccountList ${appliedAccountList}"/>-->
 
 <!--                <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" auto-field-map="[statusId:projectPosition.positionStatusId]"/>-->
 <!--                <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">-->
@@ -130,45 +142,50 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="statusId" from="'EaInvited'"><conditional-field condition="projectEdit?.allowed"><hidden/></conditional-field></field>
                         <field name="applyingPartyId"><conditional-field condition="projectEdit?.allowed" title="Invite Account">
                             <drop-down submit-on-select="true" required-manual-select="true" allow-empty="true">
-                                <dynamic-options transition="getAccountList" parameter-map="[exceptionPartyIdList:appliedAccountList*.partyPartyId]" server-search="true" min-length="2"/>
+                                <dynamic-options transition="getAccountList" parameter-map="[exceptionPartyIdList:applicationList*.applyingPartyId]" server-search="true" min-length="2"/>
                             </drop-down>
                         </conditional-field></field>
                     </form-single>
-                    <link url="createProjectPositionApplication" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,statusId:'EaApplied']" text="Apply" condition="projectPosition.statusStatusId == 'EmpsActive' &amp;&amp; !appliedAccountList*.partyPartyId?.contains(managedAccountRelationshipList?.getFirst()?.toPartyId)" tooltip="Apply to Position"/>
+                    <link url="createProjectPositionApplication" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,statusId:'EaApplied']" text="Apply" condition="projectPosition.statusStatusId == 'EmpsActive' &amp;&amp; !applicationList*.applyingPartyId?.contains(managedAccountRelationshipList?.getFirst()?.toPartyId)" tooltip="Apply to Position"/>
                     <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsInactive']" text="Close" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsActive'" tooltip="Close ${projectPosition.classTitle} Position"/>
                     <link url="updateProjectPositionStatus" parameter-map="[emplPositionId:projectPosition.positionEmplPositionId,emplPositionClassId:projectPosition.positionEmplPositionClassId,statusId:'EmpsActive']" text="Open" condition="projectEdit?.allowed &amp;&amp; projectPosition.statusStatusId == 'EmpsInactive'" tooltip="Open ${projectPosition.classTitle} Position"/>
                 </box-toolbar><box-body-nopad>
-                    <section-iterate name="AppliedAccountSection" list="appliedAccountList" entry="appliedAccount">
+                    <section-iterate name="AppliedAccountSection" list="applicationList" entry="appliedAccount">
                         <actions>
-                            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:appliedAccount.partyPartyId]" out-map="accountEdit"/>
-                            <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:appliedAccount.partyPartyId]" out-map="accountView"/></actions>
+                            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:appliedAccount.applyingPartyId]" out-map="accountEdit"/>
+                            <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:appliedAccount.applyingPartyId]" out-map="accountView"/>
+
+                            <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
+                                <econdition field-name="partyId" from="appliedAccount.applyingPartyId"/>
+                                <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
+                                <econdition field-name="contentLocation" operator="is-not-null"/>
+                                <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+                                <order-by field-name="-contentDate"/>
+                            </entity-find>
+                            
+                            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="workEffortPartyList">
+                                <econdition field-name="workEffortId"/>
+                                <econdition field-name="partyId" from="appliedAccount.applyingPartyId"/>
+                                <econdition field-name="roleTypeId" value="Talent"/>
+                                <econdition field-name="emplPositionId" from="appliedAccount.emplPositionId"/>
+                            </entity-find>
+<!--                            <log level="warn" message="appliedAccount ${appliedAccount} \n\nworkEffortPartyList ${workEffortPartyList.toString()}"/>-->
+                            <set field="workEffortParty" from="workEffortPartyList?.getFirst()"/>
+                        </actions>
                         <widgets>
                             <container-box><box-header>
-                                <image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:appliedAccount.contentPartyContentId]" width="50px"/>
-                                <label type="h5" text="${appliedAccount.partyPseudoId} -"/>
-                                <label text="> ${appliedAccount.statusDescription}"/>
+                                <image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:accountContentList?.getFirst().partyContentId]" width="50px"/>
+                                <label type="h5" text="${appliedAccount.applyingParty.pseudoId} -"/>
+                                <label text="> ${appliedAccount.statusId != 'EaApproved' ? appliedAccount.status.description : workEffortParty.status.description}"/>
                             </box-header><box-toolbar>
-<!--                                <container style="shaded-area condensed" type="span">-->
-<!--                                    <container style="float-plain condensed" type="ul">-->
-<!--                                        <container type="li">-->
-<!--                                            <container><label text="Status" type="strong"/></container>-->
-<!--                                            <container><label text="${statusItem?.description ?: ''}" type="strong" style="text-info"/></container>-->
-<!--                                        </container>-->
-<!--                                        <section-iterate name="StatusChangeLinkSection" list="statusTransitionList" entry="statusTransition"><condition>-->
-<!--                                            <expression>statusTransition.userPermissionId == null || statusTransition.userPermissionId.isEmpty() || ec.user.hasPermission(statusTransition.userPermissionId)</expression>-->
-<!--                                        </condition><widgets>-->
-<!--                                            <container type="li">-->
-<!--                                                <link url="${statusChangeTransition ?: 'updateStatus'}" text="${transitionName}"-->
-<!--                                                      text-map="statusTransition" parameter-map="[statusId:statusTransition.toStatusId]"/>-->
-<!--                                            </container>-->
-<!--                                        </widgets></section-iterate>-->
-<!--                                    </container>-->
-<!--                                </container>-->
-                                <link url="updateProjectPositionApplicationStatus" text="Invite" condition="projectEdit?.allowed &amp;&amp; ['EaRejected'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaInvited']"/>
-                                <link url="updateProjectPositionApplicationStatus" text="Apply" condition="accountEdit?.allowed &amp;&amp; ['EaCanceled'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaApplied']"/>
-                                <link url="updateProjectPositionApplicationStatus" text="Approve" condition="projectEdit?.allowed &amp;&amp; ['EaApplied'].contains(appliedAccount.statusStatusId) || accountEdit?.allowed &amp;&amp; ['EaInvited'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaApproved']"/>
-                                <link url="updateProjectPositionApplicationStatus" text="Reject" condition="projectEdit?.allowed &amp;&amp; ['EaApplied','EaApproved'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaRejected']"/>
-                                <link url="updateProjectPositionApplicationStatus" text="Cancel" condition="accountEdit?.allowed &amp;&amp; ['EaInvited','EaApproved'].contains(appliedAccount.statusStatusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.applicationEmplPositionId,employmentApplicationId:appliedAccount.applicationEmploymentApplicationId,statusId:'EaCanceled']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Invite" condition="projectEdit?.allowed &amp;&amp; ['EaRejected'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.emplPositionId,employmentApplicationId:appliedAccount.employmentApplicationId,statusId:'EaInvited']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Apply" condition="accountEdit?.allowed &amp;&amp; ['EaCanceled'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.emplPositionId,employmentApplicationId:appliedAccount.employmentApplicationId,statusId:'EaApplied']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Approve" condition="projectEdit?.allowed &amp;&amp; ['EaApplied'].contains(appliedAccount.statusId) || accountEdit?.allowed &amp;&amp; ['EaInvited'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.emplPositionId,employmentApplicationId:appliedAccount.employmentApplicationId,statusId:'EaApproved']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Reject" condition="projectEdit?.allowed &amp;&amp; ['EaApplied'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.emplPositionId,employmentApplicationId:appliedAccount.employmentApplicationId,statusId:'EaRejected']"/>
+                                <link url="updateProjectPositionApplicationStatus" text="Cancel" condition="accountEdit?.allowed &amp;&amp; ['EaInvited'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.emplPositionId,employmentApplicationId:appliedAccount.employmentApplicationId,statusId:'EaCanceled']"/>
+                                <link url="updateProjectPartyStatus" text="Unassign" condition="projectEdit?.allowed &amp;&amp; ['WeptAssigned'].contains(workEffortParty?.statusId) &amp;&amp; ['EaApproved'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,partyId:workEffortParty?.partyId,fromDate:workEffortParty?.fromDate,emplPositionId:appliedAccount.emplPositionId,statusId:'WeptUnassigned']"/>
+                                <link url="updateProjectPartyStatus" text="Decline" condition="accountEdit?.allowed &amp;&amp; ['WeptAssigned'].contains(workEffortParty?.statusId) &amp;&amp; ['EaApproved'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,partyId:workEffortParty?.partyId,fromDate:workEffortParty?.fromDate,emplPositionId:appliedAccount.emplPositionId,statusId:'WeptDeclined']"/>
+                                <link url="updateProjectPartyStatus" text="Assign" condition="projectEdit?.allowed &amp;&amp; ['WeptUnassigned'].contains(workEffortParty?.statusId) || accountEdit?.allowed &amp;&amp; ['WeptDeclined'].contains(workEffortParty?.statusId)" parameter-map="[workEffortId:workEffortId,partyId:workEffortParty?.partyId,fromDate:workEffortParty?.fromDate,emplPositionId:appliedAccount.emplPositionId,statusId:'WeptAssigned']"/>
                             </box-toolbar></container-box>
                         </widgets>
                     </section-iterate>

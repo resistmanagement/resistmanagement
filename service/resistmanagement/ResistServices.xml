@@ -935,24 +935,23 @@ along with this software (see the LICENSE.md file). If not, see
                 <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
             </entity-find-count>
 
-            <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" list="wedprftrList" distinct="true">
-                <econdition field-name="workEffortId"/>
-                <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
-                <econdition field-name="purposeEnumId" value="WepPrResistProject"/>
+<!--            <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" list="wedprftrList" distinct="true">-->
+<!--                <econdition field-name="workEffortId"/>-->
+<!--                <econdition field-name="workEffortTypeEnumId" value="WetProject"/>-->
+<!--                <econdition field-name="purposeEnumId" value="WepPrResistProject"/>-->
 
-                <!-- Conditions for visibility check -->
-                <econdition field-name="toRoleTypeId" value="ClientManager"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-                <econdition field-name="partyRoleTypeId" value="ClientManager"/>
-<!--                <econdition field-name="roleTypeId" value=""-->
-                <econditions combine="or">
-                    <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
-                    <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
-                <date-filter/>
-                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
-            </entity-find>
-
-            <log level="warn" message="wedprftrList ${wedprftrList}"/>
+<!--                &lt;!&ndash; Conditions for visibility check &ndash;&gt;-->
+<!--                <econdition field-name="toRoleTypeId" value="ClientManager"/>-->
+<!--                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>-->
+<!--                <econdition field-name="partyRoleTypeId" value="ClientManager"/>-->
+<!--&lt;!&ndash;                <econdition field-name="roleTypeId" value=""&ndash;&gt;-->
+<!--                <econditions combine="or">-->
+<!--                    <econdition field-name="visibilityEnumId" value="WevAllUsers"/>-->
+<!--                    <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>-->
+<!--                <date-filter/>-->
+<!--                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>-->
+<!--            </entity-find>-->
+<!--            <log level="warn" message="wedprftrList ${wedprftrList}"/>-->
 
             <if condition="wedprftrCount != null &amp;&amp; wedprftrCount &gt;= 1"><set field="allowed" from="true"/></if>
         </actions>
@@ -1351,8 +1350,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <!-- Make sure that statusId is in the allowed values -->
             <if condition="!['EaInvited','EaApplied','EaApproved','EaRejected','EaCanceled'].contains(statusId)">
-                <entity-find-one entity-name="moqui.basic.StatusItem" value-field="status" auto-field-map="[statusId:statusId,statusTypeId:'EmploymentApplication']"/>
-                <return error="true" message="Cannot put project position in status ${status?.description ?: statusId}"/></if>
+                <return error="true" message="Cannot put project position in status ${statusId}"/></if>
 
             <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplication" list="emplPositionList" distinct="true">
                 <econdition field-name="effortWorkEffortId" from="workEffortId"/>
@@ -1361,6 +1359,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="toRoleRoleTypeId" value="ClientManager"/>
                 <select-field field-name="effortWorkEffortId,toRoleRoleTypeId,applicationEmploymentApplicationId,applicationStatusStatusId,applicationApplyingPartyId"/>
             </entity-find>
+            <if condition="emplPositionList.size() == 0"><log level="warn" message="Service update#ProjectPositionApplicationStatus's project position not found"/></if>
             <if condition="emplPositionList.size() &gt; 1"><log level="warn" message="Service update#ProjectPositionApplicationStatus's entity find shouldn't return more than one entry from it's query."/></if>
             <set field="emplPosition" from="emplPositionList.getFirst()"/>
 
@@ -1385,21 +1384,79 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="talentRoleCount == 0">
                         <service-call name="create#mantle.party.PartyRole" in-map="[partyId:emplPosition.applicationApplyingPartyId, roleTypeId:'Supplier']"/>
                         <service-call name="create#mantle.party.PartyRole" in-map="[partyId:emplPosition.applicationApplyingPartyId, roleTypeId:'Talent']"/>
-                        <service-call name="create#mantle.party.PartyRelationship" in-map="[relationshipTypeEnumId:'PrtManager',
-                            fromPartyId:ec.user.userAccount.partyId, fromRoleTypeId:'Administrator', toPartyId:emplPosition.applicationApplyingPartyId, toRoleTypeId:'Talent',
-                            fromDate:ec.user.nowTimestamp]"/>
+<!--                        <service-call name="create#mantle.party.PartyRelationship" in-map="[relationshipTypeEnumId:'PrtManager',-->
+<!--                            fromPartyId:ec.user.userAccount.partyId, fromRoleTypeId:'Administrator', toPartyId:emplPosition.applicationApplyingPartyId, toRoleTypeId:'Talent',-->
+<!--                            fromDate:ec.user.nowTimestamp]"/>-->
                     </if>
 
-                    <entity-find-count entity-name="mantle.work.effort.WorkEffortParty" count-field="projectPartyCount">
+
+                    <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="wepList" limit="1">
+                        <date-filter/>
                         <econdition field-name="workEffortId"/>
                         <econdition field-name="partyId" from="emplPosition.applicationApplyingPartyId"/>
-                        <econdition field-name="roleTypeId" value="Talent"/></entity-find-count>
-
-                    <if condition="projectPartyCount == 0">
-                        <service-call name="mantle.work.WorkEffortServices.add#WorkEffortParty" in-map="[workEffortId:workEffortId,partyId:emplPosition.applicationApplyingPartyId,roleTypeId:'Talent']" out-map="context"/>
-                    </if>
-                    <log level="warn" message="update#ProjectPositionApplicationStatus context.toString() ${context.toString()}"/>
+                        <econdition field-name="roleTypeId" value="Talent"/>
+                        <econdition field-name="emplPositionId"/>
+                        <order-by field-name="-fromDate"/>
+                    </entity-find>
+                    <set field="fromDate" from="ec.user.nowTimestamp"/>
+                    <if condition="wepList"><then>
+                        <set field="fromDate" from="wepList[0].fromDate"/>
+                        <service-call name="update#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId,partyId:emplPosition.applicationApplyingPartyId,emplPositionId:emplPositionId,statusId:'WeptAssigned',roleTypeId:'Talent',fromDate:fromDate]"/>
+                    </then><else>
+                        <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId,partyId:emplPosition.applicationApplyingPartyId,emplPositionId:emplPositionId,statusId:'WeptAssigned',roleTypeId:'Talent',fromDate:fromDate]"/>
+                    </else></if>
+<!--                    <log level="warn" message="created WorkEffortParty emplPositionId ${emplPositionId} fromDate ${fromDate}"/>-->
+<!--                    <log level="warn" message="update#ProjectPositionApplicationStatus context.toString() ${context.toString()}"/>-->
                 </if>
+            </if>
+        </actions>
+    </service>
+    <service verb="update" noun="ProjectPartyStatus">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="partyId" required="true"/>
+            <parameter name="fromDate" required="true"/>
+            <parameter name="statusId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="statusId"/>
+        </out-parameters>
+        <actions>
+<!--            <log level="warn" message="update#ProjectPartyStatus"/>-->
+
+            <!-- Make sure that statusId is in the allowed values -->
+            <if condition="!['WeptUnassigned','WeptDeclined','WeptAssigned'].contains(statusId)">
+                <return error="true" message="Cannot put project party in status ${statusId}"/></if>
+
+<!--            <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="appliedAccountList" distinct="true">-->
+<!--                <econdition field-name="partyPartyId" from="partyId"/>-->
+<!--                <econdition field-name="effortPartyWorkEffortId" from="workEffortId"/>-->
+<!--                <econdition field-name="effortPartyFromDate" from="fromDate"/>-->
+<!--                <econdition field-name="effortPartyRoleTypeId" value="Talent"/>-->
+<!--                <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>-->
+<!--                <select-field field-name="contentPartyContentId,partyPartyId,partyPseudoId,effortPartyRoleTypeId,effortPartyPartyId,effortPartyFromDate,effortPartyStatusId,effortPartyStatusDescription"/>-->
+<!--            </entity-find>-->
+<!--            <if condition="appliedAccountList.size() == 0"><log level="warn" message="Service update#ProjectPartyStatus's project party not found"/></if>-->
+<!--            <if condition="appliedAccountList.size() &gt; 1"><log level="warn" message="Service update#ProjectPartyStatus's entity find shouldn't return more than one entry from it's query."/></if>-->
+<!--            <set field="appliedAccount" from="appliedAccountList.getFirst()"/>-->
+
+            <entity-find-one entity-name="mantle.work.effort.WorkEffortParty" value-field="workEffortParty" auto-field-map="[workEffortId:workEffortId,partyId:partyId,fromDate:fromDate,roleTypeId:'Talent']"/>
+<!--            <log level="warn" message="context.toString() ${context.toString()}"/>-->
+            <if condition="!workEffortParty"><return type="warning" message="Service update#ProjectPartyStatus's project party not found"/></if>
+
+<!--                        <log level="warn" message="appliedAccount ${appliedAccount}"/>-->
+            <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:partyId]" out-map="accountEdit"/>
+            <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+            <set field="allowed" from="false"/>
+            <if condition="statusId == 'WeptUnassigned' &amp;&amp; projectEdit?.allowed &amp; workEffortParty.statusId == 'WeptAssigned'"><set field="allowed" from="true"/></if>
+            <if condition="statusId == 'WeptDeclined' &amp;&amp; accountEdit?.allowed &amp; workEffortParty.statusId == 'WeptAssigned'"><set field="allowed" from="true"/></if>
+            <if condition="statusId == 'WeptAssigned' &amp;&amp; projectEdit?.allowed &amp;&amp; workEffortParty.statusId == 'WeptUnassigned'"><set field="allowed" from="true"/></if>
+            <if condition="statusId == 'WeptAssigned' &amp;&amp; accountEdit?.allowed &amp;&amp; workEffortParty.statusId == 'WeptDeclined'"><set field="allowed" from="true"/></if>
+
+            <if condition="allowed == false"><return type="danger" error="true" message="Not allowed to edit this project party"/></if>
+
+            <if condition="allowed == true">
+                <service-call name="update#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId,partyId:partyId,fromDate:fromDate,roleTypeId:'Talent',statusId:statusId]" out-map="context"/>
             </if>
         </actions>
     </service>
@@ -1456,20 +1513,15 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
         </out-parameters>
         <actions>
+<!--            <script><![CDATA[import org.joda.time.MutablePeriod]]></script>-->
             <!-- Notifications have 3 time periods: 1 week, 1 day, 3 hours with and 2/3 tolerance window if notifications haven't been sent -->
-            <script>
-                def fromDateDt = java.time.ZonedDateTime.ofInstant(
-                java.time.Instant.ofEpochMilli((long) previousPeriod.thruDate.time), java.time.ZoneId.systemDefault())
-                fromDateDt = fromDateDt.plusDays(1)
-                fromDate = java.sql.Date.from(fromDateDt.toInstant())
-            </script>
             <set field="nowTimestamp" from="ec.user.getNowTimestamp()"/>
-            <set field="weekStartDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) nowTimestamp.time), ZoneId.systemDefault()).minusWeeks(1))"/>
-            <set field="weekEndDate" from="weekStartDate.time + ((nowTimestamp.time - weekStartDate.time) * 2/3)"/>
-            <set field="dayStartDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) nowTimestamp.time), ZoneId.systemDefault()).minusDays(1))"/>
-            <set field="dayEndDate" from="dayStartDate.time + ((nowTimestamp.time - dayStartDate.time) * 2/3)"/>
-            <set field="hourStartDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) nowTimestamp.time), ZoneId.systemDefault()).minusHours(3))"/>
-            <set field="hourEndDate" from="hourStartDate.time + ((nowTimestamp.time - hourStartDate.time) * 2/3)"/>
+            <set field="weekEndDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) nowTimestamp.time), ZoneId.systemDefault()).plusWeeks(1).toInstant())"/>
+            <set field="weekStartDate" from="new Timestamp(weekEndDate.time - ((weekEndDate.time - nowTimestamp.time) * 2/3) as long)"/>
+            <set field="dayEndDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) nowTimestamp.time), ZoneId.systemDefault()).plusDays(1).toInstant())"/>
+            <set field="dayStartDate" from="new Timestamp(dayEndDate.time - ((dayEndDate.time - nowTimestamp.time) * 2/3) as long)"/>
+            <set field="hourEndDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) nowTimestamp.time), ZoneId.systemDefault()).plusHours(3).toInstant())"/>
+            <set field="hourStartDate" from="new Timestamp(hourEndDate.time - ((hourEndDate.time - nowTimestamp.time) * 2/3) as long)"/>
             <entity-find entity-name="mantle.work.effort.WorkEffort" list="projectList">
                 <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
                 <econdition field-name="purposeEnumId" value="WepPrResistProject"/>
@@ -1489,37 +1541,108 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="-lastUpdatedStamp"/>
             </entity-find>
+<!--            <log level="warn" message="projectList ${projectList}"/>-->
+<!--            <log level="warn" message="context.toString() ${context.toString()}"/>-->
 
             <iterate list="projectList" entry="workEffort">
 <!--                <set field="workEffort.estimatedStartDate" from="ec.l10n.format(workEffort.estimatedStartDate, 'MMMM dd, YYYY hh:mm a')"/>-->
                 <!--            <log level="warn" message="workEffort ${workEffort}"/>-->
-                <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">
-                    <econdition field-name="toPartyId" from="workEffort.ownerPartyId"/>
-                    <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-                    <econdition field-name="toRoleTypeId" value="ClientManager"/>
-                    <date-filter/></entity-find>
-
-                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="projectPositionList">
-<!--                    <econdition field-name=""-->
-                </entity-find>
+<!--                <entity-find entity-name="mantle.party.PartyFromAndToRelationship" list="pfatrList">-->
+<!--                    <econdition field-name="toPartyId" from="workEffort.ownerPartyId"/>-->
+<!--                    <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>-->
+<!--                    <econdition field-name="toRoleTypeId" value="ClientManager"/>-->
+<!--                    <date-filter/></entity-find>-->
 
                 <!--            <log level="warn" message="pfatrList ${pfatrList}"/>-->
-                <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
-                    <econdition field-name="partyId" operator="in" from="pfatrList*.fromPartyId"/>
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="projectPositionList">
+                    <econdition field-name="workEffortId" from="workEffort.workEffortId"/>
+                    <econdition field-name="statusId" value="WeptAssigned"/>
+                    <econdition field-name="roleTypeId" operator="in" from="['Talent','Manager']"/>
+                    <date-filter/>
                 </entity-find>
-                <!--            <log level="warn" message="userAccountList ${userAccountList}"/>-->
+<!--                <log level="warn" message="projectPositionList ${projectPositionList}"/>-->
+
+                <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
+                    <econdition field-name="partyId" operator="in" from="projectPositionList*.partyId"/>
+                </entity-find>
+<!--                <log level="warn" message="userAccountList ${userAccountList}"/>-->
+
+                <set field="filteredUserAccountList" from="[]"/>
+                <iterate list="userAccountList" entry="userAccount">
+                    <set field="projectWeekStartDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) workEffort.estimatedStartDate.time), ZoneId.systemDefault()).minusWeeks(1).toInstant())"/>
+                    <set field="projectWeekEndDate" from="new Timestamp(projectWeekStartDate.time + ((workEffort.estimatedStartDate.time - projectWeekStartDate.time) * 2/3) as long)"/>
+                    <set field="projectDayStartDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) workEffort.estimatedStartDate.time), ZoneId.systemDefault()).minusDays(1).toInstant())"/>
+                    <set field="projectDayEndDate" from="new Timestamp(projectDayStartDate.time + ((workEffort.estimatedStartDate.time - projectDayStartDate.time) * 2/3) as long)"/>
+                    <set field="projectHourStartDate" from="Timestamp.from(ZonedDateTime.ofInstant(Instant.ofEpochMilli((long) workEffort.estimatedStartDate.time), ZoneId.systemDefault()).minusHours(3).toInstant())"/>
+                    <set field="projectHourEndDate" from="new Timestamp(projectHourStartDate.time + ((workEffort.estimatedStartDate.time - projectHourStartDate.time) * 2/3) as long)"/>
+
+                    <!-- If multiple notifications are being sent after the system being down for a while (not likely) check sentDate nowTimestamp difference because this assumes they are the same and the difference is the time it takes to run this program -->
+                    <entity-find-count entity-name="moqui.security.user.NotificationMessageByUser" count-field="notificationMessageUserCount">
+                        <econdition field-name="userId" from="userAccount.userId"/>
+                        <econdition field-name="subTopic" from="workEffort.workEffortId"/>
+                        <econdition field-name="topic" value="ResistProjectReminder"/>
+                        <econditions combine="or">
+                            <econditions>
+                                <econdition field-name="sentDate" operator="greater-equals" from="projectWeekStartDate" ignore="projectWeekEndDate &lt; nowTimestamp || projectWeekStartDate &gt; nowTimestamp"/>
+                                <econdition field-name="sentDate" operator="less" from="projectWeekEndDate" ignore="projectWeekEndDate &lt; nowTimestamp || projectWeekStartDate &gt; nowTimestamp"/>
+                            </econditions>
+                            <econditions>
+                                <econdition field-name="sentDate" operator="greater-equals" from="projectDayStartDate" ignore="projectDayEndDate &lt; nowTimestamp || projectDayStartDate &gt; nowTimestamp"/>
+                                <econdition field-name="sentDate" operator="less" from="projectDayEndDate" ignore="projectDayEndDate &lt; nowTimestamp || projectDayStartDate &gt; nowTimestamp"/>
+                            </econditions>
+                            <econditions>
+                                <econdition field-name="sentDate" operator="greater-equals" from="projectHourStartDate" ignore="projectHourEndDate &lt; nowTimestamp || projectHourStartDate &gt; nowTimestamp"/>
+                                <econdition field-name="sentDate" operator="less" from="projectHourEndDate" ignore="projectHourEndDate &lt; nowTimestamp || projectHourStartDate &gt; nowTimestamp"/>
+                            </econditions>
+                        </econditions>
+                    </entity-find-count>
+
+<!--                    <log level="warn" message="second context.toString() ${context.toString()}"/>-->
+<!--                    <log level="warn" message="notificationMessageUserCount_xafind ${notificationMessageUserCount_xafind}"/>-->
+
+                    <if condition="notificationMessageUserCount == 0">
+                        <script>filteredUserAccountList.add(userAccount)</script>
+                    </if>
+                </iterate>
+                <log level="warn" message="filteredUserAccountList ${filteredUserAccountList}"/>
+
+<!--                <if condition="filteredUserAccountList.size() == 0"><return/></if>-->
 
                 <!-- Week Time: Wednesday November 2nd at 3pm -->
                 <!-- Day Time: 3pm (Tomorrow||Today) the 2nd of November -->
                 <!-- Hour Time: In 2 hours 45 minutes [round to 15 minutes before] at 3pm (Tomorrow||Today) the 2nd of November -->
+                <set field="title" value="${workEffort?.workEffortName ?: 'Your Project'} is starting "/>
+                <set field="startPeriod" from="new org.joda.time.MutablePeriod(nowTimestamp.time, workEffort.estimatedStartDate.time)"/>
+                <if condition="weekStartDate &lt;= workEffort.estimatedStartDate &amp;&amp; workEffort.estimatedStartDate &lt; weekEndDate">
+                    <log level="warn" message="week"/>
+                </if>
+                <if condition="dayStartDate &lt;= workEffort.estimatedStartDate &amp;&amp; workEffort.estimatedStartDate &lt; dayEndDate">
+                    <log level="warn" message="day"/>
+                </if>
+                <if condition="hourStartDate &lt;= workEffort.estimatedStartDate &amp;&amp; workEffort.estimatedStartDate &lt; hourEndDate">
 
+                    <script>
 
+                        title += 'in '
+//                        title += org.joda.time.format.PeriodFormatterBuilder()
+//                            .printZero
+//                            .appendHours()
+//                            .appendSuffix(' hour', ' hours')
+//                            .appendSeperator(' ')
+//                            .appendMinutes()
+//                            .appendSuffix(' minute', 'minutes')
+//                            .toFormatter()
+//                            .print(startPeriod)
+                    </script>
+                    <log level="warn" message="hour"/>
+                </if>
+                <log level="warn" message="context.toString() ${context.toString()}"/>
 
                 <script><![CDATA[
                     def nm = ec.makeNotificationMessage()
-                    nm.topic("ResistProjectReminder").message(workEffort)
-                    if (userAccountList) nm.userIds(new HashSet(userAccountList*.userId))
-                    nm.send()
+                    nm.topic("ResistProjectReminder").message(workEffort).subTopic(workEffort.workEffortId)
+                    if (filteredUserAccountList) nm.userIds(new HashSet(filteredUserAccountList*.userId))
+                    nm.send(true)
                     ]]></script>
             </iterate>
 

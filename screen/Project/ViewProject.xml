@@ -77,12 +77,13 @@ along with this software (see the LICENSE.md file). If not, see
         </if>
 <!--        <log level="warn" message="postContentList?.size() ${postContentList?.size()} postContentList ${postContentList} \n\n postAllContentList ${postAllContentList}"/>-->
 
-        <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" auto-field-map="project"/>
+        <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" auto-field-map="[statusId:project.statusId]"/>
         <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">
             <econdition field-name="statusId" from="project.statusId"/>
             <econdition field-name="statusFlowId" from="project.statusFlowId ?: 'Default'"/>
             <order-by field-name="transitionSequence,transitionName"/>
         </entity-find>
+<!--        <log level="warn" message="statusTransitionList ${statusTransitionList} \n\n statusItem ${statusItem}"/>-->
     </actions>
 
     <widgets>

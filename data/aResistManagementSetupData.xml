@@ -318,6 +318,9 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeInProgress" toStatusId="WeCancelled" transitionName="Cancel" transitionSequence="7"/>
     <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeCancelled" toStatusId="WeInPlanning" transitionName="Replan" transitionSequence="4"/>
 
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="WeptAssigned" toStatusId="WeptDeclined" transitionName="Decline"/>
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="WeptDeclined" toStatusId="WeptAssigned" transitionName="Assign"/>
+
     <!-- =================================================== -->
     <!-- ========== Resist Management Screen Data ========== -->
     <!-- =================================================== -->
@@ -335,8 +338,8 @@ along with this software (see the LICENSE.md file). If not, see
         titleTemplate="${fromPseudoId} said ${body}"
         linkTemplate="/rapps/Message/FindMessage?fromPartyId=${toPartyId}&amp;toPartyId=${fromPartyId}"/>
 
-    <moqui.service.job.ServiceJob jobName="send_ResistProjectNotifications_frequent" description="Render Scheduled Screens"
-                                  serviceName="resistmanagement.ResistServices.send#ProjectNotification" cronExpression="0/15 * * * * ?" paused="N"/>
+<!--    <moqui.service.job.ServiceJob jobName="send_ResistProjectNotifications_frequent" description="Render Scheduled Screens"-->
+<!--                                  serviceName="resistmanagement.ResistServices.send#ProjectNotification" cronExpression="0/15 * * * * ?" paused="N"/>-->
     <!-- EmailTemplate for Project notifications -->
     <moqui.basic.email.EmailTemplate emailTemplateId="PROJECT_NOTIFICATION" description="Project Notification" emailServerId="SYSTEM"
                                      emailTypeEnumId="EMT_NOTIFICATION" bodyScreenLocation="classpath://screen/NotificationEmail.xml" webappName="webroot"

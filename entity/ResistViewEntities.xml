@@ -266,7 +266,11 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="partyId"/></member-entity>
         <member-entity entity-alias="EMAP" entity-name="mantle.humanres.employment.EmploymentApplication" join-from-alias="PTY" join-optional="true">
             <key-map field-name="partyId" related="applyingPartyId"/></member-entity>
-        <member-entity entity-alias="STIT" entity-name="moqui.basic.StatusItem" join-from-alias="EMAP">
+        <member-entity entity-alias="EAST" entity-name="moqui.basic.StatusItem" join-from-alias="EMAP" join-optional="true">
+            <key-map field-name="statusId"/></member-entity>
+        <member-entity entity-alias="WEP" entity-name="mantle.work.effort.WorkEffortParty" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="EPST" entity-name="moqui.basic.StatusItem" join-from-alias="WEP" join-optional="true">
             <key-map field-name="statusId"/></member-entity>
         <alias-all entity-alias="PTY" prefix="party"/>
         <alias-all entity-alias="PCNT" prefix="content"/>
@@ -275,7 +279,9 @@ along with this software (see the LICENSE.md file). If not, see
         <alias-all entity-alias="PREL" prefix="relationship"/>
         <alias-all entity-alias="PTRL" prefix="role"/>
         <alias-all entity-alias="EMAP" prefix="application"/>
-        <alias-all entity-alias="STIT" prefix="status"/>
+        <alias-all entity-alias="EAST" prefix="applicationStatus"/>
+        <alias-all entity-alias="WEP" prefix="effortParty"/>
+        <alias-all entity-alias="EPST" prefix="effortPartyStatus"/>
     </view-entity>
 
     <!-- ========================================================= -->
