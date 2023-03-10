@@ -210,6 +210,12 @@ along with this software (see the LICENSE.md file). If not, see
                             // console.log(this.chatDataList[this.chatDataList.length-1])
                             if (this.chatDataList.length ? this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId : false)
                                 this.chatDataList.unshift(jsonObj.message)
+
+                            // scroll down to comment
+                            setTimeout(() => {
+                                document.documentElement.scrollTop = document.documentElement.scrollHeight;
+                                document.body.scrollTop = document.body.scrollHeight;
+                            }, 10);
                         },
                         onScrollLoad (index, done) {
                             // console.log('onScrollLoad')
