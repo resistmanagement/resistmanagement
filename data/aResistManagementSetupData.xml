@@ -285,6 +285,8 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ==================================================== -->
     <!-- ========== Resist Management Project Data ========== -->
     <!-- ==================================================== -->
+    <moqui.basic.Enumeration description="Resist Project" enumId="WepPrResistProject" parentEnumId="WetProject" enumTypeId="WorkEffortPurpose"/>
+
     <statuses statusId="EaInvited" sequenceNum="1" statusTypeId="EmploymentApplication" description="Invited"/>
     <statuses statusId="EaApplied" sequenceNum="11" statusTypeId="EmploymentApplication" description="Applied"/>
     <statuses statusId="EaApproved" sequenceNum="12" statusTypeId="EmploymentApplication" description="Approved"/>
@@ -331,7 +333,18 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.security.user.NotificationTopic topic="ResistChatEvent" description="Resist Chat Update Event"
         typeString="info" showAlert="Y" persistOnSend="N" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
         titleTemplate="${fromPseudoId} said ${body}"
-        linkTemplate="/qapps/Message/FindMessage?fromPartyId=${toPartyId}&amp;toPartyId=${fromPartyId}"/>
+        linkTemplate="/rapps/Message/FindMessage?fromPartyId=${toPartyId}&amp;toPartyId=${fromPartyId}"/>
+
+    <moqui.service.job.ServiceJob jobName="send_ResistProjectNotifications_frequent" description="Render Scheduled Screens"
+                                  serviceName="resistmanagement.ResistServices.send#ProjectNotification" cronExpression="0/15 * * * * ?" paused="N"/>
+    <!-- EmailTemplate for Project notifications -->
+    <moqui.basic.email.EmailTemplate emailTemplateId="PROJECT_NOTIFICATION" description="Project Notification" emailServerId="SYSTEM"
+                                     emailTypeEnumId="EMT_NOTIFICATION" bodyScreenLocation="classpath://screen/NotificationEmail.xml" webappName="webroot"
+                                     fromAddress="project@resistmanagement.com" fromName="" ccAddresses="" bccAddresses="" subject="${title}" sendPartial="Y"/>
+    <moqui.security.user.NotificationTopic topic="ResistProjectReminder" description="Resist Project Reminder"
+        typeString="info" showAlert="Y" persistOnSend="N" receiveNotifications="Y" emailTemplateId="PROJECT_NOTIFICATION"
+        titleTemplate="${workEffortName} starts at ${estimatedStartDate}"
+        linkTemplate="/rapps/Project/ViewProject?workEffortId=${workEffortId}"/>
 
     <CommunicationEventType communicationEventTypeId="ResistChatMessage" description="Message"/>
 
