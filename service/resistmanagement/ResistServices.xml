@@ -1507,7 +1507,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="send" noun="ProjectNotification">
+    <service verb="send" noun="ProjectNotification" authenticate="false">
         <in-parameters>
         </in-parameters>
         <out-parameters>
