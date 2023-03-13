@@ -1604,43 +1604,76 @@ along with this software (see the LICENSE.md file). If not, see
                         <script>filteredUserAccountList.add(userAccount)</script>
                     </if>
                 </iterate>
-                <log level="warn" message="filteredUserAccountList ${filteredUserAccountList}"/>
+<!--                <log level="warn" message="filteredUserAccountList ${filteredUserAccountList}"/>-->
 
 <!--                <if condition="filteredUserAccountList.size() == 0"><return/></if>-->
 
                 <!-- Week Time: Wednesday November 2nd at 3pm -->
-                <!-- Day Time: 3pm (Tomorrow||Today) the 2nd of November -->
-                <!-- Hour Time: In 2 hours 45 minutes [round to 15 minutes before] at 3pm (Tomorrow||Today) the 2nd of November -->
+                <!-- Day Time: 3pm (Tomorrow||Today) the November 2nd -->
+                <!-- Hour Time: In 2 hours 45 minutes [round to 15 minutes before] at 3pm (Tomorrow||Today) November 2nd -->
                 <set field="title" value="${workEffort?.workEffortName ?: 'Your Project'} is starting "/>
                 <set field="startPeriod" from="new org.joda.time.MutablePeriod(nowTimestamp.time, workEffort.estimatedStartDate.time)"/>
                 <if condition="weekStartDate &lt;= workEffort.estimatedStartDate &amp;&amp; workEffort.estimatedStartDate &lt; weekEndDate">
-                    <log level="warn" message="week"/>
+<!--                    <log level="warn" message="week"/>-->
+                    <script>
+                        title += ' at '
+                        title += new org.joda.time.format.DateTimeFormatterBuilder()
+                                .appendDayOfWeekText()
+                                .appendLiteral(' ')
+                                .appendMonthOfYearText()
+                                .appendLiteral(' ')
+                                .appendDayOfMonth(1)
+                                .appendLiteral(' at ')
+                                .appendClockhourOfHalfday(1)
+                                .appendHalfdayOfDayText()
+                                .toFormatter()
+                                .print(workEffort.estimatedStartDate.time)
+                    </script>
                 </if>
                 <if condition="dayStartDate &lt;= workEffort.estimatedStartDate &amp;&amp; workEffort.estimatedStartDate &lt; dayEndDate">
-                    <log level="warn" message="day"/>
+<!--                    <log level="warn" message="day"/>-->
+                    <script>
+                        title += ' at '
+                        title += new org.joda.time.format.DateTimeFormatterBuilder()
+                                .appendClockhourOfHalfday(1)
+                                .appendHalfdayOfDayText()
+                                .appendLiteral(' ')
+                                .appendMonthOfYearText()
+                                .appendLiteral(' ')
+                                .appendDayOfMonth(1)
+                                .toFormatter()
+                                .print(workEffort.estimatedStartDate.time)
+                    </script>
                 </if>
                 <if condition="hourStartDate &lt;= workEffort.estimatedStartDate &amp;&amp; workEffort.estimatedStartDate &lt; hourEndDate">
-
+<!--                    <log level="warn" message="hour"/>-->
                     <script>
-
                         title += 'in '
-//                        title += org.joda.time.format.PeriodFormatterBuilder()
-//                            .printZero
-//                            .appendHours()
-//                            .appendSuffix(' hour', ' hours')
-//                            .appendSeperator(' ')
-//                            .appendMinutes()
-//                            .appendSuffix(' minute', 'minutes')
-//                            .toFormatter()
-//                            .print(startPeriod)
+                        title += new org.joda.time.format.PeriodFormatterBuilder()
+                            .printZeroNever()
+                            .appendHours()
+                            .appendSuffix(' hour ', ' hours ')
+                            .appendMinutes()
+                            .appendSuffix(' minute', ' minutes')
+                            .toFormatter()
+                            .print(startPeriod)
+                        title += ' at '
+                        title += new org.joda.time.format.DateTimeFormatterBuilder()
+                            .appendClockhourOfHalfday(1)
+                            .appendHalfdayOfDayText()
+                            .appendLiteral(' the ')
+                            .appendMonthOfYearText()
+                            .appendLiteral(' ')
+                            .appendDayOfMonth(1)
+                            .toFormatter()
+                            .print(workEffort.estimatedStartDate.time)
                     </script>
-                    <log level="warn" message="hour"/>
                 </if>
-                <log level="warn" message="context.toString() ${context.toString()}"/>
+<!--                <log level="warn" message="context.toString() ${context.toString()}"/>-->
 
                 <script><![CDATA[
                     def nm = ec.makeNotificationMessage()
-                    nm.topic("ResistProjectReminder").message(workEffort).subTopic(workEffort.workEffortId)
+                    nm.topic("ResistProjectReminder").message(workEffort).subTopic(workEffort.workEffortId).title(title)
                     if (filteredUserAccountList) nm.userIds(new HashSet(filteredUserAccountList*.userId))
                     nm.send(true)
                     ]]></script>
