@@ -173,6 +173,8 @@ along with this software (see the LICENSE.md file). If not, see
                     },
                     methods: {
                         createMessage: function() {
+                            if (this.newServiceInfo.body === "" || this.newServiceInfo.body === null) return
+
                             var vm = this;
                             $.ajax({ type:"POST", url:"/custom/Message/FindMessage/createMessage",
                                 data:this.newServiceInfo, dataType:"json",
@@ -181,23 +183,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 success: function(responseObj, status, jqXHR) {
                                     // console.log('createMessage success')
 
-                                    vm.chatDataList.unshift({
-                                        body:vm.newServiceInfo.body,
-                                        communicationEventId:responseObj.newMessage.communicationEventId,
-                                        contentUrl:responseObj.newMessage.contentUrl,
-                                        sent:responseObj.newMessage.sent,
-                                        fromPseudoId:responseObj.newMessage.fromPseudoId,
-                                        partyId:vm.newServiceInfo.fromPartyId
-                                    })
                                     vm.newServiceInfo.body = ""
                                     vm.focusBodyElement();
-
-                                    // scroll down to comment
-                                    setTimeout(() => {
-                                        document.documentElement.scrollTop = document.documentElement.scrollHeight;
-                                        document.body.scrollTop = document.body.scrollHeight;
-                                    }, 10);
-
 
                                     // console.log(vm.chatDataList)
                                 }
@@ -208,7 +195,7 @@ along with this software (see the LICENSE.md file). If not, see
                             // console.log(jsonObj)
                             // console.log(this.chatDataList)
                             // console.log(this.chatDataList[this.chatDataList.length-1])
-                            if (this.chatDataList.length ? this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId : false)
+                            if (this.chatDataList.length ? (this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId) : true)
                                 this.chatDataList.unshift(jsonObj.message)
 
                             // scroll down to comment

@@ -13,6 +13,30 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="create" noun="Account" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="emailAddress" required="true"><text-email/></parameter>
+            <parameter name="firstName" required="true"/>
+            <parameter name="lastName" required="true"/>
+            <parameter name="username" required="true"/>
+            <parameter name="newPassword" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="userId"/>
+            <parameter name="partyId" required="true"/>
+            <parameter name="emailContactMechId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.party.PartyServices.create#Account" out-map="context"
+                    in-map="[emailAddress:emailAddress,firstName:firstName,lastName:lastName,username:username,newPassword:newPassword,newPasswordVerify:newPassword,userGroupId:'RESIST_APP_USERS']"/>
+            <service-call name="create#moqui.security.UserGroupMember" in-map="[userGroupId:'RESIST_APP_USERS', userId:userId, fromDate:ec.user.nowTimestamp]"/>
+            <service-call name="create#moqui.security.user.NotificationTopicUser" in-map="[userId:userId,topic:'ResistProjectReminder',emailNotifications:'Y']"/>
+
+            <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
+            <service-call name="resistmanagement.ResistServices.create#PersonProfile" in-map="[pseudoId:username,settingValue:partySettingType?.defaultValue]"/>
+        </actions>
+    </service>
+
     <service verb="store" noun="TalentProfileType">
         <description></description>
         <in-parameters>
@@ -1470,15 +1494,15 @@ along with this software (see the LICENSE.md file). If not, see
         <implements service="org.moqui.EntityServices.receive#DataFeed"/>
         <actions>
             <iterate list="documentList" entry="document">
-                <entity-find entity-name="mantle.party.PartyRelationship" list="partyRelationshipList">
+                <entity-find entity-name="mantle.party.PartyRelationship" list="toPartyRelationshipList">
                     <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
                     <econdition field-name="toRoleTypeId" value="ClientManager"/>
                     <econdition field-name="toPartyId" from="document.toPartyId"/>
                     <date-filter/>
                 </entity-find>
 
-                <entity-find entity-name="moqui.security.UserAccount" list="userAccountList">
-                    <econdition field-name="partyId" operator="in" from="partyRelationshipList*.fromPartyId"/>
+                <entity-find entity-name="moqui.security.UserAccount" list="toUserAccountList">
+                    <econdition field-name="partyId" operator="in" from="toPartyRelationshipList*.fromPartyId"/>
                     <select-field field-name="userId"/></entity-find>
 
                 <entity-find-one entity-name="mantle.party.Party" value-field="fromParty" auto-field-map="[partyId:document.fromPartyId]"/>
@@ -1500,7 +1524,30 @@ along with this software (see the LICENSE.md file). If not, see
                 <script><![CDATA[
                     def nm = ec.makeNotificationMessage()
                     nm.topic((String) document._type).message((Map<String, Object>) document)
-                    if (userAccountList) nm.userIds(new HashSet(userAccountList*.userId))
+                    if (toUserAccountList) nm.userIds(new HashSet(toUserAccountList*.userId))
+                    nm.send()
+
+                    // Clone document to avoid race condition in document.sent
+                    document = new HashMap(document)
+                    ]]></script>
+
+                <entity-find entity-name="mantle.party.PartyRelationship" list="fromPartyRelationshipList">
+                    <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
+                    <econdition field-name="toRoleTypeId" value="ClientManager"/>
+                    <econdition field-name="toPartyId" from="document.fromPartyId"/>
+                    <date-filter/>
+                </entity-find>
+
+                <entity-find entity-name="moqui.security.UserAccount" list="fromUserAccountList">
+                    <econdition field-name="partyId" operator="in" from="fromPartyRelationshipList*.fromPartyId"/>
+                    <select-field field-name="userId"/></entity-find>
+
+                <set field="document.sent" from="true" type="Boolean"/>
+
+                <script><![CDATA[
+                    nm = ec.makeNotificationMessage()
+                    nm.topic((String) document._type).message((Map<String, Object>) document)
+                    if (fromUserAccountList) nm.userIds(new HashSet(fromUserAccountList*.userId))
                     nm.send()
                     ]]></script>
             </iterate>
@@ -1553,7 +1600,7 @@ along with this software (see the LICENSE.md file). If not, see
 <!--                    <econdition field-name="toRoleTypeId" value="ClientManager"/>-->
 <!--                    <date-filter/></entity-find>-->
 
-                <!--            <log level="warn" message="pfatrList ${pfatrList}"/>-->
+<!--                <log level="warn" message="workEffort ${workEffort}"/>-->
                 <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="projectPositionList">
                     <econdition field-name="workEffortId" from="workEffort.workEffortId"/>
                     <econdition field-name="statusId" value="WeptAssigned"/>
@@ -1661,7 +1708,7 @@ along with this software (see the LICENSE.md file). If not, see
                         title += new org.joda.time.format.DateTimeFormatterBuilder()
                             .appendClockhourOfHalfday(1)
                             .appendHalfdayOfDayText()
-                            .appendLiteral(' the ')
+                            .appendLiteral(' on ')
                             .appendMonthOfYearText()
                             .appendLiteral(' ')
                             .appendDayOfMonth(1)
@@ -1670,6 +1717,8 @@ along with this software (see the LICENSE.md file). If not, see
                     </script>
                 </if>
 <!--                <log level="warn" message="context.toString() ${context.toString()}"/>-->
+
+<!--                <log level="warn" message="Sending notification '${title}' to ${filteredUserAccountList*.userId}"/>-->
 
                 <script><![CDATA[
                     def nm = ec.makeNotificationMessage()
