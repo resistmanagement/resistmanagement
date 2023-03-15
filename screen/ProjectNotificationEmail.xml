@@ -15,29 +15,30 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd">
     <!-- for fields available see NotificationMessageImpl.getWrappedMessageMap(), this is generic so nothing from the 'message' Map within it -->
     <actions>
-        <if condition="link">
-            <if condition="webHostName"><then>
-                <set field="linkUrl" from="'https://' + webHostName + (link.startsWith('/') ? '' : '/') + link"/>
-            </then><else>
-                <set field="rootUrl" from="org.moqui.impl.context.WebFacadeImpl.getWebappRootUrl(sri?.webappName ?: 'webroot', null, true, false, ec)"/>
-                <set field="linkUrl" from="rootUrl &amp;&amp; !rootUrl.contains('localhost') ? rootUrl + '/' + link : link"/>
-                <!-- <log level="warn" message="rootUrl ${rootUrl} link ${link} linkUrl ${linkUrl}"/> -->
-            </else></if>
-        </if>
-        <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="projectPositionList">
-            <econdition field-name="workEffortId" from="workEffort.workEffortId"/>
-            <econdition field-name="statusId" value="WeptAssigned"/>
-            <econdition field-name="roleTypeId" operator="in" from="['Talent','Manager']"/>
-            <date-filter/>
-        </entity-find>
+        <set field="linkUrl" from="'https://resistmanagement.com' + (link.startsWith('/') ? '' : '/') + link"/>
+<!--        <log level="warn" message="message ${message}"/>-->
+        <set field="startTimeString" value=""/>
+        <script>
+            startTimeString = new org.joda.time.format.DateTimeFormatterBuilder()
+                    .appendClockhourOfHalfday(1)
+                    .appendHalfdayOfDayText()
+                    .appendLiteral(' on ')
+                    .appendMonthOfYearText()
+                    .appendLiteral(' ')
+                    .appendDayOfMonth(1)
+                    .toFormatter()
+                    .print(message.estimatedStartDate.time)
+        </script>
+<!--        <log level="warn" message="startTimeString ${startTimeString}"/>-->
+<!--        <log level="warn" message="context.toString() ${context.toString()}"/>-->
     </actions>
     <widgets><render-mode>
         <text type="html"><![CDATA[<html><body>
-<h2>${title}</h2>
-
 <p>Get ready to create!</p>
 
-<p>Your project is starting soon. <#if linkUrl?has_content><a href="${linkUrl}">See your Project</a></#if></p>
+<p>Your project is starting soon. <#if linkUrl?has_content><a href="${linkUrl}">View additional details here.</a></#if></p>
+
+<p>Project start time is ${startTimeString}</p>
 
 </body></html>]]></text>
 <!--        <p>-->

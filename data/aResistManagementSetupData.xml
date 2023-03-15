@@ -338,15 +338,17 @@ along with this software (see the LICENSE.md file). If not, see
         titleTemplate="${fromPseudoId} said ${body}"
         linkTemplate="/rapps/Message/FindMessage?fromPartyId=${toPartyId}&amp;toPartyId=${fromPartyId}"/>
 
-    <moqui.service.job.ServiceJob jobName="send_ResistProjectNotifications_frequent" description="Render Scheduled Screens"
-                                  serviceName="resistmanagement.ResistServices.send#ProjectNotification" cronExpression="0/15 * * * * ?" paused="N"/>
+    <moqui.service.job.ServiceJob jobName="send_ResistProjectNotifications_frequent" description="Send Project Notifications"
+                                  serviceName="resistmanagement.ResistServices.send#ProjectNotification" cronExpression="0 0/15 * * * ?" paused="N"/>
     <!-- EmailTemplate for Project notifications -->
     <moqui.basic.email.EmailTemplate emailTemplateId="PROJECT_NOTIFICATION" description="Project Notification" emailServerId="SYSTEM"
                                      emailTypeEnumId="EMT_NOTIFICATION" bodyScreenLocation="component://resistmanagement/screen/ProjectNotificationEmail.xml" webappName="webroot"
-                                     fromAddress="project@resistmanagement.com" fromName="" ccAddresses="" bccAddresses="" subject="${title}" sendPartial="Y"/>
+                                     fromAddress="noreply@resistmanagement.com" fromName="Resist Management" ccAddresses="" bccAddresses="" subject="${title}" sendPartial="Y"/>
     <moqui.security.user.NotificationTopic topic="ResistProjectReminder" description="Resist Project Reminder"
         typeString="info" showAlert="Y" persistOnSend="N" receiveNotifications="Y" emailTemplateId="PROJECT_NOTIFICATION"
         linkTemplate="/rapps/Project/ViewProject?workEffortId=${workEffortId}&amp;canViewProjectPositions=true" emailMessageSave="Y"/>
+
+    <moqui.basic.email.EmailTemplate emailTemplateId="NOTIFICATION" fromAddress="noreply@resistmanagement.com" fromName="Resist Management"/>
 
     <CommunicationEventType communicationEventTypeId="ResistChatMessage" description="Message"/>
 
