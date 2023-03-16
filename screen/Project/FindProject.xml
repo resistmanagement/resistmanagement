@@ -126,6 +126,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="toPseudoId"><default-field title="Profile"><display/></default-field></field>
                 <field name="workEffortName"><default-field title="Name"><link url="../ViewProject" text="${workEffortName}" parameter-map="[workEffortId:workEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
                 <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
+
+                <columns type="mobile">
+                    <column>
+                        <field-ref name="toPseudoId"/>
+                        <field-ref name="workEffortName"/>
+                        <field-ref name="description"/>
+                    </column>
+                </columns>
             </form-list>
         </row-col></container-row>
     </widgets>

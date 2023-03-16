@@ -33,8 +33,8 @@ along with this software (see the LICENSE.md file). If not, see
     <#-- for layout options see: https://quasar.dev/layout/layout -->
     <#-- to build a layout use the handy Quasar tool: https://quasar.dev/layout-builder -->
     <q-layout view="hHh LpR fFf">
-        <q-header reveal bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;">
-            <q-btn push size="lg" icon="menu" @click="toggleLeftOpen()"></q-btn>
+        <q-header reveal bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;" class="bg-grey-9">
+<#--            <q-btn push size="lg" icon="menu" @click="toggleLeftOpen()"></q-btn>-->
 
             <#assign headerLogoList = sri.getThemeValues("STRT_HEADER_LOGO")>
             <#if headerLogoList?has_content>
@@ -48,28 +48,28 @@ along with this software (see the LICENSE.md file). If not, see
             </#if>
 
             <#-- NOTE: tried using q-breadcrumbs but last item with q-breadcrumbs--last class makes never clickable! -->
-            <template v-for="(navMenuItem, menuIndex) in navMenuList"><template v-if="menuIndex < (navMenuList.length - 1)">
-                <m-link v-if="navMenuItem.hasTabMenu" :href="getNavHref(menuIndex)" class="gt-xs">{{navMenuItem.title}}</m-link>
-                <div v-else-if="navMenuItem.subscreens && navMenuItem.subscreens.length" class="cursor-pointer gt-xs">
-                    {{navMenuItem.title}}
-                    <q-menu anchor="bottom left" self="top left"><q-list dense style="min-width: 200px">
-                        <q-item v-for="subscreen in navMenuItem.subscreens" :key="subscreen.name" :class="{'bg-primary':subscreen.active, 'text-white':subscreen.active}" clickable v-close-popup><q-item-section>
-                            <m-link :href="subscreen.pathWithParams">
-                                <template v-if="subscreen.image">
-                                    <i v-if="subscreen.imageType === 'icon'" :class="subscreen.image" style="padding-right: 4px;"></i>
-                                    <img v-else :src="subscreen.image" :alt="subscreen.title" width="18" class="invertible" style="padding-right: 4px;">
-                                </template>
-                                <i v-else class="fa fa-link" style="padding-right: 8px;"></i>
-                                {{subscreen.title}}
-                            </m-link></li>
-                        </q-item-section></q-item>
-                    </q-list></q-menu>
-                </div>
-                <m-link v-else :href="getNavHref(menuIndex)" class="gt-xs">{{navMenuItem.title}}</m-link>
+<#--            <template v-for="(navMenuItem, menuIndex) in navMenuList"><template v-if="menuIndex < (navMenuList.length - 1)">-->
+<#--                <m-link v-if="navMenuItem.hasTabMenu" :href="getNavHref(menuIndex)" class="gt-xs">{{navMenuItem.title}}</m-link>-->
+<#--                <div v-else-if="navMenuItem.subscreens && navMenuItem.subscreens.length" class="cursor-pointer gt-xs">-->
+<#--                    {{navMenuItem.title}}-->
+<#--                    <q-menu anchor="bottom left" self="top left"><q-list dense style="min-width: 200px">-->
+<#--                        <q-item v-for="subscreen in navMenuItem.subscreens" :key="subscreen.name" :class="{'bg-primary':subscreen.active, 'text-white':subscreen.active}" clickable v-close-popup><q-item-section>-->
+<#--                            <m-link :href="subscreen.pathWithParams">-->
+<#--                                <template v-if="subscreen.image">-->
+<#--                                    <i v-if="subscreen.imageType === 'icon'" :class="subscreen.image" style="padding-right: 4px;"></i>-->
+<#--                                    <img v-else :src="subscreen.image" :alt="subscreen.title" width="18" class="invertible" style="padding-right: 4px;">-->
+<#--                                </template>-->
+<#--                                <i v-else class="fa fa-link" style="padding-right: 8px;"></i>-->
+<#--                                {{subscreen.title}}-->
+<#--                            </m-link></li>-->
+<#--                        </q-item-section></q-item>-->
+<#--                    </q-list></q-menu>-->
+<#--                </div>-->
+<#--                <m-link v-else :href="getNavHref(menuIndex)" class="gt-xs">{{navMenuItem.title}}</m-link>-->
 
-                <q-icon size="1.5em" name="chevron_right" color="grey" class="gt-xs"></q-icon>
-            </template></template>
-            <m-link v-if="navMenuList.length > 0" :href="getNavHref(navMenuList.length - 1)" class="gt-xs">{{navMenuList[navMenuList.length - 1].title}}</m-link>
+<#--                <q-icon size="1.5em" name="chevron_right" color="grey" class="gt-xs"></q-icon>-->
+<#--            </template></template>-->
+<#--            <m-link v-if="navMenuList.length > 0" :href="getNavHref(navMenuList.length - 1)" class="gt-xs">{{navMenuList[navMenuList.length - 1].title}}</m-link>-->
 
             <q-space></q-space>
 
@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
             <component :is="qzVue" ref="qzVue"></component>
 
             <#-- screen documentation/help -->
-            <q-btn push size="lg" icon="help_outline" color="info" :class="{hidden:!documentMenuList.length}">
+            <q-btn push icon="help_outline" color="info" :class="{hidden:!documentMenuList.length}">
                 <q-tooltip>${ec.l10n.localize("Documentation")}</q-tooltip>
                 <q-menu><q-list dense class="q-my-md">
                     <q-item v-for="screenDoc in documentMenuList" :key="screenDoc.index"><q-item-section>
@@ -93,21 +93,21 @@ along with this software (see the LICENSE.md file). If not, see
 <#--            <template v-for="navPlugin in navPlugins"><component :is="navPlugin"></component></template>-->
 
             <#-- notify history -->
-            <q-btn push size="lg" icon="notifications">
-                <q-tooltip>${ec.l10n.localize("Notify History")}</q-tooltip>
-                <q-menu><q-list dense style="min-width: 300px">
-                    <q-item v-for="histItem in notifyHistoryList"><q-item-section>
-                        <#-- NOTE: don't use v-html for histItem.message, may contain input repeated back so need to encode for security (make sure scripts not run, etc) -->
-                        <q-banner dense rounded class="text-white" :class="'bg-' + getQuasarColor(histItem.type)">
-                            <#-- TODO: histItem.icon see https://v1.quasar.dev/vue-components/banner-->
-                            <strong>{{histItem.time}}</strong> <span>{{histItem.message}}</span>
-                            <template v-if="histItem.link != null" v-slot:action>
-                                <q-btn :to="histItem.link" flat color="white" label="View"/>
-                            </template>
-                        </q-banner>
-                    </q-item-section></q-item>
-                </q-list></q-menu>
-            </q-btn>
+<#--            <q-btn push size="lg" icon="notifications">-->
+<#--                <q-tooltip>${ec.l10n.localize("Notify History")}</q-tooltip>-->
+<#--                <q-menu><q-list dense style="min-width: 300px">-->
+<#--                    <q-item v-for="histItem in notifyHistoryList"><q-item-section>-->
+<#--                        &lt;#&ndash; NOTE: don't use v-html for histItem.message, may contain input repeated back so need to encode for security (make sure scripts not run, etc) &ndash;&gt;-->
+<#--                        <q-banner dense rounded class="text-white" :class="'bg-' + getQuasarColor(histItem.type)">-->
+<#--                            &lt;#&ndash; TODO: histItem.icon see https://v1.quasar.dev/vue-components/banner&ndash;&gt;-->
+<#--                            <strong>{{histItem.time}}</strong> <span>{{histItem.message}}</span>-->
+<#--                            <template v-if="histItem.link != null" v-slot:action>-->
+<#--                                <q-btn :to="histItem.link" flat color="white" label="View"/>-->
+<#--                            </template>-->
+<#--                        </q-banner>-->
+<#--                    </q-item-section></q-item>-->
+<#--                </q-list></q-menu>-->
+<#--            </q-btn>-->
 
             <#-- screen history menu -->
             <#-- get initial history from server? <#assign screenHistoryList = ec.web.getScreenHistory()><#list screenHistoryList as screenHistory><#if (screenHistory_index >= 25)><#break></#if>{url:pathWithParams, name:title}</#list> -->
@@ -133,7 +133,7 @@ along with this software (see the LICENSE.md file). If not, see
                data-placement="bottom" class="btn btn-default btn-sm navbar-btn navbar-right"><i class="fa fa-chevron-left"></i></a>
             -->
 
-            <q-btn push size="lg" icon="account_circle">
+            <q-btn push icon="account_circle">
                 <q-tooltip>${(ec.user.userAccount.userFullName)!ec.l10n.localize("Account")}</q-tooltip>
                 <q-menu><q-card flat bordered><#-- always matching header (dark): class="${headerClass}" -->
                     <q-card-section horizontal class="q-pa-md">
@@ -160,10 +160,10 @@ along with this software (see the LICENSE.md file). If not, see
             </q-btn>
         </q-toolbar></q-header>
 
-        <q-drawer v-model="leftOpen" side="left" bordered><#-- no 'overlay', for those who want to keep it open better to compress main area -->
-            <q-btn dense flat icon="menu" @click="toggleLeftOpen()" class="lt-sm"></q-btn>
-            <q-list dense padding><m-menu-nav-item :menu-index="0"></m-menu-nav-item></q-list>
-        </q-drawer>
+<#--        <q-drawer v-model="leftOpen" side="left" bordered>&lt;#&ndash; no 'overlay', for those who want to keep it open better to compress main area &ndash;&gt;-->
+<#--            <q-btn dense flat icon="menu" @click="toggleLeftOpen()" class="lt-sm"></q-btn>-->
+<#--            <q-list dense padding><m-menu-nav-item :menu-index="0"></m-menu-nav-item></q-list>-->
+<#--        </q-drawer>-->
 
         <q-page-container class="q-ma-sm"><q-page>
             <m-subscreens-active></m-subscreens-active>
@@ -171,14 +171,14 @@ along with this software (see the LICENSE.md file). If not, see
 
 <#--        <q-footer reveal bordered class="bg-grey-9 text-white row q-pa-xs" id="footer">-->
 <#--&lt;#&ndash;            <q-toolbar>&ndash;&gt;-->
-<#--&lt;#&ndash;                <q-space></q-space>&ndash;&gt;-->
-<#--            <q-tabs v-model="tab" align="justify">-->
-<#--                <q-tab name="project" label="project"></q-tab>-->
-<#--                <q-tab name="profile" label="profile"></q-tab>-->
-<#--                <q-tab name="message" label="message"></q-tab>-->
-<#--                <q-tab name="account" label="account"></q-tab>-->
+<#--                <q-space></q-space>-->
+<#--            <q-tabs align="center">-->
+<#--                <q-tab exact name="project" icon="event_note" @click.prevent="setUrl('/custom/Project')"></q-tab>-->
+<#--                <q-tab exact name="profile" icon="person" @click.prevent="setUrl('/custom/Account')"></q-tab>-->
+<#--                <q-tab exact name="message" icon="chat" @click.prevent="setUrl('/custom/Message/')"></q-tab>-->
+<#--                <q-tab exact name="account" icon="settings" @click.prevent="setUrl('/custom/Settings')"></q-tab>-->
 <#--            </q-tabs>-->
-<#--&lt;#&ndash;                <q-space></q-space>&ndash;&gt;-->
+<#--                <q-space></q-space>-->
 <#--&lt;#&ndash;            </q-toolbar>&ndash;&gt;-->
 <#--            &lt;#&ndash;            <#assign footerItemList = sri.getThemeValues("STRT_FOOTER_ITEM")>&ndash;&gt;-->
 <#--            &lt;#&ndash;            <#list footerItemList! as footerItem>&ndash;&gt;-->
