@@ -112,13 +112,16 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
     <transition name="createAccount" require-session-token="false">
         <actions>
+<!--            <log level="warn" message="createAccount"/>-->
             <service-call name="mantle.party.PartyServices.create#Account" out-map="context"
-                          in-map="context + [userGroupId:'RESIST_APP_USERS']"/>
-            <service-call name="create#moqui.security.UserGroupMember"
-                          in-map="[userGroupId:'RESIST_APP_USERS', userId:userId, fromDate:ec.user.nowTimestamp]"/>
+                    in-map="[emailAddress:emailAddress,firstName:firstName,lastName:lastName,username:username,newPassword:newPassword,newPasswordVerify:newPassword,userGroupId:'RESIST_APP_USERS']"/>
+            <service-call name="create#moqui.security.UserGroupMember" in-map="[userGroupId:'RESIST_APP_USERS', userId:userId, fromDate:ec.user.nowTimestamp]"/>
             <service-call name="create#moqui.security.user.NotificationTopicUser" in-map="[userId:userId,topic:'ResistProjectReminder',emailNotifications:'Y']"/>
+
+            <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
+            <service-call name="resistmanagement.ResistServices.create#PersonProfile" in-map="[pseudoId:username,settingValue:partySettingType?.defaultValue]"/>
         </actions>
-        <default-response type="screen-last"/><error-response url="."/>
+        <default-response url="." parameter-map="[initialTab:'#sign-up']"/>
     </transition>
 
     <pre-actions><script>
@@ -130,7 +133,7 @@ along with this software (see the LICENSE.md file). If not, see
         // Bootstrap
         html_scripts.add('/libs/twitter-bootstrap/js/bootstrap.min.js')
         // Moqui webroot layout
-        html_stylesheets.add('/css/webroot-layout.css')
+        html_stylesheets.add('/r/css/webroot-layout.css')
     </script></pre-actions>
     <actions>
         <!-- handle returnTo parameter, and general handling for when the Login screen is reached directly
@@ -174,7 +177,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <!-- NOTE: this screen is not under the apps screen, but uses similar header/footer/etc -->
-        <container id="content" style="Login"><container style="inner"><container style="container-fluid">
+        <container id="content" style="Login"><container style="inner"><container style="container-fluid;padding-right:1px;padding-left:1px">
             <section-iterate name="headerSavedMessages" list="ec.web?.savedMessages" entry="message"><widgets>
                 <render-mode><text type="html"><![CDATA[<div class="alert alert-success fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>]]></text></render-mode>
                 <label text="${message}" type="h4"/>

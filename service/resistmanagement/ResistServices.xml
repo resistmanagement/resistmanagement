@@ -13,30 +13,6 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
-    <service verb="create" noun="Account" authenticate="anonymous-all">
-        <in-parameters>
-            <parameter name="emailAddress" required="true"><text-email/></parameter>
-            <parameter name="firstName" required="true"/>
-            <parameter name="lastName" required="true"/>
-            <parameter name="username" required="true"/>
-            <parameter name="newPassword" required="true"/>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="userId"/>
-            <parameter name="partyId" required="true"/>
-            <parameter name="emailContactMechId"/>
-        </out-parameters>
-        <actions>
-            <service-call name="mantle.party.PartyServices.create#Account" out-map="context"
-                    in-map="[emailAddress:emailAddress,firstName:firstName,lastName:lastName,username:username,newPassword:newPassword,newPasswordVerify:newPassword,userGroupId:'RESIST_APP_USERS']"/>
-            <service-call name="create#moqui.security.UserGroupMember" in-map="[userGroupId:'RESIST_APP_USERS', userId:userId, fromDate:ec.user.nowTimestamp]"/>
-            <service-call name="create#moqui.security.user.NotificationTopicUser" in-map="[userId:userId,topic:'ResistProjectReminder',emailNotifications:'Y']"/>
-
-            <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
-            <service-call name="resistmanagement.ResistServices.create#PersonProfile" in-map="[pseudoId:username,settingValue:partySettingType?.defaultValue]"/>
-        </actions>
-    </service>
-
     <service verb="store" noun="TalentProfileType">
         <description></description>
         <in-parameters>

@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
     <widgets>
         <container style="text-center">
-            <label text="Choose an Application" type="h2"/>
+<!--            <label text="Choose an Application" type="h2"/>-->
 
             <section-iterate name="ScreenNestedSection" list="currentScreenDef.getMenuSubscreensItems()" entry="currentSubscreensItem">
                 <actions>

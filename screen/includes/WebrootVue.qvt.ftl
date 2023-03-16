@@ -34,7 +34,7 @@ along with this software (see the LICENSE.md file). If not, see
     <#-- to build a layout use the handy Quasar tool: https://quasar.dev/layout-builder -->
     <q-layout view="hHh LpR fFf">
         <q-header reveal bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;">
-            <q-btn dense flat icon="menu" @click="toggleLeftOpen()"></q-btn>
+            <q-btn push size="lg" icon="menu" @click="toggleLeftOpen()"></q-btn>
 
             <#assign headerLogoList = sri.getThemeValues("STRT_HEADER_LOGO")>
             <#if headerLogoList?has_content>
@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
             <component :is="qzVue" ref="qzVue"></component>
 
             <#-- screen documentation/help -->
-            <q-btn dense flat icon="help_outline" color="info" :class="{hidden:!documentMenuList.length}">
+            <q-btn push size="lg" icon="help_outline" color="info" :class="{hidden:!documentMenuList.length}">
                 <q-tooltip>${ec.l10n.localize("Documentation")}</q-tooltip>
                 <q-menu><q-list dense class="q-my-md">
                     <q-item v-for="screenDoc in documentMenuList" :key="screenDoc.index"><q-item-section>
@@ -90,10 +90,10 @@ along with this software (see the LICENSE.md file). If not, see
             </q-btn>
 
             <#-- nav plugins -->
-            <template v-for="navPlugin in navPlugins"><component :is="navPlugin"></component></template>
+<#--            <template v-for="navPlugin in navPlugins"><component :is="navPlugin"></component></template>-->
 
             <#-- notify history -->
-            <q-btn dense flat icon="notifications">
+            <q-btn push size="lg" icon="notifications">
                 <q-tooltip>${ec.l10n.localize("Notify History")}</q-tooltip>
                 <q-menu><q-list dense style="min-width: 300px">
                     <q-item v-for="histItem in notifyHistoryList"><q-item-section>
@@ -111,21 +111,21 @@ along with this software (see the LICENSE.md file). If not, see
 
             <#-- screen history menu -->
             <#-- get initial history from server? <#assign screenHistoryList = ec.web.getScreenHistory()><#list screenHistoryList as screenHistory><#if (screenHistory_index >= 25)><#break></#if>{url:pathWithParams, name:title}</#list> -->
-            <q-btn dense flat icon="history">
-                <q-tooltip>${ec.l10n.localize("Screen History")}</q-tooltip>
-                <q-menu><q-list dense style="min-width: 300px">
-                    <q-item v-for="histItem in navHistoryList" :key="histItem.pathWithParams" clickable v-close-popup><q-item-section>
-                        <m-link :href="histItem.pathWithParams">
-                            <template v-if="histItem.image">
-                                <i v-if="histItem.imageType === 'icon'" :class="histItem.image" style="padding-right: 8px;"></i>
-                                <img v-else :src="histItem.image" :alt="histItem.title" width="18" style="padding-right: 4px;">
-                            </template>
-                            <i v-else class="fa fa-link" style="padding-right: 8px;"></i>
-                            {{histItem.title}}
-                        </m-link>
-                    </q-item-section></q-item>
-                </q-list></q-menu>
-            </q-btn>
+<#--            <q-btn dense flat icon="history">-->
+<#--                <q-tooltip>${ec.l10n.localize("Screen History")}</q-tooltip>-->
+<#--                <q-menu><q-list dense style="min-width: 300px">-->
+<#--                    <q-item v-for="histItem in navHistoryList" :key="histItem.pathWithParams" clickable v-close-popup><q-item-section>-->
+<#--                        <m-link :href="histItem.pathWithParams">-->
+<#--                            <template v-if="histItem.image">-->
+<#--                                <i v-if="histItem.imageType === 'icon'" :class="histItem.image" style="padding-right: 8px;"></i>-->
+<#--                                <img v-else :src="histItem.image" :alt="histItem.title" width="18" style="padding-right: 4px;">-->
+<#--                            </template>-->
+<#--                            <i v-else class="fa fa-link" style="padding-right: 8px;"></i>-->
+<#--                            {{histItem.title}}-->
+<#--                        </m-link>-->
+<#--                    </q-item-section></q-item>-->
+<#--                </q-list></q-menu>-->
+<#--            </q-btn>-->
 
             <#-- screen history previous screen -->
             <#-- disable this for now to save space, not commonly used and limited value vs browser back:
@@ -133,17 +133,17 @@ along with this software (see the LICENSE.md file). If not, see
                data-placement="bottom" class="btn btn-default btn-sm navbar-btn navbar-right"><i class="fa fa-chevron-left"></i></a>
             -->
 
-            <q-btn dense flat icon="account_circle">
+            <q-btn push size="lg" icon="account_circle">
                 <q-tooltip>${(ec.user.userAccount.userFullName)!ec.l10n.localize("Account")}</q-tooltip>
                 <q-menu><q-card flat bordered><#-- always matching header (dark): class="${headerClass}" -->
                     <q-card-section horizontal class="q-pa-md">
-                        <q-card-section>
-                            <#if (ec.user.userAccount.userFullName)?has_content><div class="q-mb-sm text-strong">${ec.l10n.localize("Welcome")} ${ec.user.userAccount.userFullName}</div></#if>
+<#--                        <q-card-section>-->
+<#--                            <#if (ec.user.userAccount.userFullName)?has_content><div class="q-mb-sm text-strong">${ec.l10n.localize("Welcome")} ${ec.user.userAccount.userFullName}</div></#if>-->
 
-                            <#-- account plugins -->
-                            <template v-for="accountPlugin in accountPlugins"><component :is="accountPlugin"></component></template>
-                        </q-card-section>
-                        <q-separator vertical></q-separator>
+<#--                            &lt;#&ndash; account plugins &ndash;&gt;-->
+<#--                            <template v-for="accountPlugin in accountPlugins"><component :is="accountPlugin"></component></template>-->
+<#--                        </q-card-section>-->
+<#--                        <q-separator vertical></q-separator>-->
                         <q-card-actions vertical class="justify-around q-px-md">
                             <#-- logout button -->
                             <q-btn flat dense icon="settings_power" color="negative" type="a" href="${sri.buildUrl("/Login/logout").url}"
@@ -170,15 +170,25 @@ along with this software (see the LICENSE.md file). If not, see
         </q-page></q-page-container>
 
 <#--        <q-footer reveal bordered class="bg-grey-9 text-white row q-pa-xs" id="footer">-->
-<#--            <#assign footerItemList = sri.getThemeValues("STRT_FOOTER_ITEM")>-->
-<#--            <#list footerItemList! as footerItem>-->
-<#--                <#assign footerItemTemplate = footerItem?interpret>-->
-<#--                <@footerItemTemplate/>-->
-<#--            </#list>-->
+<#--&lt;#&ndash;            <q-toolbar>&ndash;&gt;-->
+<#--&lt;#&ndash;                <q-space></q-space>&ndash;&gt;-->
+<#--            <q-tabs v-model="tab" align="justify">-->
+<#--                <q-tab name="project" label="project"></q-tab>-->
+<#--                <q-tab name="profile" label="profile"></q-tab>-->
+<#--                <q-tab name="message" label="message"></q-tab>-->
+<#--                <q-tab name="account" label="account"></q-tab>-->
+<#--            </q-tabs>-->
+<#--&lt;#&ndash;                <q-space></q-space>&ndash;&gt;-->
+<#--&lt;#&ndash;            </q-toolbar>&ndash;&gt;-->
+<#--            &lt;#&ndash;            <#assign footerItemList = sri.getThemeValues("STRT_FOOTER_ITEM")>&ndash;&gt;-->
+<#--            &lt;#&ndash;            <#list footerItemList! as footerItem>&ndash;&gt;-->
+<#--            &lt;#&ndash;                <#assign footerItemTemplate = footerItem?interpret>&ndash;&gt;-->
+<#--            &lt;#&ndash;                <@footerItemTemplate/>&ndash;&gt;-->
+<#--            &lt;#&ndash;            </#list>&ndash;&gt;-->
 <#--        </q-footer>-->
     </q-layout>
     <#-- re-login dialog -->
-    <m-dialog v-model="reLoginShow" width="400" title="${ec.l10n.localize("Re-Login")}">
+    <m-dialog v-model="reLoginShow" width="375" title="${ec.l10n.localize("Re-Login")}">
         <div v-if="reLoginMfaData">
             <div style="text-align:center;padding-bottom:10px">User <strong>{{username}}</strong> requires an authentication code, you have these options:</div>
             <div style="text-align:center;padding-bottom:10px">{{reLoginMfaData.factorTypeDescriptions.join(", ")}}</div>
@@ -206,6 +216,15 @@ along with this software (see the LICENSE.md file). If not, see
 </div>
 
 <script>
+
+    // export default {
+    //     data () {
+    //         return {
+    //             tab: 'project'
+    //         }
+    //     }
+    // }
+
     window.quasarConfig = {
         brand: { // this will NOT work on IE 11
             // primary: '#e46262',

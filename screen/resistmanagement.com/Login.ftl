@@ -20,9 +20,9 @@
 <div class="text-center form-signin">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation"><a href="#login" aria-controls="login" role="tab" data-toggle="tab">${ec.l10n.localize("Login")}</a></li>
+        <li role="presentation"><a href="#sign-up" aria-controls="sign-up" role="tab" data-toggle="tab">${ec.l10n.localize("Sign Up")}</a></li>
         <li role="presentation"><a href="#reset" aria-controls="reset" role="tab" data-toggle="tab">${ec.l10n.localize("Reset Password")}</a></li>
         <li role="presentation"><a href="#change" aria-controls="change" role="tab" data-toggle="tab">${ec.l10n.localize("Change Password")}</a></li>
-        <li role="presentation"><a href="#new-account" aria-controls="new-account" role="tab" data-toggle="tab">${ec.l10n.localize("New Account")}</a></li>
     </ul>
 </div>
 <#-- old 'tabs' more like links:
@@ -56,6 +56,21 @@
             <button class="btn btn-lg btn-primary btn-block" type="submit">${ec.l10n.localize("Sign in")}</button>
             <#if expiredCredentials><p class="text-warning text-center">WARNING: Your password has expired</p></#if>
             <#if passwordChangeRequired><p class="text-warning text-center">WARNING: Password change required</p></#if>
+        </form>
+    </div>
+    <div id="sign-up" class="tab-pane">
+        <form name="createAccount" id="createAccount" method="post" class="form-signin" action="${sri.buildUrl("createAccount").url}">
+            <p class="text-muted text-center">Enter details to sign up</p>
+            <input type="hidden" name="moquiFormName" value="createAccount">
+            <input type="email" id="sign_up_email" inputmode="email" name="emailAddress" value="${(ec.getWeb().getErrorParameters().get("emailAddress"))!""}" placeholder="Email" class="form-control middle email required" required="required">
+            <input type="text" name="firstName" value="${(ec.getWeb().getErrorParameters().get("firstName"))!""}" placeholder="First Name" class="form-control top required" required="required">
+            <input type="text" name="lastName" value="${(ec.getWeb().getErrorParameters().get("lastName"))!""}" placeholder="Last Name" class="form-control middle required" required="required">
+            <input type="text" inputmode="email" name="username" value="${(ec.getWeb().getErrorParameters().get("username"))!""}" placeholder="Username" class="form-control middle required" required="required">
+            <input type="password" class="form-control middle required" name="newPassword" autocomplete="new-password" id="new-password" placeholder="Password" required="required">
+
+            <p class="text-muted text-left">By signing up, you agree to our <#list agreementList as agreement><a href="${agreement.contentLocation}">${agreement.typeDescription}</a><#sep>, </#list>.</p>
+
+            <button class="btn btn-lg btn-success btn-block" type="submit">Create Account</button>
         </form>
     </div>
     <div id="reset" class="tab-pane">
@@ -102,22 +117,6 @@
                 <#if (minOthers > 0)> and at least <strong>${minOthers} punctuation character<#if (minOthers > 1)>s</#if></strong></#if></p>
         </form>
     </div>
-    <div id="new-account" class="tab-pane">
-        <form name="createAccount" id="createAccount" method="post" class="form-signin" action="${sri.buildUrl("createAccount").url}">
-            <p class="text-muted text-center">Enter details to create a new account</p>
-            <input type="hidden" name="moquiFormName" value="createAccount">
-            <input type="text" name="firstName" value="${(ec.getWeb().getErrorParameters().get("firstName"))!""}" placeholder="First Name" class="form-control top required" required="required">
-            <input type="text" name="lastName" value="${(ec.getWeb().getErrorParameters().get("lastName"))!""}" placeholder="Last Name" class="form-control middle required" required="required">
-            <input type="email" inputmode="email" name="emailAddress" value="${(ec.getWeb().getErrorParameters().get("emailAddress"))!""}" placeholder="Email" class="form-control middle email required" required="required">
-            <input type="text" inputmode="email" name="username" value="${(ec.getWeb().getErrorParameters().get("username"))!""}" placeholder="Username" class="form-control middle">
-            <input type="password" class="form-control middle required" name="newPassword" autocomplete="new-password" id="new-password" placeholder="Password" required="required">
-            <input type="password" class="form-control bottom required" name="newPasswordVerify" autocomplete="new-password" id="new-password" placeholder="Verify Password" required="required">
-
-            <p class="text-muted text-left">By signing up, you agree to our <#list agreementList as agreement><a href="${agreement.contentLocation}">${agreement.typeDescription}</a><#sep>, </#list>.</p>
-
-            <button class="btn btn-lg btn-success btn-block" type="submit">Create Account</button>
-        </form>
-    </div>
 </div>
 
 <#if secondFactorRequired>
@@ -159,10 +158,12 @@
             if (tabName === "login") { $("#login_form_code").focus(); }
             else if (tabName === "change") { $("#change_form_code").focus(); }
             else if (tabName === "reset") { $("#reset_form_username").focus(); }
+            else if (tabName === "sign-up") { $("#sign_up_email").focus(); }
             <#else>
             if (tabName === "login") { $("#login_form_username").focus(); }
             else if (tabName === "change") { $("#change_form_username").focus(); }
             else if (tabName === "reset") { $("#reset_form_username").focus(); }
+            else if (tabName === "sign-up") { $("#sign_up_email").focus(); }
             </#if>
         });
         $('a[href="' + (location.hash || '${initialTab!"#login"}') + '"]').tab('show');
