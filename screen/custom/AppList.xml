@@ -16,6 +16,8 @@ along with this software (see the LICENSE.md file). If not, see
         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         require-authentication="true" default-menu-include="false" default-menu-title="App List">
 
+    <transition-include name="manifest.webmanifest" location="component://webroot/screen/webroot/apps.xml"/>
+
     <actions>
         <set field="appsLocation" from="sri.getRootScreenDef().getSubscreensItem('custom').location"/>
         <set field="currentScreenDef" from="sri.sfi.getScreenDefinition(appsLocation)"/>

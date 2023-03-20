@@ -150,8 +150,8 @@ along with this software (see the LICENSE.md file). If not, see
                                    onclick="return confirm('${ec.l10n.localize("Logout")} ${(ec.user.userAccount.userFullName)!''}?')">
                                 <q-tooltip>${ec.l10n.localize("Logout")} ${(ec.user.userAccount.userFullName)!''}</q-tooltip></q-btn>
                             <#-- dark/light switch -->
-                            <q-btn flat dense @click.prevent="switchDarkLight()" icon="invert_colors">
-                                <q-tooltip>${ec.l10n.localize("Switch Dark/Light")}</q-tooltip></q-btn>
+<#--                            <q-btn flat dense @click.prevent="switchDarkLight()" icon="invert_colors">-->
+<#--                                <q-tooltip>${ec.l10n.localize("Switch Dark/Light")}</q-tooltip></q-btn>-->
                             <#-- re-login button -->
                             <q-btn flat dense icon="autorenew" color="negative" @click="reLoginShowDialog"><q-tooltip>Re-Login</q-tooltip></q-btn>
                         </q-card-actions>
@@ -169,24 +169,9 @@ along with this software (see the LICENSE.md file). If not, see
             <m-subscreens-active></m-subscreens-active>
         </q-page></q-page-container>
 
-<#--        <q-footer reveal bordered class="bg-grey-9 text-white row q-pa-xs" id="footer">-->
-<#--&lt;#&ndash;            <q-toolbar>&ndash;&gt;-->
-<#--                <q-space></q-space>-->
-<#--            <q-tabs align="center">-->
-<#--                <q-tab exact name="project" icon="event_note" @click.prevent="setUrl('/custom/Project')"></q-tab>-->
-<#--                <q-tab exact name="profile" icon="person" @click.prevent="setUrl('/custom/Account')"></q-tab>-->
-<#--                <q-tab exact name="message" icon="chat" @click.prevent="setUrl('/custom/Message/')"></q-tab>-->
-<#--                <q-tab exact name="account" icon="settings" @click.prevent="setUrl('/custom/Settings')"></q-tab>-->
-<#--            </q-tabs>-->
-<#--                <q-space></q-space>-->
-<#--&lt;#&ndash;            </q-toolbar>&ndash;&gt;-->
-<#--            &lt;#&ndash;            <#assign footerItemList = sri.getThemeValues("STRT_FOOTER_ITEM")>&ndash;&gt;-->
-<#--            &lt;#&ndash;            <#list footerItemList! as footerItem>&ndash;&gt;-->
-<#--            &lt;#&ndash;                <#assign footerItemTemplate = footerItem?interpret>&ndash;&gt;-->
-<#--            &lt;#&ndash;                <@footerItemTemplate/>&ndash;&gt;-->
-<#--            &lt;#&ndash;            </#list>&ndash;&gt;-->
-<#--        </q-footer>-->
+        <r-menu></r-menu>
     </q-layout>
+
     <#-- re-login dialog -->
     <m-dialog v-model="reLoginShow" width="375" title="${ec.l10n.localize("Re-Login")}">
         <div v-if="reLoginMfaData">
