@@ -33,12 +33,14 @@ along with this software (see the LICENSE.md file). If not, see
     <#-- for layout options see: https://quasar.dev/layout/layout -->
     <#-- to build a layout use the handy Quasar tool: https://quasar.dev/layout-builder -->
     <q-layout view="hHh LpR fFf">
-        <q-header reveal bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;" class="bg-grey-9">
+        <q-header bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;" class="bg-grey-9">
 <#--            <q-btn push size="lg" icon="menu" @click="toggleLeftOpen()"></q-btn>-->
+
+            <r-toolbar-left></r-toolbar-left>
 
             <#assign headerLogoList = sri.getThemeValues("STRT_HEADER_LOGO")>
             <#if headerLogoList?has_content>
-                <m-link href="/rapps"><div class="q-mx-md q-mt-sm">
+                <m-link href="/rapps/Project"><div class="q-mx-md q-mt-sm">
                     <img src="${sri.buildUrl(headerLogoList?first).getUrl()}" alt="Home" height="32">
                 </div></m-link>
             </#if>
@@ -201,14 +203,6 @@ along with this software (see the LICENSE.md file). If not, see
 </div>
 
 <script>
-
-    // export default {
-    //     data () {
-    //         return {
-    //             tab: 'project'
-    //         }
-    //     }
-    // }
 
     window.quasarConfig = {
         brand: { // this will NOT work on IE 11

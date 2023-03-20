@@ -2113,41 +2113,44 @@ Vue.component('m-menu-item-content', {
         '<span :class="{\'text-primary\':active}">{{menuItem.title}}</span>' +
     '</div></div>'
 });
-// Vue.component('r-header', {
-//     name: "rHeader",
-//     // props: { menuItem:Object, active:Boolean },
-//     template:
-//         `<q-footer v-model="menuState" reveal bordered class="bg-grey-9 text-white row q-pa-xs" id="footer" ref="footer">` +
-//         `<q-space></q-space>` +
-//         `<q-tabs dense v-model="activeTab" align="center">` +
-//         `<q-tab exact name="Project" label="Project" icon="event_note" @click.prevent="goPath('/custom/Project')"></q-tab>` +
-//         `<q-tab exact name="Account" label="Profiles" icon="person" @click.prevent="goPath('/custom/Account')"></q-tab>` +
-//         `<q-tab exact name="Message" label="Chat" icon="chat" @click.prevent="goPath('/custom/Message')"></q-tab>` +
-//         `<q-tab exact name="Settings" label="Settings" icon="settings" @click.prevent="goPath('/custom/Settings')"></q-tab>` +
-//         `</q-tabs>` +
-//         `<q-space></q-space>` +
-//         `</q-footer>`,
-//     methods: {
-//         goPath: function goPath(path) { this.$root.setUrl(path); }
-//     },
-//     computed: {
-//         menuState: function () {
-//             // console.log('menuState')
-//             // console.log(this)
-//             // console.log(this.$root.currentPath !== "/custom/Message/FindMessage")
-//             return this.$root.currentPath !== "/custom/Message/FindMessage";
-//         },
-//         activeTab: function () {
-//             // console.log('activeTab')
-//             // console.log(this.$root.currentPath.split("/")[2])
-//             return this.$root.currentPath.split("/") ? this.$root.currentPath.split("/")[2] : "";
-//         }
-//     },
-//     // mounted: function() {
-//     //     console.log('r-menu mounted');
-//     //     console.log(this);
-//     // }
-// });
+Vue.component('r-toolbar-left', {
+    name: "rToolbarLeft",
+    template:
+        `<q-btn v-if="backState" flat round dense icon="arrow_back_ios_new" class="q-mr-sm" @click.prevent="goLastPath()"/>`//+
+        // `<m-link :href="firstPath"><div class="q-mx-md q-mt-sm">` +
+        // `<img src="/r/images/ResistSquare.png" alt="Home" height="32">` +
+        // `</div></m-link>`
+    ,
+    methods: {
+        goLastPath: function() {
+            // console.log("goPath");
+            // console.log(this);
+            // console.log(this.$root.navHistoryList[1].pathWithParams)
+            // console.log(this.$root.currentPath.substring(0, this.$root.currentPath.lastIndexOf("/")))
+            this.$root.setUrl(this.$root.navHistoryList[1] ? this.$root.navHistoryList[1].pathWithParams : this.$root.currentPath.substring(0, this.$root.currentPath.lastIndexOf("/")));
+        }
+    },
+    computed: {
+        backState: function () {
+            // console.log('menuState')
+            // console.log(this)
+            // console.log(this.$root.currentPath !== "/custom/Message/FindMessage")
+            return ["/custom/Message/FindMessage",
+                // "/custom/Project/ViewProject",
+                // "/custom/Project/FindProjectPositions",
+                // "/custom/Account/ViewAccount",
+                // "/custom/Account/FindTalent"
+            ].includes(this.$root.currentPath);
+        },
+        // firstPath: function() {
+        //     // console.log("goPath");
+        //     // console.log(this);
+        //     // console.log(this.$root.navHistoryList[1].pathWithParams)
+        //     // console.log(this.$root.currentPath.substring(0, this.$root.currentPath.lastIndexOf("/")))
+        //     return this.$root.currentPath.substring(0, this.$root.currentPath.lastIndexOf("/"));
+        // },
+    },
+});
 Vue.component('r-menu', {
     name: "rMenu",
     // props: { menuItem:Object, active:Boolean },

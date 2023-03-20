@@ -83,6 +83,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="statusFlowId" from="project.statusFlowId ?: 'Default'"/>
             <order-by field-name="transitionSequence,transitionName"/>
         </entity-find>
+        <if condition="!projectEdit.allowed"><set field="statusTransitionList" from="[]"/></if>
 <!--        <log level="warn" message="statusTransitionList ${statusTransitionList} \n\n statusItem ${statusItem}"/>-->
     </actions>
 
@@ -92,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="workEffortName"><conditional-field condition="projectEdit?.allowed" title="Project Name"><text-line/></conditional-field>
                 <default-field><label text="${workEffortName}" type="h2"/></default-field></field>
 <!--            <field name="statusId"><default-field title="Status"><label text="Status: ${project.status.description}" type="h6"/></default-field></field>-->
-            <field name="status"><conditional-field condition="projectEdit?.allowed">
+            <field name="status"><default-field>
                 <container style="shaded-area condensed" type="span">
                     <container style="float-plain condensed" type="ul">
                         <container type="li">
@@ -109,7 +110,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </widgets></section-iterate>
                     </container>
                 </container>
-            </conditional-field></field>
+            </default-field></field>
             <field name="visibilityEnumId"><conditional-field condition="projectEdit?.allowed" title="Visibility"><drop-down>
                 <entity-options key="${enumId}" text="${description}">
                     <entity-find entity-name="moqui.basic.Enumeration" cache="true">
