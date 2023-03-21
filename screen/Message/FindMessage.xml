@@ -151,9 +151,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <div style="width: 100%; max-width: 400px">
                                 <q-form @submit.prevent="createMessage" class="q-pa-md">
                                     <div class="row">
-                                        <div ref="bodyInput" class="col-10"><m-text-line dense outlined name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line></div>
+                                        <div ref="bodyInput" class="col-10"><m-text-line dense name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line></div>
 
-                                        <q-btn dense outline no-caps color="primary" class="col" type="submit" name="submitBtn" label="Send"></q-btn>
+                                        <q-btn dense no-caps color="primary" class="col" type="submit" name="submitBtn" label="Send"></q-btn>
                                     </div>
                                 </q-form>
                             </div>
