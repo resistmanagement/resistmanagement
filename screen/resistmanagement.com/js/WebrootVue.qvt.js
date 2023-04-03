@@ -2156,7 +2156,7 @@ Vue.component('r-menu', {
     // props: { menuItem:Object, active:Boolean },
     data: function() { return { selectedTab:"project" } },
     template:
-        `<q-footer v-model="menuState" bordered class="bg-grey-9 text-white row q-pa-xs" id="footer" ref="footer">` +
+        `<q-footer v-model="menuState" bordered class="bg-grey-1 text-black row q-pa-xs" id="footer" ref="footer">` +
         `<q-space></q-space>` +
         `<q-tabs dense v-model="activeTab" align="center">` +
         `<q-tab exact name="Project" label="Project" icon="event_note" @click.prevent="goPath('/custom/Project')"></q-tab>` +
