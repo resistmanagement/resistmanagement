@@ -40,7 +40,7 @@ along with this software (see the LICENSE.md file). If not, see
             <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
 
             <select-field field-name="workEffortId,description,workEffortName,toPseudoId"/>
-            <order-by field-name="-lastUpdatedStamp"/>
+            <order-by field-name="-effortLastUpdatedStamp"/>
         </entity-find>
 <!--        <log level="warn" message="projectList ${projectList}"/>-->
 
