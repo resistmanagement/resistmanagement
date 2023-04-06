@@ -94,15 +94,15 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- icons -->
     <moqui.screen.ScreenThemeResource screenThemeId="DEFAULT_QUASAR" sequenceNum="100" resourceTypeEnumId="STRT_HEADER_LOGO"
-                                      resourceValue="/r/images/ResistSquare.png"/>
+                                      resourceValue="/r/images/ResistSquareBlack200.png"/>
     <moqui.screen.ScreenThemeResource screenThemeId="DEFAULT_QUASAR" sequenceNum="101" resourceTypeEnumId="STRT_SHORTCUT_ICON"
                                       resourceValue="/r/images/ResistSquare.ico"/>
     <moqui.screen.ScreenThemeResource screenThemeId="DEFAULT" sequenceNum="100" resourceTypeEnumId="STRT_HEADER_LOGO"
-                                      resourceValue="/r/images/ResistSquare.png"/>
+                                      resourceValue="/r/images/ResistSquareBlack200.png"/>
     <moqui.screen.ScreenThemeResource screenThemeId="DEFAULT" sequenceNum="101" resourceTypeEnumId="STRT_SHORTCUT_ICON"
                                       resourceValue="/r/images/ResistSquare.ico"/>
     <moqui.screen.ScreenThemeResource screenThemeId="POPC_DEFAULT" sequenceNum="100" resourceTypeEnumId="STRT_HEADER_LOGO"
-                                      resourceValue="/r/images/ResistSquare.png"/>
+                                      resourceValue="/r/images/ResistSquareBlack200.png"/>
     <moqui.screen.ScreenThemeResource screenThemeId="POPC_DEFAULT" sequenceNum="101" resourceTypeEnumId="STRT_SHORTCUT_ICON"
                                       resourceValue="/r/images/ResistSquare.ico"/>
 
