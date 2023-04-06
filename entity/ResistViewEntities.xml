@@ -66,6 +66,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias-all entity-alias="PREL"><exclude field="fromDate,thruDate,statusId,comments"/></alias-all>
         <alias-all entity-alias="PTYT" prefix="to"><exclude field="partyId"/><exclude field="comments"/><exclude field="ownerPartyId"/></alias-all>
         <alias-all entity-alias="PTYF" prefix="from"><exclude field="partyId"/><exclude field="comments"/><exclude field="ownerPartyId"/></alias-all>
+        <alias name="effortLastUpdatedStamp" entity-alias="WEFF" field="lastUpdatedStamp"/>
         <alias name="effortStatusId" entity-alias="WEP" field="statusId"/>
         <alias name="partyRoleTypeId" entity-alias="PROL" field="roleTypeId"/>
         <alias name="relationshipFromDate" entity-alias="PREL" field="fromDate"/>
