@@ -33,7 +33,7 @@ along with this software (see the LICENSE.md file). If not, see
     <#-- for layout options see: https://quasar.dev/layout/layout -->
     <#-- to build a layout use the handy Quasar tool: https://quasar.dev/layout-builder -->
     <q-layout view="hHh LpR fFf">
-        <q-header bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;" class="bg-grey-9">
+        <q-header bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;" class="text-black bg-grey-1">
 <#--            <q-btn push size="lg" icon="menu" @click="toggleLeftOpen()"></q-btn>-->
 
             <r-toolbar-left></r-toolbar-left>
