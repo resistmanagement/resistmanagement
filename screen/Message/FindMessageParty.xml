@@ -35,6 +35,7 @@ along with this software (see the LICENSE.md file). If not, see
     </actions>
 
     <widgets>
+        <text><![CDATA[<q-page-container class="q-ma-sm"><q-page>]]></text>
         <form-list name="ListMessage" list="messageTitleList" skip-header="true" skip-form="true">
             <field name="title"><default-field><label text="Messages" type="h2"/></default-field></field>
 <!--            <field name="createAccount"><conditional-field condition="accountCount == 0"><container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Account">-->
@@ -59,5 +60,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="pseudoId"><default-field><link url="../FindMessage" text="${pseudoId}" parameter-map="[toPartyId:partyId]"/></default-field></field>
             </form-list>
         </row-col></container-row>
+        <text><![CDATA[</q-page></q-page-container>]]></text>
     </widgets>
 </screen>

@@ -124,11 +124,37 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response type="none"/></transition>
 
     <widgets>
+        <text><![CDATA[]]></text>
         <render-mode><text type="qvue"><![CDATA[
             <template>
-                <div class="q-pa-md row justify-center">
-                    <div style="width: 100%; max-width: 400px">
-                        <q-infinite-scroll @load="onScrollLoad" :initial-index="0" reverse ref="chatScroll">
+                <q-page-container class="q-ma-sm"><q-page :style-fn="$root.myTweak" style="display: flex; flex-direction: column; justify-content: flex-end;">
+<!--                <div class="q-pa-md row justify-center" style="vertical-align: bottom">-->
+                <div class="q-pa-md row justify-center" style="">
+<!--                    <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 28px; margin-top: 100px;">-->
+<!--                    <q-scroll-area class="scroll" style="height: 100%;">-->
+<!--                    <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: flex-end; margin-bottom: 28px;">-->
+<!--                        <q-infinite-scroll @load="onScrollLoad" reverse ref="chatScroll" style="">-->
+<!--                            <template slot="loading">-->
+<!--                                <div class="row justify-center q-my-md">-->
+<!--                                    <q-spinner color="primary" name="dots" size="40px"/>-->
+<!--                                </div>-->
+<!--                            </template>-->
+<!--                            <q-chat-message v-for="chatData in chatDataListReversed" :key="chatData.communicationEventId"-->
+<!--                                            class="scroll"-->
+<!--                                            :name="chatData.fromPseudoId"-->
+<!--                                            :avatar="chatData.contentUrl"-->
+<!--                                            :text="[chatData.body]"-->
+<!--                                            :sent="chatData.sent"-->
+<!--                            />-->
+<!--                        </q-infinite-scroll>-->
+<!--                        <q-page-scroller reverse position="bottom" :offset="[0, 58]">-->
+<!--                            <q-btn fab icon="keyboard_arrow_down" color="primary" label="Scroll to Bottom"/>-->
+<!--                        </q-page-scroller>-->
+<!--&lt;!&ndash;                    </q-scroll-area>&ndash;&gt;-->
+<!--                    </div>-->
+                    <div style="width: 100%; max-width: 400px;  margin-bottom: 28px;">
+<!--                    <div style="width: 100%; max-width: 400px; margin-bottom: 28px; ">-->
+                        <q-infinite-scroll @load="onScrollLoad" reverse ref="chatScroll" style="">
                             <template slot="loading">
                                 <div class="row justify-center q-my-md">
                                     <q-spinner color="primary" name="dots" size="40px"/>
@@ -145,8 +171,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <q-page-scroller reverse position="bottom">
                             <q-btn fab icon="keyboard_arrow_down" color="primary" label="Scroll to Bottom"/>
                         </q-page-scroller>
+                        <!--                    </q-scroll-area>-->
                     </div>
-                    <q-footer reveal bordered class="bg-grey-1">
+                    <q-footer bordered class="bg-grey-1">
                         <div class="q-pa-md row justify-center">
                             <div style="width: 100%; max-width: 400px">
                                 <q-form @submit.prevent="createMessage" class="q-pa-md">
@@ -159,7 +186,18 @@ along with this software (see the LICENSE.md file). If not, see
                             </div>
                         </div>
                     </q-footer>
+<!--                    <q-page-sticky position="bottom" expand style="background-color: white;">-->
+<!--                        <div class="q-ma-sm" style="width: 100%; max-width: 400px;">-->
+<!--                            <q-form @submit.prevent="createMessage">-->
+<!--                                <div class="row">-->
+<!--                                    <div class="col-10" ref="bodyInput"><m-text-line dense name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line></div>-->
+<!--                                    <q-btn class="col" dense no-caps color="primary" type="submit" name="submitBtn" label="Send"></q-btn>-->
+<!--                                </div>-->
+<!--                            </q-form>-->
+<!--                        </div>-->
+<!--                    </q-page-sticky>-->
                 </div>
+                </q-page></q-page-container>
             </template>
             <script>
                 module.exports = {
