@@ -2136,10 +2136,10 @@ Vue.component('r-toolbar-left', {
             // console.log(this)
             // console.log(this.$root.currentPath !== "/custom/Message/FindMessage")
             return ["/custom/Message/FindMessage",
-                "/custom/Project/ViewProject",
-                "/custom/Project/FindProjectPositions",
-                "/custom/Account/ViewAccount",
-                "/custom/Account/FindTalent"
+            //    "/custom/Project/ViewProject",
+            //    "/custom/Project/FindProjectPositions",
+            //    "/custom/Account/ViewAccount",
+            //    "/custom/Account/FindTalent",
             ].includes(this.$root.currentPath);
         },
         // firstPath: function() {
