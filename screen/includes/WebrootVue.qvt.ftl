@@ -28,12 +28,12 @@ along with this software (see the LICENSE.md file). If not, see
     <#assign accountCompList = sri.getThemeValues("STRT_HEADER_ACCOUNT_COMP")>
     <#list accountCompList! as accountCompUrl><input type="hidden" class="confAccountPluginUrl" value="${accountCompUrl}"></#list>
 
-    <#assign headerClass = "bg-black text-white">
+    <#assign headerClass = "text-black bg-grey-1">
 
     <#-- for layout options see: https://quasar.dev/layout/layout -->
     <#-- to build a layout use the handy Quasar tool: https://quasar.dev/layout-builder -->
     <q-layout view="hHh LpR fFf">
-        <q-header bordered class="${headerClass}" id="top"><q-toolbar style="font-size:15px;" class="text-black bg-grey-1">
+        <q-header class="${headerClass}" id="top"><q-toolbar style="font-size:15px;">
 <#--            <q-btn push size="lg" icon="menu" @click="toggleLeftOpen()"></q-btn>-->
 
             <r-toolbar-left></r-toolbar-left>
