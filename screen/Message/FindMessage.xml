@@ -124,9 +124,12 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response type="none"/></transition>
 
     <widgets>
+        <text><![CDATA[]]></text>
         <render-mode><text type="qvue"><![CDATA[
             <template>
-                <div class="q-pa-md row justify-center">
+                <q-page-container class="q-ma-sm"><q-page :style-fn="$root.myTweak" style="display: flex; flex-direction: column; justify-content: flex-end;">
+<!--                <div class="q-pa-md row justify-center" style="vertical-align: bottom">-->
+                <div class="q-pa-md row justify-center" style="">
 <!--                    <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 28px; margin-top: 100px;">-->
 <!--                    <q-scroll-area class="scroll" style="height: 100%;">-->
 <!--                    <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: flex-end; margin-bottom: 28px;">-->
@@ -149,8 +152,9 @@ along with this software (see the LICENSE.md file). If not, see
 <!--                        </q-page-scroller>-->
 <!--&lt;!&ndash;                    </q-scroll-area>&ndash;&gt;-->
 <!--                    </div>-->
-                    <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column-reverse; justify-content: flex-end; margin-bottom: 28px;">
-                        <q-infinite-scroll @load="onScrollLoad" reverse ref="chatScroll">
+                    <div style="width: 100%; max-width: 400px;  margin-bottom: 28px;">
+<!--                    <div style="width: 100%; max-width: 400px; margin-bottom: 28px; ">-->
+                        <q-infinite-scroll @load="onScrollLoad" reverse ref="chatScroll" style="">
                             <template slot="loading">
                                 <div class="row justify-center q-my-md">
                                     <q-spinner color="primary" name="dots" size="40px"/>
@@ -193,6 +197,7 @@ along with this software (see the LICENSE.md file). If not, see
 <!--                        </div>-->
 <!--                    </q-page-sticky>-->
                 </div>
+                </q-page></q-page-container>
             </template>
             <script>
                 module.exports = {
