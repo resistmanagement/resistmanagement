@@ -18,8 +18,6 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="partyId" from="ec.user.userAccount?.partyId"/>
     <parameter name="emplPositionClassId" required="true"/>
 
-<!--    <transition name="addProfile"><default-response url="AddProfile"/></transition>-->
-
     <transition name="setTalentProfileTypeDimensionType"><service-call name="resistmanagement.ResistServices.storeAndAdd#TalentProfileTypeDimensionType"/>
         <default-response url="." save-current-screen="true"/></transition>
     <transition name="setTalentProfileTypeDimension"><service-call name="store#mantle.humanres.position.EmplPositionClassDimension"/>

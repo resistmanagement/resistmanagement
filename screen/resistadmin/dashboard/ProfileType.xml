@@ -17,21 +17,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <parameter name="partyId" from="ec.user.userAccount?.partyId"/>
 
-    <transition name="setPartyClassification"><service-call name="mantle.party.PartyServices.set#PartyClassification"/>
-        <default-response url="."/></transition>
-
-    <transition name="createTalentProfileType"><service-call name="resistmanagement.ResistServices.store#TalentProfileType"/>
-        <default-response url="."/></transition>
-
-    <transition name="setPartyWorkEffort"><service-call name="store#mantle.work.effort.WorkEffort"/>
+    <transition name="storeEmplPositionClass"><service-call name="resistmanagement.ResistServices.store#EmplPositionClass"/>
         <default-response url="."/></transition>
 
     <transition name="setPartyFacility"><service-call name="store#mantle.facility.Facility"/>
         <default-response url="."/></transition>
-    <transition name="createOrganization"><service-call name="mantle.party.PartyServices.create#Organization"/>
-        <default-response url="."/></transition>
-
-    <transition name="partyProfileDetail"><default-response url="/apps/YourAccount/User/PartyProfileDetail"/></transition>
 
     <actions>
         <if condition="partyId != ec.user.userAccount.partyId"><return error="true" message="Party not found with ID ${partyId}"/></if>
@@ -41,58 +31,21 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <container-row><row-col lg="6">
 
-            <section name="TalentProfileTypeSection"><widgets>
-                <container-box><box-header title="Talent Profile Types"/><box-toolbar>
-                    <container-dialog id="CreateTalentProfileTypeDialog" button-text="Create Talent Profile Type">
-                        <form-single name="CreateTalentProfileTypeForm" transition="createTalentProfileType">
+            <section name="EmplPositionClassSection"><widgets>
+                <container-box><box-header title="Profile Types"/><box-toolbar>
+                    <container-dialog id="CreateEmplPositionClassDialog" button-text="Create Profile Type">
+                        <form-single name="CreateEmplPositionClassForm" transition="storeEmplPositionClass">
                             <field name="title"><default-field><text-line/></default-field></field>
                             <field name="description"><default-field><text-line/></default-field></field>
                             <field name="submitButton"><default-field title="Create"><submit/></default-field></field>
                         </form-single>
                     </container-dialog>
                 </box-toolbar><box-body-nopad>
-                    <form-list name="TalentProfileTypeForm" list="epcList" transition="createTalentProfileType" >
+                    <form-list name="EmplPositionClassForm" list="epcList" transition="storeEmplPositionClass">
                         <field name="emplPositionClassId"><default-field><link url="../TalentTypeDetail" text="${emplPositionClassId}"/></default-field></field>
                         <field name="title"><default-field><text-line/></default-field></field>
                         <field name="description"><default-field><text-line/></default-field></field>
                         <field name="submit"><default-field><submit/></default-field></field>
-                    </form-list>
-                </box-body-nopad></container-box>
-            </widgets></section>
-
-            <section name="ClientProfileTypeSection"><actions>
-                <entity-find entity-name="mantle.party.PartyDetail" list="pdList">
-                    <econditions combine="or"><econdition field-name="partyId"/>
-                        <econdition field-name="ownerPartyId" from="partyId"/>
-                    </econditions></entity-find>
-                <entity-find entity-name="mantle.facility.FacilityAndOwnerDetail" list="faodList">
-                    <econdition field-name="partyId" operator="in" from="pdList?.partyId"/>
-                    <econdition field-name="ownerPartyId" operator="in" from="pdList?.partyId"/></entity-find>
-                <set field="pdfaodList" from="pdList + faodList"/>
-                <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
-                    <econdition field-name="partyId"/><date-filter/><order-by field-name="-fromDate"/></entity-find>
-            </actions><widgets>
-                <container-box><box-header title="Client Profile Types"/><box-toolbar>
-                    <container-dialog id="SetClientProfileTypeDialog" button-text="Set Profile">
-                        <form-single name="SetClientProfileTypeForm" transition="setClientProfileType">
-                            <field name="partyId"><default-field><hidden/></default-field></field>
-                            <field name="emplPositionClassId"><default-field title="Type">
-                                <drop-down allow-empty="true" submit-on-select="true">
-                                    <entity-options key="${emplPositionClassId}" text="${title}">
-                                        <entity-find entity-name="mantle.humanres.position.EmplPositionClass"><order-by field-name="title"/>
-                                        </entity-find></entity-options>
-                                </drop-down>
-                            </default-field></field>
-                            <field name="submitButton"><default-field title="Set"><submit/></default-field></field>
-                        </form-single>
-                    </container-dialog>
-                </box-toolbar><box-body-nopad>
-                    <form-list name="ClientProfileTypeForm" list="epcpcList" skip-form="true" skip-header="true">
-                        <field name="emplPositionClassId"><default-field><hidden/></default-field></field>
-                        <field name="partyId"><default-field><hidden/></default-field></field>
-                        <field name="fromDate"><default-field><hidden/></default-field></field>
-                        <field name="thruDate" from="ec.user.nowTimestamp"><default-field><hidden/></default-field></field>
-                        <field name="title"><default-field title="Profile"><link url="partyProfileDetail" link-type="anchor" text="${title}"/></default-field></field>
                     </form-list>
                 </box-body-nopad></container-box>
             </widgets></section>

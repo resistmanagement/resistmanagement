@@ -35,7 +35,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="allowed">
                 <entity-find-one entity-name="mantle.party.communication.CommunicationEventContent" value-field="communicationEventContent" auto-field-map="[communicationEventContentId:communicationEventContentId]">
                     <select-field field-name="communicationEventContentId, contentLocation"/></entity-find-one>
-<!--                <log level="warn" message="communicationEventContent ${communicationEventContent}"/>-->
                 <script>ec.web.sendResourceResponse(communicationEventContent?.contentLocation, true)</script>
                 <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
         </actions>
@@ -43,9 +42,9 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
     <transition name="updateProfilePicture"><service-call name="resistmanagement.ResistServices.upload#ProfilePictureAttachment" in-map="[partyId:partyId, contentFile:contentFile]"/>
         <default-response url="."/></transition>
-    <transition name="updateProfile"><service-call name="resistmanagement.ResistServices.update#Account"/>
+    <transition name="updateAccount"><service-call name="resistmanagement.ResistServices.update#Account"/>
         <default-response url="."/></transition>
-    <transition name="addPost"><service-call name="resistmanagement.ResistServices.upload#PostAttachment" in-map="[partyId:partyId, contentFile:contentFile]"/>
+    <transition name="uploadPost"><service-call name="resistmanagement.ResistServices.upload#PostAttachment" in-map="[partyId:partyId, contentFile:contentFile]"/>
         <default-response url="."/></transition>
 
     <actions>
@@ -106,7 +105,6 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="partyProfilePictureList" from="[[partyContentId:profileContentList?.first()?.partyContentId, partyText:party?.pseudoId ?: (party?.person?.firstName + ' ' + party?.person?.lastName) ?: party?.organization?.organizationName]]"/>
         <set field="bio" value=""/><if condition="partyContentBioList?.size() &gt; 0"><set field="bio" from="partyContentBioList?.first()?.description"/></if>
 
-<!--        <log level="warn" message="postContentList?.size() ${postContentList?.size()} postContentList ${postContentList}"/>-->
         <set field="postTitleList" from="[]"/><set field="postList" from="[]"/><set field="intermediatePostList" from="[]"/>
         <if condition="postContentList?.size() &gt; 0">
             <set field="postTitleList" from="[[communicationEventContentId:postContentList?.first()?.communicationEventContentId]]"/>
@@ -126,9 +124,6 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find-one entity-name="mantle.party.PartySetting" value-field="partyVisibilitySetting" auto-field-map="[partyId:partyId,partySettingTypeId:partySettingType.partySettingTypeId]"/>
 
         <service-call name="org.moqui.impl.ImageServices.get#ImageReaderMIMETypes" out-map="context"/>
-
-        <!--        <log level="warn" message="partyContentList ${partyContentList}"/>-->
-<!--        <log level="warn" message="bio ${bio} partyContentBioList ${partyContentBioList}"/>-->
     </actions>
     <widgets>
         <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true" paginate="false" saved-finds="false" header-dialog="false">
@@ -141,9 +136,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="submit"><default-field><submit/></default-field></field>
                     </form-single></container-dialog></conditional-field>
                 <default-field><image url="${contentUrl}" url-type="plain" width="100px"/></default-field></field>
-            <field name="addPostButton"><conditional-field condition="accountEdit?.allowed">
-                <container-dialog id="AddPost" button-text="Add Post">
-                    <form-single name="AddPostForm" transition="addPost" pass-through-parameters="true">
+            <field name="uploadPostButton"><conditional-field condition="accountEdit?.allowed">
+                <container-dialog id="UploadPost" button-text="Add Post">
+                    <form-single name="UploadPostForm" transition="uploadPost" pass-through-parameters="true">
                         <field name="partyId"><default-field><hidden/></default-field></field>
                         <field name="contentFile"><default-field><file accept="${String.join(', ', imageReaderMIMETypes)}"/></default-field></field>
                         <field name="submit"><default-field><submit/></default-field></field>
@@ -154,7 +149,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <link url="../../Message/FindMessage" text="Message" parameter-map="[toPartyId:partyId]"/>
             </conditional-field></field>
         </form-list>
-        <form-single name="PartyProfileEditSection" transition="updateProfile" map="party" pass-through-parameters="true">
+        <form-single name="PartyProfileEditSection" transition="updateAccount" map="party" pass-through-parameters="true">
             <field name="partyId"><default-field><hidden/></default-field></field>
             <field name="pseudoId"><conditional-field condition="accountEdit?.allowed" title="Id"><text-line/></conditional-field>
                 <default-field title="Id"><label text="${pseudoId}"/></default-field></field>
