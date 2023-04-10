@@ -50,7 +50,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- Artifact group and authz for Settings App -->
     <artifactGroups artifactGroupId="SETTINGS" description="Settings App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/s.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://resistmanagement/screen/Settings.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
         <authz artifactAuthzId="SETTINGS_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
         <authz artifactAuthzId="SETTINGS_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>

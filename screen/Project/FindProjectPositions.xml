@@ -16,6 +16,7 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Positions" default-menu-index="7" default-menu-include="true">
 
     <parameter name="workEffortId" required="true"/>
+    <!-- This is required to not show the positions, when the project visibility setting is not enabled. It's not pretty, but it works. -->
     <parameter name="canViewProjectPositions" required="true"/>
 
     <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
@@ -36,7 +37,6 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
     <transition name="getAccountList">
         <actions>
-<!--            <log level="warn" message="exceptionPartyIdList ${exceptionPartyIdList}"/>-->
             <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSetting" list="accountList" limit="20">
                 <econdition field-name="partyId" operator="not-in" from="exceptionPartyIdList"/>
                 <econdition field-name="roleTypeId" value="ClientManager"/>
@@ -47,7 +47,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="partyId,pseudoId"/>
                 <order-by field-name="^pseudoId"/>
             </entity-find>
-<!--            <log level="warn" message="accountList ${accountList}"/>-->
             <script>
                 def outList = []
                 for (def account in accountList)
@@ -59,18 +58,16 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
 
     <actions>
+        <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
+
         <entity-find entity-name="mantle.work.effort.WorkEffortEmplPositionDetail" list="projectPositionList">
             <econdition field-name="effortWorkEffortId" from="workEffortId"/>
             <order-by field-name="-lastUpdatedStamp"/>
         </entity-find>
-        <set field="viewableProjectPositionList" from="[]"/>
+
         <entity-find entity-name="mantle.humanres.position.EmplPositionClass" list="emplPositionClassList">
             <econdition field-name="emplPositionClassId" operator="not-in" from="projectPositionList*.positionEmplPositionClassId"/>
         </entity-find>
-
-<!--        <log level="warn" message="projectPositionList ${projectPositionList}"/>-->
-
-        <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
 
         <set field="projectPositionTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
     </actions>
@@ -78,6 +75,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <form-list name="AddPosition" list="projectPositionTitleList" skip-header="true" skip-form="true">
             <field name="title"><default-field><label text="Positions" type="h2"/></default-field></field>
+            <!-- Only show the add position button, when the user is allowed to edit the project and there are position classes available. -->
             <field name="buttonText"><conditional-field condition="projectEdit?.allowed &amp;&amp; emplPositionClassList != null &amp;&amp; emplPositionClassList.size() &gt; 0">
                 <container-dialog id="AddProjectPositionDialog" button-text="Add Position">
                     <form-single name="AddProjectPositionForm" transition="addProjectPosition" pass-through-parameters="true">
@@ -94,28 +92,9 @@ along with this software (see the LICENSE.md file). If not, see
 
         <section-iterate name="PositionSectionIterate" list="projectPositionList" entry="projectPosition">
             <actions>
-<!--                <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="appliedAccountList" distinct="true">-->
-<!--                    <econdition field-name="roleRoleTypeId" value="ClientManager"/>-->
-<!--                    <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>-->
-<!--                    <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>-->
-<!--                    <econdition field-name="contentContentLocation" operator="is-not-null"/>-->
-<!--                    <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>-->
-<!--                    <econdition field-name="applicationEmplPositionId" from="projectPosition.positionEmplPositionId"/>-->
-<!--&lt;!&ndash;                    <econdition field-name="effortPartyWorkEffortId" from="workEffortId" or-null="true"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <econdition field-name="effortPartyRoleTypeId" value="Talent" or-null="true"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>&ndash;&gt;-->
-<!--                    <select-field field-name="applicationEmplPositionId,applicationEmploymentApplicationId,contentPartyContentId,partyPartyId,partyPseudoId,applicationStatusDescription,applicationStatusStatusId,applicationStatusId,applicationEmplPositionId,effortPartyRoleTypeId,effortPartyPartyId,effortPartyFromDate,effortPartyStatusId,effortPartyStatusDescription"/>-->
-<!--&lt;!&ndash;                    <select-field field-name="partyPartyId"/>&ndash;&gt;-->
-<!--                    <order-by field-name="^pseudoId"/>-->
-<!--                </entity-find>-->
-
                 <entity-find entity-name="mantle.humanres.employment.EmploymentApplication" list="applicationList">
                     <econdition field-name="emplPositionId" from="projectPosition.positionEmplPositionId"/>
                 </entity-find>
-
-<!--                <log level="warn" message="projectPosition ${projectPosition.toString()}"/>-->
-<!--                <log level="warn" message="appliedAccountList ${appliedAccountList.toString()}"/>-->
-<!--                <log level="warn" message="applicationList ${applicationList.toString()}"/>-->
 
                 <entity-find entity-name="mantle.party.PartyToAndRelationship" list="managedAccountRelationshipList">
                     <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
@@ -124,16 +103,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <date-filter/>
                     <select-field field-name="toPartyId"/>
                 </entity-find>
-
-<!--                <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" auto-field-map="[statusId:projectPosition.positionStatusId]"/>-->
-<!--                <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">-->
-<!--                    <econdition field-name="statusId" from="statusItem.statusId"/>-->
-<!--                    <econdition field-name="statusFlowId" value="EmploymentApplication"/>-->
-<!--                    <order-by field-name="transitionSequence,transitionName"/>-->
-<!--                </entity-find>-->
-
-<!--                <log level="warn" message="statusItem ${statusItem}"/>-->
-<!--                <log level="warn" message="statusTransitionList ${statusTransitionList}"/>-->
             </actions>
             <widgets>
                 <container-box><box-header title="${projectPosition.classTitle}"></box-header><box-toolbar>
@@ -155,7 +124,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:appliedAccount.applyingPartyId]" out-map="accountEdit"/>
                             <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:appliedAccount.applyingPartyId]" out-map="accountView"/>
 
-                            <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
+                            <entity-find entity-name="mantle.party.PartyContent" list="profileContentList">
                                 <econdition field-name="partyId" from="appliedAccount.applyingPartyId"/>
                                 <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
                                 <econdition field-name="contentLocation" operator="is-not-null"/>
@@ -169,12 +138,11 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="roleTypeId" value="Talent"/>
                                 <econdition field-name="emplPositionId" from="appliedAccount.emplPositionId"/>
                             </entity-find>
-<!--                            <log level="warn" message="appliedAccount ${appliedAccount} \n\nworkEffortPartyList ${workEffortPartyList.toString()}"/>-->
                             <set field="workEffortParty" from="workEffortPartyList?.getFirst()"/>
                         </actions>
                         <widgets>
                             <container-box><box-header>
-                                <image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:accountContentList?.getFirst().partyContentId]" width="50px"/>
+                                <image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:profileContentList?.getFirst().partyContentId]" width="50px"/>
                                 <label type="h5" text="${appliedAccount.applyingParty.pseudoId} -"/>
                                 <label text="> ${appliedAccount.statusId != 'EaApproved' ? appliedAccount.status.description : workEffortParty.status.description}"/>
                             </box-header><box-toolbar>

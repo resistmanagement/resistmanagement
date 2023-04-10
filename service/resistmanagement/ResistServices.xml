@@ -253,7 +253,7 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
     <!-- End Permission Services -->
 
-    <!-- FindTalent screen services -->
+    <!-- Talent screen services -->
     <service verb="store" noun="PartyDimension">
         <in-parameters>
             <parameter name="partyId" required="true"/>
@@ -302,7 +302,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="set" noun="PartySkills">
+    <service verb="set" noun="PartySkill">
         <in-parameters>
             <parameter name="partyId" required="true"/>
             <parameter name="emplPositionClassId" required="true"/>
@@ -383,7 +383,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="delete#mantle.humanres.position.EmplPositionClassParty" in-map="context" out-map="context"/>
         </actions>
     </service>
-    <!-- End FindTalent screen services -->
+    <!-- End Talent screen services -->
 
 
     <service verb="update" noun="Account">
@@ -1035,6 +1035,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <!-- This is used to get the list of supported image file mime types for internal conversion services for displaying in a browser. -->
     <service verb="get" noun="SupportedImageFileTypeList">
         <in-parameters>
             <parameter name="supportedImageFileTypeList" type="List" default="['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp', 'image/apng', 'image/avif', 'image/gif']"><description>

@@ -15,6 +15,15 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Account" default-menu-index="2" render-modes="qvt">
 
+    <!--
+    This screen is to view or edit an account similar to the instagram profile page. Here is where a profile editor can
+    edit their profile, upload new posts, and edit their talents (the talent screen should be joined with this one). This
+    should also have a back button, similar to the ViewProject screen.
+
+    The menu should also have a page like this that is for the user to edit their own profile instead of the settings page
+    being in the menu, and instead include the settings page in the profile accout page.
+    -->
+
     <parameter name="partyId" required="true"/>
     <parameter name="canViewAccount"/>
 
@@ -75,6 +84,7 @@ along with this software (see the LICENSE.md file). If not, see
             <filter-map-list list="partyContentList" to-list="profileContentList"><field-map field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/></filter-map-list>
             <filter-map-list list="partyContentList" to-list="partyContentBioList"><field-map field-name="partyContentTypeEnumId" value="PcntBio"/></filter-map-list>
 
+            <!-- Profile Posts Communication Event Content Medium and Small -->
             <entity-find entity-name="mantle.party.communication.CommunicationEventAndContent" list="postAllContentList">
                 <econdition field-name="fromPartyId" from="partyId"/>
                 <econdition field-name="communicationEventTypeId" value="Post"/>
@@ -86,6 +96,7 @@ along with this software (see the LICENSE.md file). If not, see
             <filter-map-list list="postAllContentList" to-list="postContentList"><field-map field-name="contentTypeEnumId" value="CmctImageSmall"/></filter-map-list>
             <filter-map-list list="postAllContentList" to-list="postDetailedContentList"><field-map field-name="contentTypeEnumId" value="CmctImageMedium"/></filter-map-list>
         <else>
+            <!-- Only find posts if they're allowed to view the account. By default everyone is allowed to see everyone elses profile picture and bio -->
             <entity-find entity-name="mantle.party.PartyContent" list="partyContentList">
                 <econdition field-name="partyId"/>
                 <econditions combine="or">
@@ -109,6 +120,7 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="postContentList?.size() &gt; 0">
             <set field="postTitleList" from="[[communicationEventContentId:postContentList?.first()?.communicationEventContentId]]"/>
 
+            <!-- Build the post list in 3s for showing them in a grid of 3s. Not the best way to do it, and could do it better through more flexible form list grids. -->
             <iterate list="postContentList" entry="communicationEventAndContent">
                 <script>intermediatePostList.add(sri.buildUrl('downloadCommEventContent').addParameter('communicationEventContentId', communicationEventAndContent.communicationEventContentId).getUrlWithParams())</script>
                 <if condition="communicationEventAndContent_index % 3 == 2 || communicationEventAndContent_index == postContentList.size() - 1">
@@ -129,6 +141,7 @@ along with this software (see the LICENSE.md file). If not, see
         <form-list name="PartyProfilePictureSection" list="partyProfilePictureList" skip-form="true" skip-header="true" paginate="false" saved-finds="false" header-dialog="false">
             <row-actions><set field="contentUrl" from="sri.buildUrl('downloadPartyContent').addParameter('partyContentId', partyContentId).getUrlWithParams()"/></row-actions>
             <field name="content"><conditional-field condition="accountEdit?.allowed"><container-dialog id="UpdateProfilePicture" button-text="Update Picture">
+                    <!-- This is a bit of a hack so that the dialog button is openable through an image press. -->
                     <text><![CDATA[<template v-slot:button><img src="${contentUrl}" width="100px"/></template>]]></text>
                     <form-single name="UpdateProfilePictureForm" transition="updateProfilePicture" pass-through-parameters="true">
                         <field name="partyId"><default-field><hidden/></default-field></field>
@@ -136,6 +149,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <field name="submit"><default-field><submit/></default-field></field>
                     </form-single></container-dialog></conditional-field>
                 <default-field><image url="${contentUrl}" url-type="plain" width="100px"/></default-field></field>
+            <!-- Post button dialog should have something like: https://v1.quasar.dev/vue-components/uploader -->
             <field name="uploadPostButton"><conditional-field condition="accountEdit?.allowed">
                 <container-dialog id="UploadPost" button-text="Add Post">
                     <form-single name="UploadPostForm" transition="uploadPost" pass-through-parameters="true">

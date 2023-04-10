@@ -18,6 +18,7 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
 
     <actions>
+        <!-- TODO: Simplify this to not use a view entity and only the necessary fields -->
         <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true" cache="true">
             <econdition field-name="roleTypeId" value="ClientManager"/>
             <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
@@ -38,20 +39,6 @@ along with this software (see the LICENSE.md file). If not, see
         <text><![CDATA[<q-page-container class="q-ma-sm"><q-page>]]></text>
         <form-list name="ListMessage" list="messageTitleList" skip-header="true" skip-form="true">
             <field name="title"><default-field><label text="Messages" type="h2"/></default-field></field>
-<!--            <field name="createAccount"><conditional-field condition="accountCount == 0"><container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Account">-->
-<!--                <form-single name="SetPersonalTalentAccountForm" transition="createPersonAccount">-->
-<!--                    <field name="partySettingTypeId"><default-field><hidden default-value="PartyVisibility"/></default-field></field>-->
-<!--                    <field name="pseudoId"><default-field title="Account Username"><text-line/></default-field></field>-->
-<!--                    <field name="settingValue" from="partySettingType?.defaultValue"><default-field title="Account Visibility">-->
-<!--                        <drop-down><list-options list="partySettingType?.type?.enums" key="${enumId}" text="${description}"/></drop-down>-->
-<!--                    </default-field></field>-->
-<!--                    <field name="submitButton"><default-field title="Set"><submit/></default-field></field>-->
-<!--                    <field-layout>-->
-<!--                        <field-row><field-ref name="pseudoId"/><field-ref name="settingValue"/></field-row>-->
-<!--                        <field-ref name="submitButton"/>-->
-<!--                    </field-layout>-->
-<!--                </form-single>-->
-<!--            </container-dialog></conditional-field></field>-->
         </form-list>
         <container-row><row-col lg="12">
             <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">

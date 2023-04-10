@@ -37,7 +37,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <section name="PageTextSection" condition="pageLocation">
             <widgets>
-                <container-row><row-col xs="1" md="2"></row-col><row-col xs="10" md="8" >
+                <container-row><row-col xs="1" md="2"></row-col><row-col xs="10" md="8">
                     <render-mode>
                         <text type="html,vuet,qvt" template="true" location="${pageLocation?:''}${versionName &amp;&amp; currentVersionName != versionName ? '#' + versionName.take(12) : ''}"/>
                     </render-mode>

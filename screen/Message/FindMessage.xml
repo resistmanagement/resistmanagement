@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <always-actions>
         <!-- TODO: Fix how this is handled for john.doe -->
-        <!--        <log level="warn" message="toPartyId ${toPartyId}"/>-->
+        <!-- TODO: Don't use a view entity for this -->
         <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true" cache="true">
             <econdition field-name="roleTypeId" value="ClientManager"/>
             <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
@@ -33,9 +33,9 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
             <date-filter/><select-field field-name="partyId"/>
         </entity-find>
-        <!--        <log level="warn" message="accountList ${accountList}"/>-->
         <set field="fromPartyId" from="accountList?.getFirst()?.partyId"/>
         <if condition="!fromPartyId"><return message="Not allowed" error="true" type="danger"/></if>
+
         <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="checkAccountEdit"/>
         <if condition="!checkAccountEdit.allowed"><return message="Not allowed" error="true" type="danger"/></if>
     </always-actions>
@@ -60,8 +60,6 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
     <transition name="getMessages" read-only="true">
         <actions>
-            <!--        <log level="warn" message="context ${context.toString()}"/>-->
-
             <set field="accountList" from="[fromPartyId, toPartyId]"/>
             <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
                 <econdition field-name="partyId" operator="in" from="accountList"/>
@@ -70,16 +68,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
                 <order-by field-name="-contentDate"/>
             </entity-find>
-            <!--        <log level="warn" message="accountContentList ${accountContentList.partyId}"/>-->
 
             <set field="toParty" from="accountContentList?.find{it.partyId == toPartyId}"/>
             <set field="fromParty" from="accountContentList?.find{it.partyId == fromPartyId}"/>
 
-            <!--            <log level="warn" message="toParty ${toParty}"/>-->
-            <!--            <log level="warn" message="fromParty ${fromParty}"/>-->
-
-            <!--            <log level="warn" message="offset ${offset}"/>-->
-<!--            <log level="warn" message="earliestEntryDate ${earliestEntryDate}"/>-->
             <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList" limit="20">
                 <econditions combine="or">
                     <econditions>
@@ -99,13 +91,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="-entryDate"/>
             </entity-find>
 
-            <!--            <log level="warn" message="commEventList ${commEventList}"/>-->
-
             <set field="messageList" from="[]"/>
             <iterate list="commEventList" entry="commEvent">
                 <set field="partyContent" from="accountContentList?.find{it.partyId == commEvent.fromPartyId}"/>
-                <!--                <log level="warn" message="partyContent ${partyContent}"/>-->
-                <!--                <log level="warn" message="commEvent.fromPartyId ${commEvent.fromPartyId}"/>-->
                 <set field="message" from="[
                     communicationEventId:commEvent.communicationEventId,
                     partyId:partyContent.partyId,
@@ -118,7 +106,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>messageList.add(message)</script>
             </iterate>
 
-            <!--            <log level="warn" message="messageList ${messageList}"/>-->
             <script>ec.web.sendJsonResponse([messageList:messageList])</script>
         </actions>
         <default-response type="none"/></transition>
@@ -128,33 +115,10 @@ along with this software (see the LICENSE.md file). If not, see
         <render-mode><text type="qvue"><![CDATA[
             <template>
                 <q-page-container class="q-ma-sm"><q-page :style-fn="$root.myTweak" style="display: flex; flex-direction: column; justify-content: flex-end;">
-<!--                <div class="q-pa-md row justify-center" style="vertical-align: bottom">-->
                 <div class="q-pa-md row justify-center" style="">
-<!--                    <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 28px; margin-top: 100px;">-->
-<!--                    <q-scroll-area class="scroll" style="height: 100%;">-->
-<!--                    <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: flex-end; margin-bottom: 28px;">-->
-<!--                        <q-infinite-scroll @load="onScrollLoad" reverse ref="chatScroll" style="">-->
-<!--                            <template slot="loading">-->
-<!--                                <div class="row justify-center q-my-md">-->
-<!--                                    <q-spinner color="primary" name="dots" size="40px"/>-->
-<!--                                </div>-->
-<!--                            </template>-->
-<!--                            <q-chat-message v-for="chatData in chatDataListReversed" :key="chatData.communicationEventId"-->
-<!--                                            class="scroll"-->
-<!--                                            :name="chatData.fromPseudoId"-->
-<!--                                            :avatar="chatData.contentUrl"-->
-<!--                                            :text="[chatData.body]"-->
-<!--                                            :sent="chatData.sent"-->
-<!--                            />-->
-<!--                        </q-infinite-scroll>-->
-<!--                        <q-page-scroller reverse position="bottom" :offset="[0, 58]">-->
-<!--                            <q-btn fab icon="keyboard_arrow_down" color="primary" label="Scroll to Bottom"/>-->
-<!--                        </q-page-scroller>-->
-<!--&lt;!&ndash;                    </q-scroll-area>&ndash;&gt;-->
-<!--                    </div>-->
+
                     <div style="width: 100%; max-width: 400px;  margin-bottom: 28px;">
-<!--                    <div style="width: 100%; max-width: 400px; margin-bottom: 28px; ">-->
-                        <q-infinite-scroll @load="onScrollLoad" reverse ref="chatScroll" style="">
+                        <q-infinite-scroll @load="onScrollLoad" reverse ref="chatScroll">
                             <template slot="loading">
                                 <div class="row justify-center q-my-md">
                                     <q-spinner color="primary" name="dots" size="40px"/>
@@ -171,7 +135,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <q-page-scroller reverse position="bottom">
                             <q-btn fab icon="keyboard_arrow_down" color="primary" label="Scroll to Bottom"/>
                         </q-page-scroller>
-                        <!--                    </q-scroll-area>-->
                     </div>
                     <q-footer bordered class="bg-grey-1">
                         <div class="q-pa-md row justify-center">
@@ -186,16 +149,6 @@ along with this software (see the LICENSE.md file). If not, see
                             </div>
                         </div>
                     </q-footer>
-<!--                    <q-page-sticky position="bottom" expand style="background-color: white;">-->
-<!--                        <div class="q-ma-sm" style="width: 100%; max-width: 400px;">-->
-<!--                            <q-form @submit.prevent="createMessage">-->
-<!--                                <div class="row">-->
-<!--                                    <div class="col-10" ref="bodyInput"><m-text-line dense name="body" v-model="newServiceInfo.body" stack-label label="Message" type="text" size="100"></m-text-line></div>-->
-<!--                                    <q-btn class="col" dense no-caps color="primary" type="submit" name="submitBtn" label="Send"></q-btn>-->
-<!--                                </div>-->
-<!--                            </q-form>-->
-<!--                        </div>-->
-<!--                    </q-page-sticky>-->
                 </div>
                 </q-page></q-page-container>
             </template>
@@ -219,20 +172,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 headers:{ Accept:'application/json', 'X-CSRF-Token':this.$root.moquiSessionToken },
                                 error:moqui.handleAjaxError,
                                 success: function(responseObj, status, jqXHR) {
-                                    // console.log('createMessage success')
-
                                     vm.newServiceInfo.body = ""
                                     vm.focusBodyElement();
-
-                                    // console.log(vm.chatDataList)
                                 }
                             });
                         },
                         notificationCallback: function (jsonObj, webSocket) {
-                            // console.log('notificationCallback')
-                            // console.log(jsonObj)
-                            // console.log(this.chatDataList)
-                            // console.log(this.chatDataList[this.chatDataList.length-1])
                             if (this.chatDataList.length ? (this.chatDataList[this.chatDataList.length-1].communicationEventId !== jsonObj.message.communicationEventId) : true)
                                 this.chatDataList.unshift(jsonObj.message)
 
@@ -243,13 +188,8 @@ along with this software (see the LICENSE.md file). If not, see
                             }, 10);
                         },
                         onScrollLoad (index, done) {
-                            // console.log('onScrollLoad')
-                            // console.log(index)
-                            // console.log(done)
                             setTimeout(() => {
                                 var stop = false
-
-                                // console.log(this.chatDataList)
 
                                 var earliestEntryDate = this.chatDataList.length ? this.chatDataList[this.chatDataList.length-1].entryDate : null;
                                 // console.log(earliestEntryDate)
@@ -265,18 +205,12 @@ along with this software (see the LICENSE.md file). If not, see
                                         },
                                         success: function(responseObj, status, jqXHR) {
                                             // update display objects
-                                            // console.log(responseObj.messageList)
                                             if (responseObj.messageList !== null) {
                                                 vm.chatDataList.push.apply(vm.chatDataList, responseObj.messageList);
                                             }
-                                            // for (key in vm.chatDataList) {
-                                            //     console.log(vm.chatDataList[key].communicationEventId)
-                                            // }
                                             if (responseObj.messageList === null || responseObj.messageList.length < 20) {
-                                                // console.log('stop = true')
                                                 stop = true
                                             }
-                                            // console.log(stop)
                                             done(stop)
                                         }
                                     });
@@ -290,7 +224,6 @@ along with this software (see the LICENSE.md file). If not, see
                         }
                     },
                     mounted: function() {
-                        // console.log('FindMessage mounted')
                         this.$root.notificationClient.registerListener("ResistChatEvent", this.notificationCallback);
                         this.focusBodyElement();
                     },

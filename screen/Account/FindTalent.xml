@@ -25,10 +25,10 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="storePartyClassificationAppl"><service-call name="resistmanagement.ResistServices.store#PartyClassificationAppl"/>
         <default-response url="."/></transition>
-    <transition name="setPartySkill"><service-call name="resistmanagement.ResistServices.set#PartySkills"/>
+    <transition name="setPartySkill"><service-call name="resistmanagement.ResistServices.set#PartySkill"/>
         <default-response url="."/></transition>
 
-    <transition name="setTalentProfile"><service-call name="resistmanagement.ResistServices.store#TalentProfile"/>
+    <transition name="storeTalentProfile"><service-call name="resistmanagement.ResistServices.store#TalentProfile"/>
         <default-response url="."/></transition>
     <transition name="deleteTalentProfile"><service-call name="resistmanagement.ResistServices.delete#TalentProfile"/>
         <default-response url="."/></transition>
@@ -39,7 +39,7 @@ along with this software (see the LICENSE.md file). If not, see
         <entity-find entity-name="mantle.humanres.position.EmplPositionClassPartyClass" list="epcpcList">
             <econdition field-name="partyId"/><date-filter/><order-by field-name="-fromDate"/></entity-find>
 
-        <!-- TODO: Allow for different relationships between the current party and an organization -->
+        <!-- Note: Eventually allow for different relationships between the current party and an organization -->
         <entity-find entity-name="mantle.party.PartyDetail" list="pdList">
             <econdition field-name="ownerPartyId" from="partyId"/></entity-find>
 
@@ -54,8 +54,8 @@ along with this software (see the LICENSE.md file). If not, see
             <form-list name="SetTalent" list="talentTaskList" skip-header="true" skip-form="true">
                 <field name="title"><default-field><label text="Talents" type="h2"/></default-field></field>
                 <field name="buttonText"><conditional-field condition="accountEdit?.allowed &amp;&amp; epcList?.size() &gt; 0">
-                    <container-dialog id="SetTalentProfileDialog" button-text="Add Talent">
-                        <form-single name="SetTalentProfileForm" transition="setTalentProfile" pass-through-parameters="true">
+                    <container-dialog id="StoreTalentProfileDialog" button-text="Add Talent">
+                        <form-single name="StoreTalentProfileForm" transition="storeTalentProfile" pass-through-parameters="true">
                             <field name="partyId"><default-field><hidden/></default-field></field>
                             <field name="emplPositionClassId"><default-field title="Type">
                                 <drop-down allow-empty="true" submit-on-select="true">
@@ -79,19 +79,19 @@ along with this software (see the LICENSE.md file). If not, see
                     <entity-find entity-name="mantle.humanres.position.EmplPositionClassDimension" list="epcdList">
                         <econdition field-name="emplPositionClassId"/></entity-find>
 
+                    <!-- This pattern of finding the entities and mapping them into a data structure may be the best way
+                    to do this, however I'd imagine that using a view entity here may be simpler and faster. -->
+
                     <set field="epcdpList" from="[]"/>
                     <iterate list="epcdList" entry="epcd">
-<!--                        <log level="warn" message="epcd.getMap() ${epcd.getMap()} epcdpList ${epcdpList}"/>-->
                         <entity-find entity-name="mantle.party.PartyDimension" list="pdList">
                             <econdition field-name="partyId"/>
                             <econdition field-name="uomDimensionTypeId" from="epcd.uomDimensionTypeId"/>
                             <order-by field-name="-dimensionDate"/></entity-find>
                         <if condition="pdList?.getFirst() &amp;&amp; pdList.getFirst().getMap()?.value"><then>
                             <script>epcdpList.add(pdList.getFirst().getMap() + [uomDescription:pdList.getFirst().uom.description, uomTypeDescription:pdList.getFirst().type.description])</script>
-<!--                            <log level="warn" message="pdList epcdpList ${epcdpList}"/>-->
                         </then><else-if condition="epcd.getMap()?.uomDimensionTypeId">
                             <script>epcdpList.add(epcd.getMap() + [partyId:partyId, uomId:epcd.type.defaultUomId, uomDescription:epcd.type.defaultUom.description, uomTypeDescription:epcd.type.description])</script>
-<!--                            <log level="warn" message="epcd epcdpList ${epcdpList}"/>-->
                         </else-if></if>
                     </iterate>
 
@@ -100,19 +100,15 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <set field="epcpctpList" from="[]"/>
                     <iterate list="epcpctList" entry="epcpct">
-<!--                        <log level="warn" message="epcpct.getMap() ${epcpct.getMap()} epcpctpList ${epcpctpList}"/>-->
                         <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="pcapList">
                             <econdition field-name="partyId"/>
                             <econdition field-name="classificationTypeEnumId" from="epcpct.classificationTypeEnumId"/>
                             <date-filter/><order-by field-name="-thruDate,-fromDate"/></entity-find>
                         <set field="classificationTypeDescription" from="epcpct.type.description"/>
-<!--                        <log level="warn" message="pcapList?.getFirst() ${pcapList?.getFirst()}"/>-->
                         <if condition="pcapList?.getFirst() &amp;&amp; pcapList.getFirst()?.partyClassificationId"><then>
                             <script>epcpctpList.add(pcapList.getFirst().getMap() + [classificationTypeDescription:classificationTypeDescription])</script>
-<!--                            <log level="warn" message="pcapList epcpctpList ${epcpctpList}"/>-->
                         </then><else-if condition="epcpct.getMap()?.classificationTypeEnumId">
                             <script>epcpctpList.add(epcpct.getMap() + [partyId:partyId, classificationTypeDescription:classificationTypeDescription, description:''])</script>
-<!--                            <log level="warn" message="epcpct epcpctpList ${epcpctpList}"/>-->
                         </else-if></if>
                     </iterate>
 
@@ -128,8 +124,6 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <set field="epcspList" from="[]"/>
                     <iterate list="epcsList" entry="epcs"><script>epcspList.add(epcs.getMap() + [partyId:partyId, skillTypeDescription:epcs.skillTypeEnum.description])</script></iterate>
-
-<!--                    <log level="warn" message="context ${context.toString()}"/>-->
                 </actions>
                 <widgets>
                     <container-box><box-header title="${emplPositionClass.title}"></box-header><box-toolbar>
@@ -170,7 +164,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </box-body-nopad></container-box>
                 </widgets>
             </section-iterate>
-
         </row-col></container-row>
     </widgets>
 </screen>

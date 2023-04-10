@@ -15,6 +15,17 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         default-menu-title="Project" default-menu-index="6" default-menu-include="true">
 
+    <!--
+    The idea with this screen is to show a project and its details including the positions (which are currently on the
+    FindProjectPositions.xml page), and allow the user to edit the project if they have permission. It would look like
+    something approximating the instagram profile page, but has the additional information needed to view and manage the
+    project. This would additionally probably need a back button similar to FindMessages.xml to go back to the project
+    list view.
+
+    This page may be worth client rendering with quasar to handle space more efficiently and properly show the images in
+    a grid instead of the hacky way I did it here. Try out using cards with media inside of them: https://v1.quasar.dev/vue-components/card#media-content.
+    -->
+
     <parameter name="workEffortId" required="true"/>
     <parameter name="canViewProjectPositions"/>
 
@@ -24,9 +35,8 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="updateProject"><service-call name="resistmanagement.ResistServices.update#Project"
             in-map="[workEffortId:workEffortId, workEffortName:workEffortName, visibilityEnumId:visibilityEnumId, statusId:statusId, estimatedStartDate:estimatedStartDate, estimatedWorkDuration:estimatedWorkDuration, description:description]"/>
         <default-response url="."/></transition>
-    <transition name="updateStatus"><service-call name="resistmanagement.ResistServices.update#Project"
-                                                  in-map="[workEffortId:workEffortId, statusId:statusId]"/><default-response url="."/></transition>
-    <transition name="addProjectPost"><service-call name="resistmanagement.ResistServices.upload#ProjectPostAttachment" in-map="[workEffortId:workEffortId,contentFile:contentFile]"/>
+    <transition name="updateStatus"><service-call name="resistmanagement.ResistServices.update#Project" in-map="[workEffortId:workEffortId, statusId:statusId]"/><default-response url="."/></transition>
+    <transition name="uploadProjectPost"><service-call name="resistmanagement.ResistServices.upload#ProjectPostAttachment" in-map="[workEffortId:workEffortId,contentFile:contentFile]"/>
         <default-response url="."/></transition>
     <transition name="downloadProjectCommEventContent" read-only="true">
         <parameter name="communicationEventContentId"/>
@@ -34,7 +44,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="allowed">
                 <entity-find-one entity-name="mantle.party.communication.CommunicationEventContent" value-field="communicationEventContent" auto-field-map="[communicationEventContentId:communicationEventContentId]">
                     <select-field field-name="communicationEventContentId, contentLocation"/></entity-find-one>
-<!--                <log level="warn" message="communicationEventContent ${communicationEventContent}"/>-->
                 <script>ec.web.sendResourceResponse(communicationEventContent?.contentLocation, true)</script>
                 <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
         </actions>
@@ -43,20 +52,18 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>
-<!--        <log level="warn" message="project ${project}"/>-->
 
         <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
-<!--        <log level="warn" message="projectEdit ${projectEdit}"/>-->
 
         <service-call name="org.moqui.impl.ImageServices.get#ImageReaderMIMETypes" out-map="context"/>
 
+        <!-- TODO: Simplify this to not use a view entity -->
         <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" list="postAllContentList">
             <econdition field-name="effortEventWorkEffortId" from="workEffortId"/>
             <econdition field-name="eventCommunicationEventTypeId" value="Post"/>
             <econdition field-name="eventContentContentLocation" operator="is-not-null"/>
             <econdition field-name="eventContentContentTypeEnumId" operator="in" value="CmctImageMedium,CmctImageSmall"/>
             <select-field field-name="eventCommunicationEventId,eventContentCommunicationEventContentId,eventContentContentLocation,eventContentContentTypeEnumId"/>
-<!--            <select-field field-name="effortWorkEffortId,effortEventWorkEffortId,effortEventCommunicationEventId,eventCommunicationEventId,eventCommunicationEventTypeId,eventContentContentLocation,eventContentContentTypeEnumId,eventContentCommunicationEventContentId"/>-->
             <order-by field-name="eventContentSequenceId,-eventContentContentDate,-eventContentEntryDate"/>
         </entity-find>
         <filter-map-list list="postAllContentList" to-list="postContentList"><field-map field-name="eventContentContentTypeEnumId" value="CmctImageSmall"/></filter-map-list>
@@ -67,7 +74,6 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="postTitleList" from="[[communicationEventContentId:postContentList?.first()?.eventContentCommunicationEventContentId]]"/>
 
             <iterate list="postContentList" entry="communicationEventAndContent">
-<!--                <log level="warn"-->
                 <script>intermediatePostList.add(sri.buildUrl('downloadProjectCommEventContent').addParameter('communicationEventContentId', communicationEventAndContent.eventContentCommunicationEventContentId).getUrlWithParams())</script>
                 <if condition="communicationEventAndContent_index % 3 == 2 || communicationEventAndContent_index == postContentList.size() - 1">
                     <script>postList.add(intermediatePostList)</script>
@@ -75,7 +81,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </iterate>
         </if>
-<!--        <log level="warn" message="postContentList?.size() ${postContentList?.size()} postContentList ${postContentList} \n\n postAllContentList ${postAllContentList}"/>-->
 
         <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" auto-field-map="[statusId:project.statusId]"/>
         <entity-find entity-name="moqui.basic.StatusFlowTransitionToDetail" list="statusTransitionList">
@@ -84,7 +89,6 @@ along with this software (see the LICENSE.md file). If not, see
             <order-by field-name="transitionSequence,transitionName"/>
         </entity-find>
         <if condition="!projectEdit.allowed"><set field="statusTransitionList" from="[]"/></if>
-<!--        <log level="warn" message="statusTransitionList ${statusTransitionList} \n\n statusItem ${statusItem}"/>-->
     </actions>
 
     <widgets>
@@ -92,7 +96,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- TODO: allow for partyId selection like FindProject when user can have multiple accounts -->
             <field name="workEffortName"><conditional-field condition="projectEdit?.allowed" title="Project Name"><text-line/></conditional-field>
                 <default-field><label text="${workEffortName}" type="h2"/></default-field></field>
-<!--            <field name="statusId"><default-field title="Status"><label text="Status: ${project.status.description}" type="h6"/></default-field></field>-->
+            <!-- This field was taken and modified from SimpleScreens/template/StatusWidgets.xml -->
             <field name="status"><default-field>
                 <container style="shaded-area condensed" type="span">
                     <container style="float-plain condensed" type="ul">
@@ -126,7 +130,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <default-field><label text="${description ?: ''}"/></default-field></field>
             <field name="submitButton"><conditional-field condition="projectEdit?.allowed" title="Update"><submit/></conditional-field></field>
             <field-layout>
-<!--                <field-row-big><field-ref name="workEffortName"/></field-row-big>-->
                 <field-row><field-ref name="workEffortName"/><field-ref name="status"/></field-row>
                 <field-row-big><field-ref name="estimatedStartDate"/><field-ref name="estimatedWorkDuration"/><field-ref name="visibilityEnumId"/></field-row-big>
                 <fields-not-referenced/>
@@ -135,9 +138,10 @@ along with this software (see the LICENSE.md file). If not, see
 
         <form-single name="CreateProjectPostForm">
             <field name="title"><default-field><label text="Posts" type="h2"/></default-field></field>
-            <field name="addProjectPostButton"><conditional-field condition="projectEdit?.allowed">
-                <container-dialog id="AddProjectPostContainer" button-text="Add Post">
-                    <form-single name="AddProjectPostForm" transition="addProjectPost" pass-through-parameters="true">
+            <field name="uploadProjectPostButton"><conditional-field condition="projectEdit?.allowed">
+                <!-- Post button dialog should have something like: https://v1.quasar.dev/vue-components/uploader -->
+                <container-dialog id="UploadProjectPostContainer" button-text="Add Post">
+                    <form-single name="UploadProjectPostForm" transition="uploadProjectPost" pass-through-parameters="true">
                         <field name="workEffortId"><default-field><hidden/></default-field></field>
                         <field name="contentFile"><default-field><file accept="${String.join(', ', imageReaderMIMETypes)}"/></default-field></field>
                         <field name="submit"><default-field><submit/></default-field></field>
@@ -145,11 +149,11 @@ along with this software (see the LICENSE.md file). If not, see
                 </container-dialog>
             </conditional-field></field>
             <field-layout>
-                <field-row><field-ref name="title"/><field-ref name="addProjectPostButton"/></field-row>
+                <field-row><field-ref name="title"/><field-ref name="uploadProjectPostButton"/></field-row>
             </field-layout>
         </form-single>
 
-        <!-- Posts -->
+        <!-- Post Grid -->
         <section-iterate name="PostsSection" list="postList" entry="intermediatePostList">
             <actions>
                 <set field="postUrl0" from="intermediatePostList?.size > 0 ? intermediatePostList?.get(0) : null"/>

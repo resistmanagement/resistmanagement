@@ -30,8 +30,6 @@ along with this software (see the LICENSE.md file). If not, see
         <default-response url="."/></transition>
     <transition name="editPaymentMethod"><default-response url="../PaymentMethod/EditPaymentMethod"/></transition>
 
-<!--    <transition name="updatePaymentMethodInfo"><default-response url="UpdatePaymentMethodInfo"/></transition>-->
-
     <subscreens>
         <subscreens-item name="VerifyEmail" location="component://tools/screen/System/Security/UserAccount/UserAccountDetail/VerifyEmail.xml"/>
         <subscreens-item name="VerifySms" location="component://tools/screen/System/Security/UserAccount/UserAccountDetail/VerifySms.xml"/>
