@@ -22,18 +22,20 @@ along with this software (see the LICENSE.md file). If not, see
     <always-actions>
         <!-- TODO: Fix how this is handled for john.doe -->
         <!-- TODO: Don't use a view entity for this -->
-        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true" cache="true">
-            <econdition field-name="roleTypeId" value="ClientManager"/>
-            <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
-            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
-            <econdition field-name="contentLocation" operator="is-not-null"/>
-            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-            <econdition field-name="fromRoleTypeId" value="Administrator"/>
-            <econdition field-name="toRoleTypeId" value="ClientManager"/>
-            <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
-            <date-filter/><select-field field-name="partyId"/>
+        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="accountList" distinct="true" cache="true">
+            <econdition field-name="roleRoleTypeId" value="ClientManager"/>
+            <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>
+            <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="contentContentLocation" operator="is-not-null"/>
+            <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
+            <econdition field-name="relationshipFromRoleTypeId" value="Administrator"/>
+            <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
+            <econdition field-name="relationshipFromPartyId" from="ec.user.userAccount?.partyId"/>
+            <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+            <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
+            <select-field field-name="partyPartyId"/>
         </entity-find>
-        <set field="fromPartyId" from="accountList?.getFirst()?.partyId"/>
+        <set field="fromPartyId" from="accountList?.getFirst()?.partyPartyId"/>
         <if condition="!fromPartyId"><return message="Not allowed" error="true" type="danger"/></if>
 
         <service-call name="resistmanagement.ResistServices.check#AccountEdit" in-map="[partyId:fromPartyId]" out-map="checkAccountEdit"/>
@@ -60,9 +62,9 @@ along with this software (see the LICENSE.md file). If not, see
     <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
     <transition name="getMessages" read-only="true">
         <actions>
-            <set field="accountList" from="[fromPartyId, toPartyId]"/>
+            <set field="accountMessageList" from="[fromPartyId, toPartyId]"/>
             <entity-find entity-name="mantle.party.PartyContent" list="accountContentList">
-                <econdition field-name="partyId" operator="in" from="accountList"/>
+                <econdition field-name="partyId" operator="in" from="accountMessageList"/>
                 <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
                 <econdition field-name="contentLocation" operator="is-not-null"/>
                 <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>

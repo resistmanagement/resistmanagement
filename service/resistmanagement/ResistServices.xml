@@ -94,23 +94,52 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <!-- TODO: This is a more complicated than necessary solution to allow viewing of projects. Don't use a view entity in this scenario. -->
-            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount" distinct="true">
-                <econdition field-name="workEffortId"/>
-                <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
-                <econdition field-name="purposeEnumId" value="WepPrResistProject"/>
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" count-field="projectViewCount" distinct="true">
+                <econdition field-name="effortPartyWorkEffortId" from="workEffortId"/>
+                <econdition field-name="effortWorkEffortTypeEnumId" value="WetProject"/>
+                <econdition field-name="effortPurposeEnumId" value="WepPrResistProject"/>
 
                 <!-- Conditions for visibility check -->
-                <econdition field-name="toRoleTypeId" value="ClientManager"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-                <econdition field-name="partyRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
+                <econdition field-name="toRoleRoleTypeId" value="ClientManager"/>
                 <econditions combine="or">
-                    <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
-                    <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
-                <date-filter/>
+                    <econdition field-name="effortVisibilityEnumId" value="WevAllUsers"/>
+                    <econdition field-name="relationshipFromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
+                <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
                 <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+                <select-field field-name="effortWorkEffortId"/>
             </entity-find-count>
 
-            <if condition="wedprftrCount != null &amp;&amp; wedprftrCount &gt;= 1"><set field="allowed" from="true"/></if>
+            <if condition="projectViewCount != null &amp;&amp; projectViewCount &gt;= 1"><set field="allowed" from="true"/></if>
+        </actions>
+    </service>
+
+    <service verb="check" noun="ProjectEdit" authz-action="view">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="allowed" default="false"/>
+        </out-parameters>
+        <actions>
+            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" count-field="projectEditCount">
+                <econdition field-name="effortPartyWorkEffortId" from="workEffortId"/>
+                <econdition field-name="effortWorkEffortTypeEnumId" value="WetProject"/>
+                <econdition field-name="effortPurposeEnumId" value="WepPrResistProject"/>
+
+                <!-- Conditions for visibility check -->
+                <econdition field-name="effortPartyRoleTypeId" value="Manager"/>
+                <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
+                <econdition field-name="toRoleRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipFromPartyId" from="ec.user.userAccount?.partyId"/>
+                <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
+                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+                <select-field field-name="effortWorkEffortId"/>
+            </entity-find-count>
+
+            <if condition="projectEditCount != null &amp;&amp; projectEditCount == 1"><set field="allowed" from="true"/></if>
         </actions>
     </service>
 
@@ -138,41 +167,12 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="check" noun="ProjectEdit" authz-action="view">
-        <in-parameters>
-            <parameter name="workEffortId" required="true"/>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="allowed"/>
-        </out-parameters>
-        <actions>
-            <set field="allowed" from="false"/>
-            <!-- TODO: This is a more complicated than necessary solution to allow editing of projects. Don't use a view entity in this scenario. -->
-            <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" count-field="wedprftrCount">
-                <econdition field-name="workEffortId"/>
-                <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
-                <econdition field-name="purposeEnumId" value="WepPrResistProject"/>
-                <econdition field-name="roleTypeId" value="Manager"/>
-
-                <!-- Conditions for visibility check -->
-                <econdition field-name="toRoleTypeId" value="ClientManager"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-                <econdition field-name="partyRoleTypeId" value="ClientManager"/>
-                <econdition field-name="fromPartyId" from="ec.user.userAccount.partyId"/>
-                <date-filter/>
-                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
-            </entity-find-count>
-
-            <if condition="wedprftrCount != null &amp;&amp; wedprftrCount == 1"><set field="allowed" from="true"/></if>
-        </actions>
-    </service>
-
     <service verb="check" noun="AccountPartyContentView" authz-action="view">
         <in-parameters>
             <parameter name="partyContentId" required="true"/>
         </in-parameters>
         <out-parameters>
-            <parameter name="allowed" default="false" required="true"/>
+            <parameter name="allowed" default="false"/>
         </out-parameters>
         <actions>
             <!-- If party can edit it, allow viewing of content -->
@@ -204,7 +204,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="communicationEventContentId" required="true"/>
         </in-parameters>
         <out-parameters>
-            <parameter name="allowed" default="false" required="true"/>
+            <parameter name="allowed" default="false"/>
         </out-parameters>
         <actions>
             <!-- See if the content exists of the right type and communication event type -->
@@ -456,16 +456,17 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="accountCount"/>
         </out-parameters>
         <actions>
-            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" count-field="accountCount" distinct="true" cache="true">
-                <econdition field-name="roleTypeId" value="ClientManager"/>
-                <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
-                <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
-                <econdition field-name="contentLocation" operator="is-not-null"/>
-                <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-                <econdition field-name="fromRoleTypeId" value="Administrator"/>
-                <econdition field-name="toRoleTypeId" value="ClientManager"/>
-                <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
-                <date-filter/>
+            <entity-find-count entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" count-field="accountCount" distinct="true" cache="true">
+                <econdition field-name="roleRoleTypeId" value="ClientManager"/>
+                <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>
+                <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>
+                <econdition field-name="contentContentLocation" operator="is-not-null"/>
+                <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
+                <econdition field-name="relationshipFromRoleTypeId" value="Administrator"/>
+                <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
+                <econdition field-name="relationshipFromPartyId" from="ec.user.userAccount?.partyId"/>
+                <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+                <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
             </entity-find-count>
         </actions>
     </service>

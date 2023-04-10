@@ -19,17 +19,19 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <!-- TODO: Simplify this to not use a view entity and only the necessary fields -->
-        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationship" list="accountList" distinct="true" cache="true">
-            <econdition field-name="roleTypeId" value="ClientManager"/>
-            <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
-            <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
-            <econdition field-name="contentLocation" operator="is-not-null"/>
-            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-            <econdition field-name="fromRoleTypeId" value="Administrator"/>
-            <econdition field-name="toRoleTypeId" value="ClientManager"/>
-            <econdition field-name="fromPartyId" operator="not-equals" from="ec.user.userAccount?.partyId"/>
-            <date-filter/><select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
-            <order-by field-name="-contentDate"/>
+        <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="accountList" distinct="true" cache="true">
+            <econdition field-name="roleRoleTypeId" value="ClientManager"/>
+            <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>
+            <econdition field-name="contentPartyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="contentContentLocation" operator="is-not-null"/>
+            <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
+            <econdition field-name="relationshipFromRoleTypeId" value="Administrator"/>
+            <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
+            <econdition field-name="relationshipFromPartyId" operator="not-equals" from="ec.user.userAccount?.partyId"/>
+            <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
+            <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
+            <select-field field-name="partyPartyId, partyPseudoId, contentPartyContentId"/>
+            <order-by field-name="-contentContentDate"/>
         </entity-find>
 
         <set field="messageTitleList" from="[[thisIsRequiredBecause:'a form list needs one entry']]"/>
@@ -42,9 +44,9 @@ along with this software (see the LICENSE.md file). If not, see
         </form-list>
         <container-row><row-col lg="12">
             <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">
-                <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyId]" out-map="context"/></row-actions>
-                <field name="profilePicture"><default-field><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/></default-field></field>
-                <field name="pseudoId"><default-field><link url="../FindMessage" text="${pseudoId}" parameter-map="[toPartyId:partyId]"/></default-field></field>
+                <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyPartyId]" out-map="context"/></row-actions>
+                <field name="profilePicture"><default-field><image url="downloadPartyContent" url-type="transition" parameter-map="[partyContentId:contentPartyContentId]" width="50px"/></default-field></field>
+                <field name="pseudoId"><default-field><link url="../FindMessage" text="${partyPseudoId}" parameter-map="[toPartyId:partyPartyId]"/></default-field></field>
             </form-list>
         </row-col></container-row>
         <text><![CDATA[</q-page></q-page-container>]]></text>

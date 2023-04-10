@@ -37,22 +37,22 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <!-- Find the Resist Projects that are visible to the logged in user -->
-        <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationship" list="projectList" distinct="true" cache="true">
-            <econdition field-name="workEffortTypeEnumId" value="WetProject"/>
-            <econdition field-name="purposeEnumId" value="WepPrResistProject"/>
+        <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" list="projectList">
+            <econdition field-name="effortWorkEffortTypeEnumId" value="WetProject"/>
+            <econdition field-name="effortPurposeEnumId" value="WepPrResistProject"/>
 
             <!-- Conditions for visibility check -->
-            <econdition field-name="roleTypeId" value="Manager"/>
-            <econdition field-name="toRoleTypeId" value="ClientManager"/>
-            <econdition field-name="relationshipTypeEnumId" value="PrtManager"/>
-            <econdition field-name="partyRoleTypeId" value="ClientManager"/>
+            <econdition field-name="effortPartyRoleTypeId" value="Manager"/>
+            <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
+            <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
+            <econdition field-name="toRoleRoleTypeId" value="ClientManager"/>
             <econditions combine="or">
-                <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
-                <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
-            <date-filter/>
+                <econdition field-name="effortVisibilityEnumId" value="WevAllUsers"/>
+                <econdition field-name="relationshipFromPartyId" from="ec.user.userAccount?.partyId"/></econditions>
+            <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
             <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
 
-            <select-field field-name="workEffortId,description,workEffortName,toPseudoId"/>
+            <select-field field-name="effortPartyWorkEffortId,effortDescription,effortWorkEffortName,partyPseudoId"/>
             <order-by field-name="-effortLastUpdatedStamp"/>
         </entity-find>
 
@@ -121,17 +121,17 @@ along with this software (see the LICENSE.md file). If not, see
             </form-list>
 
             <form-list name="ListProjects" list="projectList" skip-form="true">
-                <row-actions><service-call name="resistmanagement.ResistServices.check#ProjectPositionView" in-map="[workEffortId:workEffortId]" out-map="projectPositionView"/></row-actions>
-                <field name="toPseudoId"><default-field title="Profile"><display/></default-field></field>
-                <field name="workEffortName"><default-field title="Name"><link url="../ViewProject" text="${workEffortName}" parameter-map="[workEffortId:workEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
-                <field name="description"><default-field><label text="${description ?: ''}"/></default-field></field>
+                <row-actions><service-call name="resistmanagement.ResistServices.check#ProjectPositionView" in-map="[workEffortId:effortPartyWorkEffortId]" out-map="projectPositionView"/></row-actions>
+                <field name="partyPseudoId"><default-field title="Profile"><display/></default-field></field>
+                <field name="effortWorkEffortName"><default-field title="Name"><link url="../ViewProject" text="${effortWorkEffortName}" parameter-map="[workEffortId:effortPartyWorkEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
+                <field name="effortDescription"><default-field title="Description"><label text="${effortDescription ?: ''}"/></default-field></field>
 
                 <!-- These are only shown on mobile devices, by default this doesn't apply to desktop -->
                 <columns type="mobile">
                     <column>
-                        <field-ref name="toPseudoId"/>
-                        <field-ref name="workEffortName"/>
-                        <field-ref name="description"/>
+                        <field-ref name="partyPseudoId"/>
+                        <field-ref name="effortWorkEffortName"/>
+                        <field-ref name="effortDescription"/>
                     </column>
                 </columns>
             </form-list>
