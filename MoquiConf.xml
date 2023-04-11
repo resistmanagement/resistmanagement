@@ -6,6 +6,10 @@
         <webapp name="webroot">
             <!-- timeout session in 2 weeks without a request -->
             <session-config timeout="20160"/>
+            <!-- cache static assets for 1 year without a request -->
+            <response-header type="web-resource-inline" name="Cache-Control" value="max-age=31536000, must-revalidate, public"/>
+            <response-header type="screen-resource-text" name="Cache-Control" value="max-age=1209600, must-revalidate, public"/>
+
         </webapp>
     </webapp-list>
 
