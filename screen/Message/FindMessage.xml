@@ -53,13 +53,12 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="contentLocation" operator="is-not-null"/>
             <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
             <order-by field-name="-contentDate"/></entity-find>
-        <if condition="accountContentList"><set field="newMessage.contentUrl" from="'/custom/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
+        <if condition="accountContentList"><set field="newMessage.contentUrl" from="'/custom/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
         <set field="newMessage.fromPseudoId" from="accountContentList.getFirst()?.party?.pseudoId"/>
         <set field="newMessage.sent" from="true"/>
         <set field="newMessage.entryDate" from="entryDate"/>
         <script>ec.web.sendJsonResponse([newMessage:newMessage])</script>
     </actions><default-response type="none"/></transition>
-    <transition-include name="downloadPartyContent" location="component://resistmanagement/screen/Account/ViewAccount.xml"/>
     <transition name="getMessages" read-only="true">
         <actions>
             <set field="accountMessageList" from="[fromPartyId, toPartyId]"/>
@@ -101,7 +100,7 @@ along with this software (see the LICENSE.md file). If not, see
                     partyId:partyContent.partyId,
                     fromPseudoId:partyContent.party.pseudoId,
                     body:commEvent.body,
-                    contentUrl:'/custom/Message/FindMessage/downloadPartyContent?partyContentId=' + partyContent.partyContentId,
+                    contentUrl:'/custom/downloadPartyContent?partyContentId=' + partyContent.partyContentId,
                     entryDate:commEvent.entryDate
                 ]"/>
                 <set field="message.sent" from="commEvent.fromPartyId == fromPartyId"/>

@@ -38,17 +38,6 @@ along with this software (see the LICENSE.md file). If not, see
     <transition name="updateStatus"><service-call name="resistmanagement.ResistServices.update#Project" in-map="[workEffortId:workEffortId, statusId:statusId]"/><default-response url="."/></transition>
     <transition name="uploadProjectPost"><service-call name="resistmanagement.ResistServices.upload#ProjectPostAttachment" in-map="[workEffortId:workEffortId,contentFile:contentFile]"/>
         <default-response url="."/></transition>
-    <transition name="downloadProjectCommEventContent" read-only="true">
-        <parameter name="communicationEventContentId"/>
-        <actions><service-call name="resistmanagement.ResistServices.check#ProjectCommEventContentView" in-map="[communicationEventContentId:communicationEventContentId]" out-map="context"/>
-            <if condition="allowed">
-                <entity-find-one entity-name="mantle.party.communication.CommunicationEventContent" value-field="communicationEventContent" auto-field-map="[communicationEventContentId:communicationEventContentId]">
-                    <select-field field-name="communicationEventContentId, contentLocation"/></entity-find-one>
-                <script>ec.web.sendResourceResponse(communicationEventContent?.contentLocation, true)</script>
-                <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
-        </actions>
-        <default-response type="none"/>
-    </transition>
 
     <actions>
         <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="project" auto-field-map="[workEffortId:workEffortId]"/>
@@ -74,7 +63,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="postTitleList" from="[[communicationEventContentId:postContentList?.first()?.eventContentCommunicationEventContentId]]"/>
 
             <iterate list="postContentList" entry="communicationEventAndContent">
-                <script>intermediatePostList.add(sri.buildUrl('downloadProjectCommEventContent').addParameter('communicationEventContentId', communicationEventAndContent.eventContentCommunicationEventContentId).getUrlWithParams())</script>
+                <script>intermediatePostList.add(sri.buildUrl('/custom/downloadProjectCommEventContent').addParameter('communicationEventContentId', communicationEventAndContent.eventContentCommunicationEventContentId).getUrlWithParams())</script>
                 <if condition="communicationEventAndContent_index % 3 == 2 || communicationEventAndContent_index == postContentList.size() - 1">
                     <script>postList.add(intermediatePostList)</script>
                     <set field="intermediatePostList" from="[]"/>
