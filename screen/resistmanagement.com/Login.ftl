@@ -68,7 +68,7 @@
             <input type="text" inputmode="email" name="username" value="${(ec.getWeb().getErrorParameters().get("username"))!""}" placeholder="Username" class="form-control middle required" required="required">
             <input type="password" class="form-control middle required" name="newPassword" autocomplete="new-password" id="new-password" placeholder="Password" required="required">
 
-            <p class="text-muted text-left">By signing up, you agree to our <#list agreementList as agreement><a href="${agreement.contentLocation}">${agreement.typeDescription}</a><#sep>, </#list>.</p>
+            <p class="text-muted text-left">By signing up, you agree to our <#list agreementList as agreement><a href="${agreement.contentContentLocation}">${agreement.typeDescription}</a><#sep>, </#list>.</p>
 
             <button class="btn btn-lg btn-success btn-block" type="submit">Create Account</button>
         </form>

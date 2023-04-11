@@ -112,7 +112,6 @@ along with this software (see the LICENSE.md file). If not, see
     </transition>
     <transition name="createAccount" require-session-token="false">
         <actions>
-<!--            <log level="warn" message="createAccount"/>-->
             <service-call name="mantle.party.PartyServices.create#Account" out-map="context"
                     in-map="[emailAddress:emailAddress,firstName:firstName,lastName:lastName,username:username,newPassword:newPassword,newPasswordVerify:newPassword,userGroupId:'RESIST_APP_USERS']"/>
             <service-call name="create#moqui.security.UserGroupMember" in-map="[userGroupId:'RESIST_APP_USERS', userId:userId, fromDate:ec.user.nowTimestamp]"/>
@@ -163,11 +162,12 @@ along with this software (see the LICENSE.md file). If not, see
         </else></if>
 
         <entity-find entity-name="mantle.party.agreement.AgreementAndContent" list="agreementList">
-            <econdition field-name="agreementTypeEnumId" operator="in" from="['AgrPrivacyPolicy','AgrTermsOfUse']" ignore-if-empty="true"/>
-            <econdition field-name="isTemplate" value="Y" ignore-if-empty="true"/>
-            <econdition field-name="contentTypeEnumId" value="AcntDocument"/>
-            <date-filter/>
-            <order-by field-name="-contentDate, -agreementDate"/>
+            <econdition field-name="agreementAgreementTypeEnumId" operator="in" from="['AgrPrivacyPolicy','AgrTermsOfUse']" ignore-if-empty="true"/>
+            <econdition field-name="agreementIsTemplate" value="Y" ignore-if-empty="true"/>
+            <econdition field-name="contentContentTypeEnumId" value="AcntDocument"/>
+            <date-filter from-field-name="agreementFromDate" thru-field-name="agreementThruDate"/>
+            <select-field field-name="contentContentLocation, typeDescription"/>
+            <order-by field-name="-contentContentDate, -agreementAgreementDate"/>
         </entity-find>
 
         <set field="passwordNode" from="ec.ecfi.confXmlRoot.first('user-facade').first('password')"/>
