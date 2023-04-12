@@ -823,7 +823,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
                     <order-by field-name="-contentDate"/>
                 </entity-find>
-                <if condition="accountContentList"><set field="document.contentUrl" from="'/custom/Message/FindMessage/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
+                <if condition="accountContentList"><set field="document.contentUrl" from="'/custom/downloadPartyContent?partyContentId=' + accountContentList.getFirst().partyContentId"/></if>
                 <set field="document.sent" from="false" type="Boolean"/>
 
                 <script><![CDATA[
