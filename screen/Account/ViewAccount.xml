@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
     should also have a back button, similar to the ViewProject screen.
 
     The menu should also have a page like this that is for the user to edit their own profile instead of the settings page
-    being in the menu, and instead include the settings page in the profile accout page.
+    being in the menu, and instead include the settings page in the profile account page.
     -->
 
     <parameter name="partyId" required="true"/>
