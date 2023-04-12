@@ -123,7 +123,8 @@ along with this software (see the LICENSE.md file). If not, see
             <form-list name="ListProjects" list="projectList" skip-form="true">
                 <row-actions>
                     <service-call name="resistmanagement.ResistServices.check#ProjectPositionView" in-map="[workEffortId:effortPartyWorkEffortId]" out-map="projectPositionView"/>
-                    <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:ec.user.userAccount.partyId]" out-map="accountView"/></row-actions>
+                    <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:ec.user.userAccount.partyId]" out-map="accountView"/>
+                </row-actions>
                 <field name="partyPseudoId"><default-field title="Profile"><link url="../../Account/ViewAccount" text="${partyPseudoId}" link-type="anchor" parameter-map="[partyId:effortOwnerPartyId, canViewAccount:accountView?.allowed]"/></default-field></field>
                 <field name="effortWorkEffortName"><default-field title="Name"><link url="../ViewProject" text="${effortWorkEffortName}" parameter-map="[workEffortId:effortPartyWorkEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
                 <field name="effortDescription"><default-field title="Description"><label text="${effortDescription ?: ''}"/></default-field></field>
