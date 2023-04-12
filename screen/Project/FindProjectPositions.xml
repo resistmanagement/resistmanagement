@@ -141,8 +141,10 @@ along with this software (see the LICENSE.md file). If not, see
                         </actions>
                         <widgets>
                             <container-box><box-header>
+                                <link url="../../Account/ViewAccount" link-type="anchor" parameter-map="[partyId:appliedAccount.applyingPartyId, canViewAccount:accountView?.allowed ?: null]">
                                 <image url="/custom/downloadPartyContent" url-type="transition" parameter-map="[partyContentId:profileContentList?.getFirst().partyContentId]" width="50px"/>
-                                <label type="h5" text="${appliedAccount.applyingParty.pseudoId} -"/>
+                                </link>
+                                <link text="${appliedAccount.applyingParty.pseudoId} -" url="../../Account/ViewAccount" link-type="anchor" parameter-map="[partyId:appliedAccount.applyingPartyId, canViewAccount:accountView?.allowed ?: null]" />
                                 <label text="> ${appliedAccount.statusId != 'EaApproved' ? appliedAccount.status.description : workEffortParty.status.description}"/>
                             </box-header><box-toolbar>
                                 <link url="updateProjectPositionApplicationStatus" text="Invite" condition="projectEdit?.allowed &amp;&amp; ['EaRejected'].contains(appliedAccount.statusId)" parameter-map="[workEffortId:workEffortId,emplPositionId:appliedAccount.emplPositionId,employmentApplicationId:appliedAccount.employmentApplicationId,statusId:'EaInvited']"/>

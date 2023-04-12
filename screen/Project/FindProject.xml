@@ -42,6 +42,9 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="effortPurposeEnumId" value="WepPrResistProject"/>
 
             <!-- Conditions for visibility check -->
+            <econdition field-name="ownerContentPartyContentTypeEnumId" value="PcntPrimaryImage"/>
+            <econdition field-name="ownerContentContentLocation" operator="is-not-null"/>
+
             <econdition field-name="effortPartyRoleTypeId" value="Manager"/>
             <econdition field-name="relationshipToRoleTypeId" value="ClientManager"/>
             <econdition field-name="relationshipRelationshipTypeEnumId" value="PrtManager"/>
@@ -52,9 +55,11 @@ along with this software (see the LICENSE.md file). If not, see
             <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
             <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
 
-            <select-field field-name="effortPartyWorkEffortId,effortDescription,effortWorkEffortName,partyPseudoId,effortOwnerPartyId"/>
+            <select-field field-name="effortPartyWorkEffortId,effortDescription,effortWorkEffortName,partyPseudoId,effortOwnerPartyId, ownerContentPartyContentId"/>
             <order-by field-name="-effortLastUpdatedStamp"/>
         </entity-find>
+
+        <log level="warn" message="projectList ${projectList.toString()}" />
 
         <!-- Find the profiles that the logged in user manages -->
         <entity-find entity-name="mantle.party.PartyToAndRelationship" list="profileRelationshipList">
@@ -120,21 +125,27 @@ along with this software (see the LICENSE.md file). If not, see
                 </field>
             </form-list>
 
-            <form-list name="ListProjects" list="projectList" skip-form="true">
+            <form-list name="ListProjects" list="projectList" skip-form="true" skip-header="true">
                 <row-actions>
                     <service-call name="resistmanagement.ResistServices.check#ProjectPositionView" in-map="[workEffortId:effortPartyWorkEffortId]" out-map="projectPositionView"/>
-                    <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:ec.user.userAccount.partyId]" out-map="accountView"/>
+                    <service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:effortOwnerPartyId]" out-map="accountView"/>
                 </row-actions>
-                <field name="partyPseudoId"><default-field title="Profile"><link url="../../Account/ViewAccount" text="${partyPseudoId}" link-type="anchor" parameter-map="[partyId:effortOwnerPartyId, canViewAccount:accountView?.allowed]"/></default-field></field>
+                <field name="ownerContentPartyContentId"><default-field>
+                    <link url="../../Account/ViewAccount" link-type="anchor" parameter-map="[partyId:effortOwnerPartyId, canViewAccount:accountView?.allowed ?: null]">
+                        <image url="/custom/downloadPartyContent" url-type="transition" parameter-map="[partyContentId:ownerContentPartyContentId]" width="50px"/>
+                    </link>
+                </default-field></field>
+                <field name="partyPseudoId"><default-field title="Profile"><link url="../../Account/ViewAccount" text="${partyPseudoId}" link-type="anchor" parameter-map="[partyId:effortOwnerPartyId, canViewAccount:accountView?.allowed ?: null]"/></default-field></field>
                 <field name="effortWorkEffortName"><default-field title="Name"><link url="../ViewProject" text="${effortWorkEffortName}" link-type="anchor" parameter-map="[workEffortId:effortPartyWorkEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
-                <field name="effortDescription"><default-field title="Description"><label text="${effortDescription ?: ''}"/></default-field></field>
+<!--                <field name="effortDescription"><default-field title="Description"><label text="${effortDescription ?: ''}"/></default-field></field>-->
 
                 <!-- These are only shown on mobile devices, by default this doesn't apply to desktop -->
                 <columns type="mobile">
                     <column>
+                        <field-ref name="ownerContentPartyContentId"/>
                         <field-ref name="partyPseudoId"/>
                         <field-ref name="effortWorkEffortName"/>
-                        <field-ref name="effortDescription"/>
+<!--                        <field-ref name="effortDescription"/>-->
                     </column>
                 </columns>
             </form-list>

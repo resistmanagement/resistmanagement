@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="partySettingTypeId" value="PartyVisibility"/>
             <econdition field-name="partyContentTypeEnumId" value="PcntPrimaryImage"/>
             <econdition field-name="contentLocation" operator="is-not-null"/>
-            <select-field field-name="partyId, pseudoId, partyContentId, contentLocation"/>
+            <select-field field-name="partyId, pseudoId, partyContentId"/>
             <order-by field-name="-contentDate"/>
         </entity-find>
 
@@ -66,11 +66,11 @@ along with this software (see the LICENSE.md file). If not, see
             <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">
                 <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyId]" out-map="accountView"/></row-actions>
                 <field name="profilePicture"><default-field>
-                    <link url="../ViewAccount" link-type="anchor" parameter-map="[partyId:partyId, canViewAccount:accountView?.allowed]">
+                    <link url="../ViewAccount" link-type="anchor" parameter-map="[partyId:partyId, canViewAccount:accountView?.allowed ?: null]">
                     <image url="/custom/downloadPartyContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/>
                     </link>
                 </default-field></field>
-                <field name="pseudoId"><default-field><link url="../ViewAccount" text="${pseudoId}" link-type="anchor" parameter-map="[partyId:partyId, canViewAccount:accountView?.allowed]"/></default-field></field>
+                <field name="pseudoId"><default-field><link url="../ViewAccount" text="${pseudoId}" link-type="anchor" parameter-map="[partyId:partyId, canViewAccount:accountView?.allowed ?: null]"/></default-field></field>
             </form-list>
         </row-col></container-row>
     </widgets>
