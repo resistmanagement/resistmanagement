@@ -46,7 +46,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <container-row><row-col lg="12">
             <form-list name="SetAccount" list="accountTitleList" skip-header="true" skip-form="true">
-                <field name="title"><default-field><label text="Accounts" type="h2"/></default-field></field>
+<!--                <field name="title"><default-field><label text="Accounts" type="h2"/></default-field></field>-->
                 <field name="createAccount"><conditional-field condition="accountCount == 0"><container-dialog id="SetPersonalTalentAccountDialog" button-text="Create Account">
                     <form-single name="SetPersonalTalentAccountForm" transition="createPersonAccount">
                         <field name="partySettingTypeId"><default-field><hidden default-value="PartyVisibility"/></default-field></field>
@@ -65,8 +65,12 @@ along with this software (see the LICENSE.md file). If not, see
 
             <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">
                 <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyId]" out-map="accountView"/></row-actions>
-                <field name="profilePicture"><default-field><image url="/custom/downloadPartyContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/></default-field></field>
-                <field name="pseudoId"><default-field><link url="../ViewAccount" text="${pseudoId}" parameter-map="[partyId:partyId, canViewAccount:accountView?.allowed]"/></default-field></field>
+                <field name="profilePicture"><default-field>
+                    <link url="../ViewAccount" link-type="anchor" parameter-map="[partyId:partyId, canViewAccount:accountView?.allowed]">
+                    <image url="/custom/downloadPartyContent" url-type="transition" parameter-map="[partyContentId:partyContentId]" width="50px"/>
+                    </link>
+                </default-field></field>
+                <field name="pseudoId"><default-field><link url="../ViewAccount" text="${pseudoId}" link-type="anchor" parameter-map="[partyId:partyId, canViewAccount:accountView?.allowed]"/></default-field></field>
             </form-list>
         </row-col></container-row>
     </widgets>
