@@ -16,7 +16,6 @@ along with this software (see the LICENSE.md file). If not, see
         default-menu-title="Find Accounts" default-menu-include="false">
 
     <actions>
-        <!-- TODO: Simplify this to not use a view entity and only the necessary fields -->
         <entity-find entity-name="mantle.party.PartyDetailAndRoleAndContentAndSettingAndRelationshipAndEmplApplication" list="accountList" distinct="true" cache="true">
             <econdition field-name="roleRoleTypeId" value="ClientManager"/>
             <econdition field-name="settingPartySettingTypeId" value="PartyVisibility"/>

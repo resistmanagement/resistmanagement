@@ -22,7 +22,7 @@ along with this software (see the LICENSE.md file). If not, see
     <always-actions><service-call name="resistmanagement.ResistServices.check#ProjectView" in-map="[workEffortId:workEffortId]" out-map="projectView"/>
         <if condition="!projectView?.allowed"><return message="Not allowed to view project" error="true" type="danger"/></if></always-actions>
 
-    <transition name="addProjectPosition"><service-call name="resistmanagement.ResistServices.create#ProjectPosition" in-map="[workEffortId:workEffortId, emplPositionClassId:emplPositionClassId]" out-map="context"/>
+    <transition name="createProjectPosition"><service-call name="resistmanagement.ResistServices.create#ProjectPosition" in-map="[workEffortId:workEffortId, emplPositionClassId:emplPositionClassId]" out-map="context"/>
         <default-response url="."/></transition>
     <transition name="updateProjectPositionStatus"><service-call name="resistmanagement.ResistServices.update#ProjectPositionStatus" in-map="[workEffortId:workEffortId,emplPositionId:emplPositionId,statusId:statusId]" out-map="context"/>
         <default-response url="."/></transition>
@@ -76,8 +76,8 @@ along with this software (see the LICENSE.md file). If not, see
             <field name="title"><default-field><label text="Positions" type="h2"/></default-field></field>
             <!-- Only show the add position button, when the user is allowed to edit the project and there are position classes available. -->
             <field name="buttonText"><conditional-field condition="projectEdit?.allowed &amp;&amp; emplPositionClassList != null &amp;&amp; emplPositionClassList.size() &gt; 0">
-                <container-dialog id="AddProjectPositionDialog" button-text="Add Position">
-                    <form-single name="AddProjectPositionForm" transition="addProjectPosition" pass-through-parameters="true">
+                <container-dialog id="CreateProjectPositionDialog" button-text="Add Position">
+                    <form-single name="CreateProjectPositionForm" transition="createProjectPosition" pass-through-parameters="true">
                         <field name="workEffortId"><default-field><hidden/></default-field></field>
                         <field name="emplPositionClassId"><default-field title="Type">
                             <drop-down submit-on-select="true" required-manual-select="true" allow-empty="true">

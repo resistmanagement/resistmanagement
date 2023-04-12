@@ -46,7 +46,6 @@ along with this software (see the LICENSE.md file). If not, see
 
         <service-call name="org.moqui.impl.ImageServices.get#ImageReaderMIMETypes" out-map="context"/>
 
-        <!-- TODO: Simplify this to not use a view entity -->
         <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" list="postAllContentList">
             <econdition field-name="effortEventWorkEffortId" from="workEffortId"/>
             <econdition field-name="eventCommunicationEventTypeId" value="Post"/>

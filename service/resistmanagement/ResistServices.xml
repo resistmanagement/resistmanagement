@@ -102,7 +102,6 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="allowed" from="false"/>
             <if condition="!ec.user.userAccount?.partyId"><return/></if>
 
-            <!-- TODO: This is a more complicated than necessary solution to allow viewing of projects. Don't use a view entity in this scenario. -->
             <entity-find-count entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplicationWithCommunicationEventContent" count-field="projectViewCount" distinct="true">
                 <econdition field-name="effortPartyWorkEffortId" from="workEffortId"/>
                 <econdition field-name="effortWorkEffortTypeEnumId" value="WetProject"/>
@@ -148,7 +147,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="relationshipFromPartyId" from="ec.user.userAccount?.partyId"/>
                 <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
                 <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
-                <select-field field-name="effortWorkEffortId"/>
+                <select-field field-name="effortPartyWorkEffortId"/>
             </entity-find-count>
 
             <if condition="projectEditCount != null &amp;&amp; projectEditCount == 1"><set field="allowed" from="true"/></if>
@@ -623,7 +622,6 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="resistmanagement.ResistServices.check#ProjectEdit" in-map="[workEffortId:workEffortId]" out-map="projectEdit"/>
             <if condition="!projectEdit?.allowed"><return type="danger" error="true" message="Not allowed to edit this project position"/></if>
 
-            <!-- TODO: Simplify this to not use a view entity -->
             <entity-find-one entity-name="WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplication" value-field="emplPosition">
                 <field-map field-name="effortWorkEffortId" from="workEffortId"/>
                 <field-map field-name="positionEmplPositionId" from="emplPositionId"/>
@@ -699,7 +697,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true" message="Cannot put project position in status ${statusId}"/></if>
 
             <!-- Find the employment position -->
-            <!-- TODO: Simplify this to not use a view entity -->
             <entity-find entity-name="mantle.work.effort.WorkEffortDetailPartyWithRoleAndFromToRelationshipWithEmplPositionApplication" list="emplPositionList" distinct="true">
                 <econdition field-name="effortWorkEffortId" from="workEffortId"/>
                 <econdition field-name="positionEmplPositionId" from="emplPositionId"/>
@@ -1390,6 +1387,21 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <set field="contentFile" from="ec.resource.getLocationReference(contentFileLocation)" type="moqui.org.resource.ResourceReference"/>
             <service-call name="resistmanagement.ResistServices.upload#PostAttachment" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="ProjectPostAttachmentResourceInternal">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="contentFileLocation" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="communicationEventId"/>
+            <parameter name="attachmentReference" type="org.moqui.content.ResourceReference"/>
+        </out-parameters>
+        <actions>
+            <set field="contentFile" from="ec.resource.getLocationReference(contentFileLocation)" type="moqui.org.resource.ResourceReference"/>
+            <service-call name="resistmanagement.ResistServices.upload#ProjectPostAttachment" in-map="context" out-map="context"/>
         </actions>
     </service>
 

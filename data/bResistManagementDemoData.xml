@@ -93,15 +93,6 @@ along with this software (see the LICENSE.md file). If not, see
     </parties>
     <mantle.party.PartyRelationship lastUpdatedStamp="1670441131340" fromPartyId="elonmusk" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1670441131366" partyRelationshipId="elonmuskaccountmanagerrelationship" relationshipTypeEnumId="PrtManager" toPartyId="elonmuskaccount"/>
     <mantle.party.PartyRelationship lastUpdatedStamp="1670441142468" fromPartyId="elonmusk" toRoleTypeId="Talent" fromRoleTypeId="Administrator" fromDate="1670441142588" partyRelationshipId="elonmuskaccounttalentrelationship" relationshipTypeEnumId="PrtManager" toPartyId="elonmuskaccount"/>
-    <workEfforts workEffortId="goToStore" workEffortTypeEnumId="WetProject" purposeEnumId="WepPrResistProject" estimatedStartDate="1670442060000" statusId="WeInPlanning" workEffortName="Go to the Store" estimatedWorkDuration="1" lastUpdatedStamp="1670442803509" ownerPartyId="elonmusk" visibilityEnumId="WevAllUsers">
-        <description><![CDATA[Get:
-- Zebra Patterned Fabric
-- 15ft by 20ft of Grasslands Fabric
-- Golden Horn with Elastic Band
-- Leather Diary]]></description>
-        <parties lastUpdatedStamp="1670442101584" roleTypeId="Manager" fromDate="1670442101683" statusId="WeptAssigned" partyId="elonmusk"/>
-        <parties lastUpdatedStamp="1670442101584" roleTypeId="Manager" fromDate="1670442101684" statusId="WeptAssigned" partyId="elonmuskaccount"/>
-    </workEfforts>
     <resistmanagement.ResistServices.upload-ProfilePictureAttachmentInternal partyId="elonmuskaccount"/>
     <resistmanagement.ResistServices.upload-PostAttachmentResourceInternal partyId="elonmuskaccount" contentFileLocation="component://moqui-image/data/images/Wolf_Moving_Amination.gif"/>
 
@@ -128,6 +119,15 @@ along with this software (see the LICENSE.md file). If not, see
         <mantle.party.PartyDimension lastUpdatedStamp="1670966549232" uomId="LEN_in" value="72" dimensionDate="1670966544657" uomDimensionTypeId="Height"/>
     </parties>
     <mantle.party.PartyRelationship lastUpdatedStamp="1670442925705" fromPartyId="harrisonford" toRoleTypeId="ClientManager" fromRoleTypeId="Administrator" fromDate="1670442925712" partyRelationshipId="harrisonfordmanagerrelationship" relationshipTypeEnumId="PrtManager" toPartyId="harrisonfordaccount"/>
+    <resistmanagement.ResistServices.upload-ProfilePictureAttachmentInternal partyId="harrisonfordaccount"/>
+    <resistmanagement.ResistServices.upload-PostAttachmentResourceInternal partyId="harrisonfordaccount" contentFileLocation="component://moqui-image/data/images/autumn.tif"/>
+
+    <mantle.humanres.position.EmplPosition emplPositionId="safariModelElonMusk" emplPositionClassId="Model" statusId="EmpsActive">
+        <mantle.humanres.employment.EmploymentApplication applyingPartyId="elonmuskaccount" statusId="EaApproved" referredByEnumId="EarbPersonal" employmentApplicationId="safariModelElonMuskAppl" applicationDate="1681316115806"/>
+    </mantle.humanres.position.EmplPosition>
+    <mantle.humanres.position.EmplPosition emplPositionId="safariPhotographerHarrisonFord" emplPositionClassId="Photographer" statusId="EmpsActive">
+        <mantle.humanres.employment.EmploymentApplication applyingPartyId="harrisonfordaccount" statusId="EaApproved" referredByEnumId="EarbPersonal" employmentApplicationId="safariPhotographerHarrisonFordAppl" applicationDate="1681316124072"/>
+    </mantle.humanres.position.EmplPosition>
     <workEfforts workEffortId="safarifantasyshoot" workEffortTypeEnumId="WetProject" purposeEnumId="WepPrResistProject" estimatedStartDate="1670442900000" statusId="WeInPlanning" workEffortName="Safari Fantasy Shoot" estimatedWorkDuration="1" lastUpdatedStamp="1670443145680" ownerPartyId="harrisonfordaccount" visibilityEnumId="WevAllUsers">
         <description><![CDATA[Need to Get:
 - Animal Costume
@@ -144,9 +144,29 @@ Need to Bring:
 - Food]]></description>
         <parties lastUpdatedStamp="1670443145680" roleTypeId="Manager" fromDate="1670443145795" statusId="WeptAssigned" partyId="harrisonford"/>
         <parties lastUpdatedStamp="1670443145680" roleTypeId="Manager" fromDate="1670443145795" statusId="WeptAssigned" partyId="harrisonfordaccount"/>
+        <parties lastUpdatedStamp="1681316126030" roleTypeId="Talent" emplPositionId="safariPhotographerHarrisonFord" fromDate="1681316126196" statusId="WeptAssigned" partyId="harrisonfordaccount"/>
+        <parties lastUpdatedStamp="1681316128825" roleTypeId="Talent" emplPositionId="safariModelElonMusk" fromDate="1681316128829" statusId="WeptAssigned" partyId="elonmuskaccount"/>
+        <mantle.work.effort.WorkEffortEmplPosition emplPositionId="safariModelElonMusk" lastUpdatedStamp="1681315990659"/>
+        <mantle.work.effort.WorkEffortEmplPosition emplPositionId="safariPhotographerHarrisonFord" lastUpdatedStamp="1681315993694"/>
     </workEfforts>
-    <resistmanagement.ResistServices.upload-ProfilePictureAttachmentInternal partyId="harrisonfordaccount"/>
-    <resistmanagement.ResistServices.upload-PostAttachmentResourceInternal partyId="harrisonfordaccount" contentFileLocation="component://moqui-image/data/images/autumn.tif"/>
+    <resistmanagement.ResistServices.upload-ProjectPostAttachmentResourceInternal workEffortId="safarifantasyshoot" contentFileLocation="component://moqui-image/data/images/elon_musk_in_an_animal_costume_safari_background_holding_a_spell_book.jpg"/>
+    <mantle.humanres.position.EmplPosition emplPositionId="storePhotographerElonMusk" emplPositionClassId="Model" statusId="EmpsActive">
+        <mantle.humanres.employment.EmploymentApplication applyingPartyId="elonmuskaccount" statusId="EaApplied" referredByEnumId="EarbPersonal" employmentApplicationId="storePhotographerElonMuskAppl" applicationDate="1681316115806"/>
+    </mantle.humanres.position.EmplPosition>
+    <workEfforts workEffortId="goToStore" workEffortTypeEnumId="WetProject" purposeEnumId="WepPrResistProject" estimatedStartDate="1670442060000" statusId="WeInPlanning" workEffortName="Go to the Store" estimatedWorkDuration="1" lastUpdatedStamp="1670442803509" ownerPartyId="elonmuskaccount" visibilityEnumId="WevAllUsers">
+        <description><![CDATA[Get:
+- Zebra Patterned Fabric
+- 15ft by 20ft of Grasslands Fabric
+- Golden Horn with Elastic Band
+- Leather Diary]]></description>
+        <parties lastUpdatedStamp="1670442101584" roleTypeId="Manager" fromDate="1670442101683" statusId="WeptAssigned" partyId="elonmusk"/>
+        <parties lastUpdatedStamp="1670442101584" roleTypeId="Manager" fromDate="1670442101684" statusId="WeptAssigned" partyId="elonmuskaccount"/>
+        <mantle.work.effort.WorkEffortEmplPosition emplPositionId="storePhotographerElonMusk" lastUpdatedStamp="1681315990659"/>
+    </workEfforts>
+    <resistmanagement.ResistServices.upload-ProjectPostAttachmentResourceInternal workEffortId="goToStore" contentFileLocation="component://moqui-image/data/images/All_Around_Amazing_Barnstar_Hires.png"/>
+
+    <communicationEvents fromPartyId="elonmuskaccount" entryDate="1681321444970" body="Hey Harrison, my picture in the project we did looks kinda weird. Why is it like that?" communicationEventTypeId="ResistChatMessage" statusId="CeReceived" communicationEventId="elonharrisonmessage1" toPartyId="harrisonfordaccount"/>
+    <communicationEvents fromPartyId="harrisonfordaccount" entryDate="1681321528318" body="It&apos;s because you&apos;re not actually Elon, and that was generated by an artificial intelligence." communicationEventTypeId="ResistChatMessage" statusId="CeReceived" communicationEventId="elonharrisonmessage2" toPartyId="elonmuskaccount"/>
 
     <dbResources lastUpdatedStamp="1678472257884" resourceId="edupageresource" filename="edu.md" isFile="Y" parentResourceId="WIKI_SPACE_ROOT">
         <file lastUpdatedStamp="1678472338954" rootVersionName="01" mimeType="text/x-markdown" versionName="02">
