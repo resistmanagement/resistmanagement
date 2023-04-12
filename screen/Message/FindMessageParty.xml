@@ -38,13 +38,17 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <text><![CDATA[<q-page-container class="q-ma-sm"><q-page>]]></text>
         <form-list name="ListMessage" list="messageTitleList" skip-header="true" skip-form="true">
-            <field name="title"><default-field><label text="Messages" type="h2"/></default-field></field>
+<!--            <field name="title"><default-field><label text="Messages" type="h2"/></default-field></field>-->
         </form-list>
         <container-row><row-col lg="12">
             <form-list name="ListAccounts" list="accountList" skip-form="true" skip-header="true">
                 <row-actions><service-call name="resistmanagement.ResistServices.check#AccountView" in-map="[partyId:partyPartyId]" out-map="context"/></row-actions>
-                <field name="profilePicture"><default-field><image url="/custom/downloadPartyContent" url-type="transition" parameter-map="[partyContentId:contentPartyContentId]" width="50px"/></default-field></field>
-                <field name="pseudoId"><default-field><link url="../FindMessage" text="${partyPseudoId}" parameter-map="[toPartyId:partyPartyId]"/></default-field></field>
+                <field name="profilePicture"><default-field>
+                    <link url="../FindMessage" text="${partyPseudoId}" link-type="anchor" parameter-map="[toPartyId:partyPartyId]">
+                    <image url="/custom/downloadPartyContent" url-type="transition" parameter-map="[partyContentId:contentPartyContentId]" width="50px"/>
+                    </link>
+                </default-field></field>
+                <field name="pseudoId"><default-field><link url="../FindMessage" text="${partyPseudoId}" link-type="anchor" parameter-map="[toPartyId:partyPartyId]"/></default-field></field>
             </form-list>
         </row-col></container-row>
         <text><![CDATA[</q-page></q-page-container>]]></text>
