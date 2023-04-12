@@ -52,7 +52,7 @@ along with this software (see the LICENSE.md file). If not, see
             <date-filter from-field-name="effortPartyFromDate" thru-field-name="effortPartyThruDate"/>
             <date-filter from-field-name="relationshipFromDate" thru-field-name="relationshipThruDate"/>
 
-            <select-field field-name="effortPartyWorkEffortId,effortDescription,effortWorkEffortName,partyPseudoId"/>
+            <select-field field-name="effortPartyWorkEffortId,effortDescription,effortWorkEffortName,partyPseudoId,effortOwnerPartyId"/>
             <order-by field-name="-effortLastUpdatedStamp"/>
         </entity-find>
 
@@ -73,7 +73,7 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <container-row><row-col lg="12">
             <form-list name="SetProject" list="projectTitleList" skip-header="true" skip-form="true">
-                <field name="title"><default-field><label text="Projects" type="h2"/></default-field></field>
+<!--                <field name="title"><default-field><label text="Projects" type="h2"/></default-field></field>-->
                 <!-- If the user is a manager of at least one profile, show the New Project button -->
                 <field name="createProject"><conditional-field condition="profileRelationshipList">
                     <container-dialog id="NewProjectContainer" button-text="New Project">
@@ -122,7 +122,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <form-list name="ListProjects" list="projectList" skip-form="true">
                 <row-actions><service-call name="resistmanagement.ResistServices.check#ProjectPositionView" in-map="[workEffortId:effortPartyWorkEffortId]" out-map="projectPositionView"/></row-actions>
-                <field name="partyPseudoId"><default-field title="Profile"><display/></default-field></field>
+                <field name="partyPseudoId"><default-field title="Profile"><link url="../../Account/ViewAccount" text="${partyPseudoId}" link-type="anchor" parameter-map="[partyId:effortOwnerPartyId, canViewAccount:accountView?.allowed]"/></default-field></field>
                 <field name="effortWorkEffortName"><default-field title="Name"><link url="../ViewProject" text="${effortWorkEffortName}" parameter-map="[workEffortId:effortPartyWorkEffortId,canViewProjectPositions:projectPositionView?.allowed]"/></default-field></field>
                 <field name="effortDescription"><default-field title="Description"><label text="${effortDescription ?: ''}"/></default-field></field>
 
