@@ -91,7 +91,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <m-subscreens-active></m-subscreens-active>
 
-        <r-menu></r-menu>
+        <#-- <r-menu></r-menu> -->
     </q-layout>
 
     <#-- re-login dialog -->

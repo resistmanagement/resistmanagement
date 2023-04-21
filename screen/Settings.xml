@@ -20,6 +20,6 @@ along with this software (see the LICENSE.md file). If not, see
     <widgets>
         <text><![CDATA[<q-page-container class="q-ma-sm"><q-page>]]></text>
         <subscreens-panel id="settings-panel" type="popup"/>
-        <text><![CDATA[</q-page></q-page-container>]]></text>
+        <text><![CDATA[</q-page></q-page-container><r-menu></r-menu>]]></text>
     </widgets>
 </screen>

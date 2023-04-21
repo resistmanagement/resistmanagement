@@ -50,6 +50,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <field name="pseudoId"><default-field><link url="../FindMessage" text="${partyPseudoId}" link-type="anchor" parameter-map="[toPartyId:partyPartyId]"/></default-field></field>
             </form-list>
         </row-col></container-row>
-        <text><![CDATA[</q-page></q-page-container>]]></text>
+        <text><![CDATA[</q-page></q-page-container><r-menu></r-menu>]]></text>
     </widgets>
 </screen>
