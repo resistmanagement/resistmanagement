@@ -14,16 +14,6 @@
     </webapp-list>
 
     <screen-facade>
-        <screen location="component://resistmanagement/screen/custom.xml">
-            <subscreens-item name="Project" menu-title="Projects" menu-index="5"
-                             location="component://resistmanagement/screen/Project.xml"/>
-            <subscreens-item name="Account" menu-title="Accounts" menu-index="6"
-                             location="component://resistmanagement/screen/Account.xml"/>
-            <subscreens-item name="Message" menu-title="Messages" menu-index="7"
-                             location="component://resistmanagement/screen/Message.xml"/>
-            <subscreens-item name="Settings" menu-title="Settings" menu-index="8"
-                             location="component://resistmanagement/screen/Settings.xml"/>
-        </screen>
         <screen location="component://webroot/screen/webroot/apps.xml">
             <subscreens-item name="resistmanagementadmin" menu-title="Resist Admin" menu-index="3"
                              location="component://resistmanagement/screen/resistadmin.xml"/>

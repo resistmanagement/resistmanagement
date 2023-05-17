@@ -13,41 +13,16 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
         require-authentication="anonymous-view" default-menu-title="Resist" allow-extra-path="true">
 
-    <transition name="downloadPartyContent" read-only="true">
-        <parameter name="partyContentId"/>
-        <actions><service-call name="resistmanagement.ResistServices.check#AccountPartyContentView" in-map="[partyContentId:partyContentId]" out-map="context"/>
-            <if condition="allowed">
-                <entity-find-one entity-name="mantle.party.PartyContent" value-field="partyContent" auto-field-map="[partyContentId:partyContentId,partyId:partyId]">
-                    <select-field field-name="partyContentId, contentLocation"/></entity-find-one>
-                <script>ec.web.sendResourceResponse(partyContent?.contentLocation, true)</script>
-                <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
-        </actions>
-        <default-response type="none"/>
-    </transition>
-    <transition name="downloadCommEventContent" read-only="true">
-        <parameter name="communicationEventContentId"/>
-        <actions><service-call name="resistmanagement.ResistServices.check#AccountCommEventContentView" in-map="[communicationEventContentId:communicationEventContentId]" out-map="context"/>
-            <if condition="allowed">
-                <entity-find-one entity-name="mantle.party.communication.CommunicationEventContent" value-field="communicationEventContent" auto-field-map="[communicationEventContentId:communicationEventContentId]">
-                    <select-field field-name="communicationEventContentId, contentLocation"/></entity-find-one>
-                <script>ec.web.sendResourceResponse(communicationEventContent?.contentLocation, true)</script>
-                <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
-        </actions>
-        <default-response type="none"/>
-    </transition>
-    <transition name="downloadProjectCommEventContent" read-only="true">
-        <parameter name="communicationEventContentId"/>
-        <actions><service-call name="resistmanagement.ResistServices.check#ProjectCommEventContentView" in-map="[communicationEventContentId:communicationEventContentId]" out-map="context"/>
-            <if condition="allowed">
-                <entity-find-one entity-name="mantle.party.communication.CommunicationEventContent" value-field="communicationEventContent" auto-field-map="[communicationEventContentId:communicationEventContentId]">
-                    <select-field field-name="communicationEventContentId, contentLocation"/></entity-find-one>
-                <script>ec.web.sendResourceResponse(communicationEventContent?.contentLocation, true)</script>
-                <else><script>ec.web.sendError(403, "Content not allowed", null)</script></else></if>
-        </actions>
-        <default-response type="none"/>
-    </transition>
+    <transition-include name="downloadPartyContent" location="component://WeCreate/screen/wcinternal.xml"/>
+    <transition-include name="downloadCommEventContent" location="component://WeCreate/screen/wcinternal.xml"/>
+    <transition-include name="downloadProjectCommEventContent" location="component://WeCreate/screen/wcinternal.xml"/>
 
-    <subscreens default-item="AppList"/>
+    <subscreens default-item="Account">
+        <subscreens-item name="Project" location="component://WeCreate/screen/wcinternal/Project.xml" menu-index="1"/>
+        <subscreens-item name="Account" location="component://WeCreate/screen/wcinternal/Account.xml" menu-index="2"/>
+        <subscreens-item name="Message" location="component://WeCreate/screen/wcinternal/Message.xml" menu-index="3"/>
+        <subscreens-item name="Settings" location="component://WeCreate/screen/wcinternal/Settings.xml" menu-index="4"/>
+    </subscreens>
     <widgets>
         <!-- just a placeholder screen, nothing here because rendering gets skipped by rapps.xml wrapper -->
         <label text="Go to /rapps" type="strong"/>

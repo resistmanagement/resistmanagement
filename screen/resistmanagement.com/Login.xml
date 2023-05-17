@@ -118,7 +118,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="create#moqui.security.user.NotificationTopicUser" in-map="[userId:userId,topic:'ResistProjectReminder',emailNotifications:'Y']"/>
 
             <entity-find-one entity-name="mantle.party.PartySettingType" value-field="partySettingType" auto-field-map="[partySettingTypeId:'PartyVisibility']"/>
-            <service-call name="resistmanagement.ResistServices.create#PersonProfile" in-map="[pseudoId:username,settingValue:partySettingType?.defaultValue]"/>
+            <service-call name="WeCreate.WeCreateServices.create#PersonProfile" in-map="[pseudoId:username,settingValue:partySettingType?.defaultValue]"/>
         </actions>
         <default-response url="." parameter-map="[initialTab:'#sign-up']"/>
     </transition>

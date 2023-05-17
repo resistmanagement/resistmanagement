@@ -18,7 +18,7 @@ along with this software (see the LICENSE.md file). If not, see
     <parameter name="partyId" from="ec.user.userAccount?.partyId"/>
     <parameter name="emplPositionClassId" required="true"/>
 
-    <transition name="setTalentProfileTypeDimensionType"><service-call name="resistmanagement.ResistServices.storeAndAdd#TalentProfileTypeDimensionType"/>
+    <transition name="setTalentProfileTypeDimensionType"><service-call name="WeCreate.WeCreateServices.storeAndAdd#TalentProfileTypeDimensionType"/>
         <default-response url="." save-current-screen="true"/></transition>
     <transition name="setTalentProfileTypeDimension"><service-call name="store#mantle.humanres.position.EmplPositionClassDimension"/>
         <default-response url="." save-current-screen="true"/></transition>
@@ -27,17 +27,17 @@ along with this software (see the LICENSE.md file). If not, see
 
     <transition name="setTalentProfileTypeClassificationType"><service-call name="store#mantle.party.EmplPositionClassPtyClsTp"/>
         <default-response url="." save-current-screen="true"/></transition>
-    <transition name="createTalentProfileTypeClassificationType"><service-call name="resistmanagement.ResistServices.storeAndAdd#TalentProfileTypeClassificationType"/>
+    <transition name="createTalentProfileTypeClassificationType"><service-call name="WeCreate.WeCreateServices.storeAndAdd#TalentProfileTypeClassificationType"/>
         <default-response url="." save-current-screen="true"/></transition>
     <transition name="removeTalentProfileTypeClassificationType"><service-call name="delete#mantle.party.EmplPositionClassPtyClsTp"/>
         <default-response url="." save-current-screen="true"/></transition>
 
-    <transition name="setTalentProfileTypeClassificationTypeAttribute"><service-call name="resistmanagement.ResistServices.store#TalentProfileTypeClassificationTypeAttribute"/>
+    <transition name="setTalentProfileTypeClassificationTypeAttribute"><service-call name="WeCreate.WeCreateServices.store#TalentProfileTypeClassificationTypeAttribute"/>
         <default-response url="." save-current-screen="true"/></transition>
     <transition name="removeTalentProfileTypeClassificationType"><service-call name="delete#mantle.party.EmplPositionClassPtyClsTp"/>
         <default-response url="." save-current-screen="true"/></transition>
 
-    <transition name="setTalentProfileTypeSkillType"><service-call name="resistmanagement.ResistServices.storeAndAdd#TalentProfileTypeSkillType"/>
+    <transition name="setTalentProfileTypeSkillType"><service-call name="WeCreate.WeCreateServices.storeAndAdd#TalentProfileTypeSkillType"/>
         <default-response url="." save-current-screen="true"/></transition>
     <transition name="setTalentProfileTypeSkill"><service-call name="store#mantle.humanres.position.EmplPositionClassSkill"/>
         <default-response url="." save-current-screen="true"/></transition>

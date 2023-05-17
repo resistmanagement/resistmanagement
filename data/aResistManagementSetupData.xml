@@ -27,34 +27,6 @@ along with this software (see the LICENSE.md file). If not, see
         <authz artifactAuthzId="YOUR_ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
 
-    <!-- Artifact group and authz for Projects App -->
-    <artifactGroups artifactGroupId="PROJECT" description="Project App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/Project.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <authz artifactAuthzId="PROJECT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
-        <authz artifactAuthzId="PROJECT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-    </artifactGroups>
-
-    <!-- Artifact group and authz for Account App -->
-    <artifactGroups artifactGroupId="ACCOUNT" description="Accounts App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/Account.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <authz artifactAuthzId="ACCOUNT_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
-        <authz artifactAuthzId="ACCOUNT_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-    </artifactGroups>
-
-    <!-- Artifact group and authz for Message App -->
-    <artifactGroups artifactGroupId="MESSAGE" description="Messages App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/Message.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <authz artifactAuthzId="MESSAGE_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
-        <authz artifactAuthzId="MESSAGE_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-    </artifactGroups>
-
-    <!-- Artifact group and authz for Settings App -->
-    <artifactGroups artifactGroupId="SETTINGS" description="Settings App (via root screen)">
-        <artifacts artifactName="component://resistmanagement/screen/Settings.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
-        <authz artifactAuthzId="SETTINGS_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
-        <authz artifactAuthzId="SETTINGS_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
-    </artifactGroups>
-
     <!-- Artifact group and authz for Resist Management App -->
     <artifactGroups artifactGroupId="RESIST_MANAGEMENT" description="Resist Management App (via root screen)">
         <artifacts artifactName="component://resistmanagement/screen/resistmanagement.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
@@ -79,8 +51,10 @@ along with this software (see the LICENSE.md file). If not, see
             <filters entityFilterSetId="MANTLE_ACTIVE_ORG"/></authz>
     </artifactGroups>
 
+    <!-- Artifact Group and Authz for custom/rapps app -->
     <artifactGroups artifactGroupId="ResistManagementApp" description="Resist Management App Access">
-        <artifacts artifactName="component://resistmanagement/screen/custom/AppList.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <!-- TODO: load on server, changed to go to custom.xml directly to get full app and subscreens -->
+        <artifacts artifactName="component://resistmanagement/screen/custom.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
         <authz artifactAuthzId="RESIST_MANAGEMENT_APP_1" userGroupId="RESIST_APP_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
         <authz artifactAuthzId="RESIST_MANAGEMENT_APP_2" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
     </artifactGroups>
@@ -340,7 +314,7 @@ along with this software (see the LICENSE.md file). If not, see
         linkTemplate="/rapps/Message/FindMessage?fromPartyId=${toPartyId}&amp;toPartyId=${fromPartyId}"/>
 
     <moqui.service.job.ServiceJob jobName="send_ResistProjectNotifications_frequent" description="Send Project Notifications"
-                                  serviceName="resistmanagement.ResistServices.send#ProjectNotification" cronExpression="0 0/15 * * * ?" paused="N"/>
+                                  serviceName="WeCreate.WeCreateServices.send#ProjectNotification" cronExpression="0 0/15 * * * ?" paused="N"/>
     <!-- EmailTemplate for Project notifications -->
     <moqui.basic.email.EmailTemplate emailTemplateId="PROJECT_NOTIFICATION" description="Project Notification" emailServerId="SYSTEM"
                                      emailTypeEnumId="EMT_NOTIFICATION" bodyScreenLocation="component://resistmanagement/screen/ProjectNotificationEmail.xml" webappName="webroot"
@@ -368,7 +342,7 @@ along with this software (see the LICENSE.md file). If not, see
     </dataDocuments>
 
     <moqui.entity.feed.DataFeed dataFeedId="ResistChatNotifications" dataFeedTypeEnumId="DTFDTP_RT_PUSH"
-        feedName="Resist Chat Notifications" feedReceiveServiceName="resistmanagement.ResistServices.send#DataDocumentChatNotifications"
+        feedName="Resist Chat Notifications" feedReceiveServiceName="WeCreate.WeCreateServices.send#DataDocumentChatNotifications"
         feedDeleteServiceName="org.moqui.impl.BasicServices.noop">
         <documents dataDocumentId="ResistChatEvent"/>
     </moqui.entity.feed.DataFeed>
