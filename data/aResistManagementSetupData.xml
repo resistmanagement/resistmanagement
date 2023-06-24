@@ -256,46 +256,6 @@ along with this software (see the LICENSE.md file). If not, see
     <delete-mantle.party.agreement.AgreementContent agreementContentId="CookiesPolicyTemplateContent"/>
     <delete-mantle.party.agreement.Agreement agreementId="CookiesPolicyTemplate"/>
 
-    <!-- ==================================================== -->
-    <!-- ========== Resist Management Project Data ========== -->
-    <!-- ==================================================== -->
-    <moqui.basic.Enumeration description="Resist Project" enumId="WepPrResistProject" parentEnumId="WetProject" enumTypeId="WorkEffortPurpose"/>
-    <moqui.basic.Enumeration description="Objective" enumId="WetObjective" parentEnumId="WetTask" enumTypeId="WorkEffortPurpose"/>
-
-    <statuses statusId="EaInvited" sequenceNum="1" statusTypeId="EmploymentApplication" description="Invited"/>
-    <statuses statusId="EaApplied" sequenceNum="11" statusTypeId="EmploymentApplication" description="Applied"/>
-    <statuses statusId="EaApproved" sequenceNum="12" statusTypeId="EmploymentApplication" description="Approved"/>
-    <statuses statusId="EaRejected" sequenceNum="98" statusTypeId="EmploymentApplication" description="Rejected by Project Owner"/>
-    <statuses statusId="EaCanceled" sequenceNum="99" statusTypeId="EmploymentApplication" description="Canceled by Applicant"/>
-
-    <!-- TODO: Is there a way to check whether the person requesting the state change is allowed to (like in the StatusFlowTransition screens)? -->
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaRejected" toStatusId="EaInvited" transitionName="Invite"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaCanceled" toStatusId="EaApplied" transitionName="Apply"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaApplied" toStatusId="EaApproved" transitionName="Approve"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaInvited" toStatusId="EaApproved" transitionName="Approve"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaApplied" toStatusId="EaRejected" transitionName="Reject"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaApproved" toStatusId="EaRejected" transitionName="Reject"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaInvited" toStatusId="EaCanceled" transitionName="Cancel"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EaApproved" toStatusId="EaCanceled" transitionName="Cancel"/>
-
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EmpsActive" toStatusId="EmpsInactive" transitionName="Close"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="EmpsInactive" toStatusId="EmpsActive" transitionName="Open"/>
-
-    <moqui.basic.StatusFlow statusFlowId="ResistProject" description="Resist project status flow"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeInPlanning" toStatusId="WeApproved" transitionName="Approve" transitionSequence="1"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeApproved" toStatusId="WeInProgress" transitionName="Start" transitionSequence="2"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeInProgress" toStatusId="WeComplete" transitionName="Complete" transitionSequence="3"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeApproved" toStatusId="WeInPlanning" transitionName="Replan" transitionSequence="4"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeInProgress" toStatusId="WeApproved" transitionName="Restart" transitionSequence="5"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeComplete" toStatusId="WeInProgress" transitionName="Resume" transitionSequence="6"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeInPlanning" toStatusId="WeCancelled" transitionName="Cancel" transitionSequence="7"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeApproved" toStatusId="WeCancelled" transitionName="Cancel" transitionSequence="7"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeInProgress" toStatusId="WeCancelled" transitionName="Cancel" transitionSequence="7"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="ResistProject" statusId="WeCancelled" toStatusId="WeInPlanning" transitionName="Replan" transitionSequence="4"/>
-
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="WeptAssigned" toStatusId="WeptDeclined" transitionName="Decline"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="WeptDeclined" toStatusId="WeptAssigned" transitionName="Assign"/>
-
     <!-- =================================================== -->
     <!-- ========== Resist Management Screen Data ========== -->
     <!-- =================================================== -->
@@ -308,6 +268,7 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
     <!-- ========== Resist Management Notification Data ========== -->
     <!-- ========================================================= -->
+    <!-- use from WeCreate:
     <moqui.security.user.NotificationTopic topic="ResistChatEvent" description="Resist Chat Update Event"
         typeString="info" showAlert="Y" persistOnSend="N" receiveNotifications="Y" emailTemplateId="NOTIFICATION"
         titleTemplate="${fromPseudoId} said ${body}"
@@ -315,16 +276,21 @@ along with this software (see the LICENSE.md file). If not, see
 
     <moqui.service.job.ServiceJob jobName="send_ResistProjectNotifications_frequent" description="Send Project Notifications"
                                   serviceName="WeCreate.WeCreateServices.send#ProjectNotification" cronExpression="0 0/15 * * * ?" paused="N"/>
-    <!-- EmailTemplate for Project notifications -->
+    -->
+
+    <!-- EmailTemplate for Project notifications, override and augment settings from WeCreate -->
     <moqui.basic.email.EmailTemplate emailTemplateId="PROJECT_NOTIFICATION" description="Project Notification" emailServerId="SYSTEM"
                                      emailTypeEnumId="EMT_NOTIFICATION" bodyScreenLocation="component://resistmanagement/screen/ProjectNotificationEmail.xml" webappName="webroot"
                                      fromAddress="noreply@resistmanagement.com" fromName="Resist Management" ccAddresses="" bccAddresses="" subject="${title}" sendPartial="Y"/>
-    <moqui.security.user.NotificationTopic topic="ResistProjectReminder" description="Resist Project Reminder"
-        typeString="info" showAlert="Y" persistOnSend="N" receiveNotifications="Y" emailTemplateId="PROJECT_NOTIFICATION"
-        linkTemplate="/rapps/Project/ViewProject?workEffortId=${workEffortId}&amp;canViewProjectPositions=true" emailMessageSave="Y"/>
+
+    <!-- NotificationTopic for Project reminders, override and augment settings from WeCreate -->
+    <moqui.security.user.NotificationTopic topic="WeCreateProjectReminder" description="Resist Project Reminder"
+            typeString="info" showAlert="Y" persistOnSend="N" receiveNotifications="Y" emailTemplateId="PROJECT_NOTIFICATION"
+            linkTemplate="/rapps/Project/ViewProject?workEffortId=${workEffortId}&amp;canViewProjectPositions=true" emailMessageSave="Y"/>
 
     <moqui.basic.email.EmailTemplate emailTemplateId="NOTIFICATION" fromAddress="noreply@resistmanagement.com" fromName="Resist Management"/>
 
+    <!-- use from WeCreate:
     <CommunicationEventType communicationEventTypeId="ResistChatMessage" description="Message"/>
 
     <dataDocuments dataDocumentId="ResistChatEvent" indexName="mantle" documentName="Resist Chat Event"
@@ -346,5 +312,5 @@ along with this software (see the LICENSE.md file). If not, see
         feedDeleteServiceName="org.moqui.impl.BasicServices.noop">
         <documents dataDocumentId="ResistChatEvent"/>
     </moqui.entity.feed.DataFeed>
-
+    -->
 </entity-facade-xml>
